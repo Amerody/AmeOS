@@ -1,0 +1,218 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "rpi4",
+      "hidden": true,
+      "cacheVariables": {
+        "KERNEL_PLATFORM": "rpi4"
+      }
+    },
+    {
+      "name": "windows-rpi4-debug",
+      "displayName": "Windows | Raspberry Pi 4 | Debug",
+      "inherits": [
+        "base",
+        "host-windows",
+        "rpi4",
+        "debug"
+      ],
+      "cacheVariables": {
+        "KERNEL_DOCS_INTERNAL": "ON"
+      }
+    },
+    {
+      "name": "windows-rpi4-release",
+      "displayName": "Windows | Raspberry Pi 4 | Release",
+      "inherits": [
+        "base",
+        "host-windows",
+        "rpi4",
+        "release"
+      ],
+      "cacheVariables": {
+        "KERNEL_DOCS_INTERNAL": "OFF"
+      }
+    },
+    {
+      "name": "linux-rpi4-debug",
+      "displayName": "Linux | Raspberry Pi 4 | Debug",
+      "inherits": [
+        "base",
+        "host-linux",
+        "rpi4",
+        "debug"
+      ],
+      "cacheVariables": {
+        "KERNEL_DOCS_INTERNAL": "ON"
+      }
+    },
+    {
+      "name": "linux-rpi4-release",
+      "displayName": "Linux | Raspberry Pi 4 | Release",
+      "inherits": [
+        "base",
+        "host-linux",
+        "rpi4",
+        "release"
+      ],
+      "cacheVariables": {
+        "KERNEL_DOCS_INTERNAL": "OFF"
+      }
+    },
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "toolchainFile": "${sourceDir}/cmake/toolchain-aarch64.cmake",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "host-windows",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "host-linux",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "debug",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "release",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "qemu",
+      "hidden": true,
+      "cacheVariables": {
+        "KERNEL_PLATFORM": "qemu-virt"
+      }
+    },
+    {
+      "name": "windows-qemu-debug",
+      "displayName": "Windows | QEMU virt | Debug",
+      "inherits": [
+        "base",
+        "host-windows",
+        "qemu",
+        "debug"
+      ]
+    },
+    {
+      "name": "windows-qemu-release",
+      "displayName": "Windows | QEMU virt | Release",
+      "inherits": [
+        "base",
+        "host-windows",
+        "qemu",
+        "release"
+      ]
+    },
+    {
+      "name": "linux-qemu-debug",
+      "displayName": "Linux | QEMU virt | Debug",
+      "inherits": [
+        "base",
+        "host-linux",
+        "qemu",
+        "debug"
+      ]
+    },
+    {
+      "name": "linux-qemu-release",
+      "displayName": "Linux | QEMU virt | Release",
+      "inherits": [
+        "base",
+        "host-linux",
+        "qemu",
+        "release"
+      ]
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "windows-rpi4-debug",
+      "inherits": "build-host-windows",
+      "configurePreset": "windows-rpi4-debug"
+    },
+    {
+      "name": "windows-rpi4-release",
+      "inherits": "build-host-windows",
+      "configurePreset": "windows-rpi4-release"
+    },
+    {
+      "name": "linux-rpi4-debug",
+      "inherits": "build-host-linux",
+      "configurePreset": "linux-rpi4-debug"
+    },
+    {
+      "name": "linux-rpi4-release",
+      "inherits": "build-host-linux",
+      "configurePreset": "linux-rpi4-release"
+    },
+    {
+      "name": "build-host-windows",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "build-host-linux",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "windows-qemu-debug",
+      "inherits": "build-host-windows",
+      "configurePreset": "windows-qemu-debug"
+    },
+    {
+      "name": "windows-qemu-release",
+      "inherits": "build-host-windows",
+      "configurePreset": "windows-qemu-release"
+    },
+    {
+      "name": "linux-qemu-debug",
+      "inherits": "build-host-linux",
+      "configurePreset": "linux-qemu-debug"
+    },
+    {
+      "name": "linux-qemu-release",
+      "inherits": "build-host-linux",
+      "configurePreset": "linux-qemu-release"
+    }
+  ]
+}

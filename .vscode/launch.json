@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach to QEMU (AArch64)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${command:cmake.buildDirectory}/kernel.elf",
+      "cwd": "${workspaceFolder}",
+      "MIMode": "gdb",
+      "miDebuggerPath": "C:/ARM/bin/aarch64-none-elf-gdb.exe",
+      "miDebuggerServerAddress": "localhost:1234",
+      "stopAtEntry": false,
+      "targetArchitecture": "arm64",
+      "preLaunchTask": "qemu-debug",
+      "setupCommands": [
+        { "text": "-enable-pretty-printing", "ignoreFailures": true },
+        { "text": "hbreak _start" }
+      ]
+    }
+  ]
+}

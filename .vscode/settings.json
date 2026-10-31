@@ -1,0 +1,21 @@
+{
+    "clangd.arguments": [
+        "--compile-commands-dir=build/windows-rpi4-debug",
+        "--query-driver=C:/Program Files/LLVM/bin/clang*",
+        "--background-index",
+        "--header-insertion=never",
+        "--function-arg-placeholders=0",
+    ],
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "C_Cpp.hover": "default",
+    "chat.disableAIFeatures": true,
+    "cmake.useCMakePresets": "always",
+    "[c]": {
+    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+    "editor.formatOnSave": true
+    },
+    "[cpp]": {
+        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+        "editor.formatOnSave": true
+    }
+}

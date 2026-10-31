@@ -1,0 +1,13 @@
+# Code Comment decisions
+
+- Use `/** ... */` in headers, directly above the declaration.
+- `@brief` always. `@param` and `@return` only when not obvious.
+- One `@defgroup` per subsystem (`hal`, `mm`. `sched`, `drivers`...), defined in a single place per module.
+- Assembly routines are documented on their C prototype (include calling convention and clobbered registers), plus a header comment in the `.s` file.
+- Don’t document internals unless they’re surprising. Normal `//`comment for those
+
+## Workflow habits
+- Docs change in the same commit as the code.
+- Write an ADR (`diagram/decisions/NNNN-title.md`) whenever picking between real alternatives (memory map layout, allocator design, how the HAL splits, C vs C++ for a module).
+- Add to hardware-notes.md the moment something surprises me, such as a register that needs a specific write order or a QEMU behavior that differs from the Pi.
+- Run `docs` before milestones and fix warnings. Once clean, enable `WARN_AS_ERROR`.

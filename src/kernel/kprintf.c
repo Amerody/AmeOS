@@ -1,9 +1,9 @@
+#include "kernel/kprintf.h"
 #include "kernel/console.h"
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-
 
 static void print_str(const char* s)
 {

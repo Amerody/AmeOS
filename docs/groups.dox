@@ -31,6 +31,13 @@ DRIVERS
  * @brief Shared AUX block (enables and IRQ status) used by the mini UART and SPI1/2.
  */
 
+/**
+ * @defgroup timer Timer Driver
+ * @ingroup drivers
+ * @brief ARMv8-A timer Driver
+ */
+
+
 
 KERNEL
 

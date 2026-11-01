@@ -14,17 +14,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # ------------------------------------------------------------------------------
 # Options
 # ------------------------------------------------------------------------------
-set(KERNEL_PLATFORM "rpi4" CACHE STRING "Target platform: rpi4 (default) or qemu-virt")
-set_property(CACHE KERNEL_PLATFORM PROPERTY STRINGS rpi4 qemu-virt)
+set(KERNEL_PLATFORM "rpi4")
 
 option(KERNEL_BUILD_DOCS "Generate Doxygen docs as part of the default build" ON)
 option(KERNEL_DOCS_INTERNAL "Include internal code in docs" OFF)
 
-set(KERNEL_KNOWN_PLATFORMS rpi4 qemu-virt)
-if(NOT KERNEL_PLATFORM IN_LIST KERNEL_KNOWN_PLATFORMS)
-    message(FATAL_ERROR "Unknown KERNEL_PLATFORM '${KERNEL_PLATFORM}'. "
-                        "Valid values: ${KERNEL_KNOWN_PLATFORMS}")
-endif()
 message(STATUS "Kernel platform: ${KERNEL_PLATFORM}")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -35,9 +29,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Expected layout:
 #   src/kernel/                  platform-independent kernel code
 #   src/arch/aarch64/            CPU-specific code (boot stub, exception vectors, ...)
-#   src/platform/<platform>/     board-specific code (UART, interrupt controller, timer)
+#   src/platform/rpi4/           board-specific code (UART, interrupt controller, ...)
 #   include/                     headers (Doxygen comments live here)
-#   linker/<platform>.ld         one linker script per platform
+#   linker/rpi4.ld               linker script
 #
 # CONFIGURE_DEPENDS makes the build re-glob automatically when files are added.
 # ------------------------------------------------------------------------------
@@ -49,7 +43,22 @@ endif()
 # shared flags and include root for every library
 add_library(kernel_flags INTERFACE)
 target_include_directories(kernel_flags INTERFACE "${CMAKE_SOURCE_DIR}/include")
-target_compile_options(kernel_flags INTERFACE -ffreestanding)   # plus your other freestanding flags
+target_compile_options(kernel_flags INTERFACE 
+    -mcpu=cortex-a72
+    -ffreestanding
+    -fno-stack-protector
+    -fno-pic
+    -fno-omit-frame-pointer
+    -fparse-all-comments
+    -Wall -Wextra
+    # Don't compile kernel code with float/vector instructions
+    # Kernel code will not use float
+    $<$<COMPILE_LANGUAGE:C,CXX>:-mgeneral-regs-only>
+    # C++ without a runtime (no unwinder, no RTTI, no thread-safe static guards)
+    $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
+    $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
+    $<$<COMPILE_LANGUAGE:CXX>:-fno-threadsafe-statics>
+)
 
 add_subdirectory("src")
 
@@ -58,6 +67,8 @@ add_subdirectory("src")
 # ------------------------------------------------------------------------------
 add_executable(kernel)
 target_link_libraries(kernel PRIVATE 
+    kernel_flags
+
     kernel_core    
     aarch64
     platform
@@ -71,28 +82,6 @@ set_target_properties(kernel PROPERTIES
 
 target_include_directories(kernel PRIVATE "${CMAKE_SOURCE_DIR}/include")
 
-# e.g. KERNEL_PLATFORM_QEMU_VIRT or KERNEL_PLATFORM_RPI4, for #ifdef in code
-string(MAKE_C_IDENTIFIER "${KERNEL_PLATFORM}" _platform_id)
-string(TOUPPER "${_platform_id}" _platform_id)
-target_compile_definitions(kernel PRIVATE KERNEL_PLATFORM_${_platform_id})
-
-# Pi 4 and QEMU's virt machine (with -cpu cortex-a72) use the same core.
-target_compile_options(kernel PRIVATE
-    -mcpu=cortex-a72
-    -ffreestanding
-    -fno-stack-protector
-    -fno-pic
-    -fno-omit-frame-pointer
-    -fparse-all-comments
-    -Wall -Wextra
-    # Keep the compiler away from FP/SIMD registers until they are enabled
-    # in CPACR_EL1, otherwise the first float/vector instruction faults.
-    $<$<COMPILE_LANGUAGE:C,CXX>:-mgeneral-regs-only>
-    # C++ without a runtime (no unwinder, no RTTI, no thread-safe static guards)
-    $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
-    $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
-    $<$<COMPILE_LANGUAGE:CXX>:-fno-threadsafe-statics>)
-
 target_link_options(kernel PRIVATE
     -fuse-ld=lld
     -nostdlib
@@ -105,53 +94,42 @@ target_link_options(kernel PRIVATE
 # ------------------------------------------------------------------------------
 find_program(KERNEL_OBJCOPY NAMES llvm-objcopy HINTS "${KERNEL_LLVM_BIN}")
 
-if(KERNEL_PLATFORM STREQUAL "rpi4")
-    if(KERNEL_OBJCOPY)
-        add_custom_command(TARGET kernel POST_BUILD
-            COMMAND "${KERNEL_OBJCOPY}" -O binary
-                    "$<TARGET_FILE:kernel>" "$<TARGET_FILE_DIR:kernel>/kernel8.img"
-            COMMENT "Creating kernel8.img"
-            VERBATIM)
-    else()
-        message(WARNING "llvm-objcopy not found: kernel8.img will not be generated")
-    endif()
+if(KERNEL_OBJCOPY)
+    add_custom_command(TARGET kernel POST_BUILD
+        COMMAND "${KERNEL_OBJCOPY}" -O binary
+                "$<TARGET_FILE:kernel>" "$<TARGET_FILE_DIR:kernel>/kernel8.img"
+        COMMENT "Creating kernel8.img"
+        VERBATIM)
+else()
+    message(WARNING "llvm-objcopy not found: kernel8.img will not be generated")
 endif()
 
+
 # ------------------------------------------------------------------------------
-# QEMU helper targets:
+# QEMU helper targets (emulated Raspberry Pi 4B, needs QEMU 9.0 or newer;
+# peripheral coverage is partial, so real hardware is the source of truth):
 #   cmake --build --preset <preset> --target run     boot the kernel
 #   cmake --build --preset <preset> --target debug   boot and wait for gdb on :1234
-#
-#   rpi4      -> -M raspi4b  (emulated Raspberry Pi 4B, needs QEMU 9.0 or newer;
-#                             RAM and core count are fixed by the machine)
-#   qemu-virt -> -M virt     (generic board, kept as a fallback for triage)
 # ------------------------------------------------------------------------------
 find_program(KERNEL_QEMU NAMES qemu-system-aarch64
              HINTS "$ENV{ProgramFiles}/qemu")
 
 set(_qemu_usable FALSE)
 if(KERNEL_QEMU)
-    set(_qemu_usable TRUE)
-    if(KERNEL_PLATFORM STREQUAL "rpi4")
-        execute_process(COMMAND "${KERNEL_QEMU}" -M help
-                        OUTPUT_VARIABLE _qemu_machines ERROR_QUIET)
-        if(NOT _qemu_machines MATCHES "raspi4b")
-            set(_qemu_usable FALSE)
-            message(WARNING "This QEMU has no 'raspi4b' machine (needs QEMU 9.0+): "
-                            "'run' and 'debug' targets disabled")
-        endif()
+    execute_process(COMMAND "${KERNEL_QEMU}" -M help
+                    OUTPUT_VARIABLE _qemu_machines ERROR_QUIET)
+    if(_qemu_machines MATCHES "raspi4b")
+        set(_qemu_usable TRUE)
+    else()
+        message(WARNING "This QEMU has no 'raspi4b' machine (needs QEMU 9.0+): "
+                        "'run' and 'debug' targets disabled")
     endif()
 else()
     message(STATUS "qemu-system-aarch64 not found: 'run' and 'debug' targets disabled")
 endif()
 
 if(_qemu_usable)
-    if(KERNEL_PLATFORM STREQUAL "rpi4")
-        set(_qemu_args -M raspi4b -nographic -kernel "$<TARGET_FILE:kernel>")
-    else()
-        set(_qemu_args -M virt -cpu cortex-a72 -m 512M -nographic
-                       -kernel "$<TARGET_FILE:kernel>")
-    endif()
+    set(_qemu_args -M raspi4b -nographic -kernel "$<TARGET_FILE:kernel>")
     add_custom_target(run
         COMMAND "${KERNEL_QEMU}" ${_qemu_args}
         DEPENDS kernel USES_TERMINAL VERBATIM)

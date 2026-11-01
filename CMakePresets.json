@@ -7,65 +7,6 @@
   },
   "configurePresets": [
     {
-      "name": "rpi4",
-      "hidden": true,
-      "cacheVariables": {
-        "KERNEL_PLATFORM": "rpi4"
-      }
-    },
-    {
-      "name": "windows-rpi4-debug",
-      "displayName": "Windows | Raspberry Pi 4 | Debug",
-      "inherits": [
-        "base",
-        "host-windows",
-        "rpi4",
-        "debug"
-      ],
-      "cacheVariables": {
-        "KERNEL_DOCS_INTERNAL": "ON"
-      }
-    },
-    {
-      "name": "windows-rpi4-release",
-      "displayName": "Windows | Raspberry Pi 4 | Release",
-      "inherits": [
-        "base",
-        "host-windows",
-        "rpi4",
-        "release"
-      ],
-      "cacheVariables": {
-        "KERNEL_DOCS_INTERNAL": "OFF"
-      }
-    },
-    {
-      "name": "linux-rpi4-debug",
-      "displayName": "Linux | Raspberry Pi 4 | Debug",
-      "inherits": [
-        "base",
-        "host-linux",
-        "rpi4",
-        "debug"
-      ],
-      "cacheVariables": {
-        "KERNEL_DOCS_INTERNAL": "ON"
-      }
-    },
-    {
-      "name": "linux-rpi4-release",
-      "displayName": "Linux | Raspberry Pi 4 | Release",
-      "inherits": [
-        "base",
-        "host-linux",
-        "rpi4",
-        "release"
-      ],
-      "cacheVariables": {
-        "KERNEL_DOCS_INTERNAL": "OFF"
-      }
-    },
-    {
       "name": "base",
       "hidden": true,
       "generator": "Ninja",
@@ -108,74 +49,39 @@
       }
     },
     {
-      "name": "qemu",
-      "hidden": true,
+      "name": "windows-rpi4-debug",
+      "displayName": "Windows | Raspberry Pi 4 | Debug",
+      "inherits": ["base", "host-windows", "debug"],
       "cacheVariables": {
-        "KERNEL_PLATFORM": "qemu-virt"
+        "KERNEL_DOCS_INTERNAL": "ON"
       }
     },
     {
-      "name": "windows-qemu-debug",
-      "displayName": "Windows | QEMU virt | Debug",
-      "inherits": [
-        "base",
-        "host-windows",
-        "qemu",
-        "debug"
-      ]
-    },
-    {
-      "name": "windows-qemu-release",
-      "displayName": "Windows | QEMU virt | Release",
-      "inherits": [
-        "base",
-        "host-windows",
-        "qemu",
-        "release"
-      ]
-    },
-    {
-      "name": "linux-qemu-debug",
-      "displayName": "Linux | QEMU virt | Debug",
-      "inherits": [
-        "base",
-        "host-linux",
-        "qemu",
-        "debug"
-      ]
-    },
-    {
-      "name": "linux-qemu-release",
-      "displayName": "Linux | QEMU virt | Release",
-      "inherits": [
-        "base",
-        "host-linux",
-        "qemu",
-        "release"
-      ]
-    }
-  ],
-  "buildPresets": [
-    {
-      "name": "windows-rpi4-debug",
-      "inherits": "build-host-windows",
-      "configurePreset": "windows-rpi4-debug"
-    },
-    {
       "name": "windows-rpi4-release",
-      "inherits": "build-host-windows",
-      "configurePreset": "windows-rpi4-release"
+      "displayName": "Windows | Raspberry Pi 4 | Release",
+      "inherits": ["base", "host-windows", "release"],
+      "cacheVariables": {
+        "KERNEL_DOCS_INTERNAL": "OFF"
+      }
     },
     {
       "name": "linux-rpi4-debug",
-      "inherits": "build-host-linux",
-      "configurePreset": "linux-rpi4-debug"
+      "displayName": "Linux | Raspberry Pi 4 | Debug",
+      "inherits": ["base", "host-linux", "debug"],
+      "cacheVariables": {
+        "KERNEL_DOCS_INTERNAL": "ON"
+      }
     },
     {
       "name": "linux-rpi4-release",
-      "inherits": "build-host-linux",
-      "configurePreset": "linux-rpi4-release"
-    },
+      "displayName": "Linux | Raspberry Pi 4 | Release",
+      "inherits": ["base", "host-linux", "release"],
+      "cacheVariables": {
+        "KERNEL_DOCS_INTERNAL": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
     {
       "name": "build-host-windows",
       "hidden": true,
@@ -195,24 +101,24 @@
       }
     },
     {
-      "name": "windows-qemu-debug",
+      "name": "windows-rpi4-debug",
       "inherits": "build-host-windows",
-      "configurePreset": "windows-qemu-debug"
+      "configurePreset": "windows-rpi4-debug"
     },
     {
-      "name": "windows-qemu-release",
+      "name": "windows-rpi4-release",
       "inherits": "build-host-windows",
-      "configurePreset": "windows-qemu-release"
+      "configurePreset": "windows-rpi4-release"
     },
     {
-      "name": "linux-qemu-debug",
+      "name": "linux-rpi4-debug",
       "inherits": "build-host-linux",
-      "configurePreset": "linux-qemu-debug"
+      "configurePreset": "linux-rpi4-debug"
     },
     {
-      "name": "linux-qemu-release",
+      "name": "linux-rpi4-release",
       "inherits": "build-host-linux",
-      "configurePreset": "linux-qemu-release"
+      "configurePreset": "linux-rpi4-release"
     }
   ]
 }

@@ -11,9 +11,13 @@
  * @brief Kernel printf
  */
 
+#include <stdarg.h>
+
 /**
  * @brief Prints a formatted string to the console
  */
-void kprintf(const char* fmt, ...);
+__attribute__((format(printf, 1, 2))) void kprintf(const char* fmt, ...);
+
+void kvprintf(const char* fmt, va_list ap);
 
 /** @} */

@@ -2,6 +2,7 @@ set(RPI4_MODULES
     gpio
     aux
     uart
+    console
 )
 
 add_library(gpio OBJECT
@@ -21,6 +22,12 @@ add_library(uart OBJECT
 )
 target_link_libraries(uart PUBLIC kernel_flags)
 
+add_library(console OBJECT
+    "console.c"
+)
+target_link_libraries(console PUBLIC kernel_flags)
+
+
 add_library(rpi4 INTERFACE)
 foreach(module IN LISTS RPI4_MODULES)
     target_sources(rpi4 INTERFACE
@@ -28,17 +35,3 @@ foreach(module IN LISTS RPI4_MODULES)
     )
 endforeach()
 target_link_libraries(rpi4 INTERFACE kernel_flags)
-
-# add_library(rpi4 STATIC
-#     # gpio
-#     "gpio.c"
-
-#     # aux
-#     "auxiliary.c"
-
-#     # uart
-#     "uart/uart.c"
-#     "uart/uart_mini.c"
-#     "uart/uart_pl011.c"
-# )
-# target_link_libraries(rpi4 PUBLIC kernel_flags)

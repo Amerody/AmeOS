@@ -9,5 +9,4 @@
 ## Workflow habits
 - Docs change in the same commit as the code.
 - Write an ADR (`diagram/decisions/NNNN-title.md`) whenever picking between real alternatives (memory map layout, allocator design, how the HAL splits, C vs C++ for a module).
-- Add to hardware-notes.md the moment something surprises me, such as a register that needs a specific write order or a QEMU behavior that differs from the Pi.
 - Run `docs` before milestones and fix warnings. Once clean, enable `WARN_AS_ERROR`.

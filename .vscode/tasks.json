@@ -9,19 +9,25 @@
       "problemMatcher": []
     },
     {
-        "label": "qemu-debug",
-        "type": "shell",
-        "dependsOn": "build-kernel",
-        "isBackground": true,
-        "command": "Write-Host 'QEMU_READY'; & 'C:/Program Files/qemu/qemu-system-aarch64.exe' -M raspi4b -display none -serial null -serial mon:stdio -kernel '${command:cmake.buildDirectory}/kernel.elf' -s -S",
-        "problemMatcher": {
-            "pattern": { "regexp": "^$" },
-            "background": {
-            "activeOnStart": true,
-            "beginsPattern": "QEMU_BEGIN",
-            "endsPattern": "QEMU_READY"
-            }
+      "label": "qemu-debug",
+      "type": "shell",
+      "dependsOn": "build-kernel",
+      "isBackground": true,
+      "command": "Write-Host 'QEMU_READY'; & 'C:/Program Files/qemu/qemu-system-aarch64.exe' -M raspi4b -display none -serial null -serial mon:stdio -kernel '${command:cmake.buildDirectory}/kernel.elf' -s -S",
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "QEMU_BEGIN",
+          "endsPattern": "QEMU_READY"
         }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     }
   ]
 }

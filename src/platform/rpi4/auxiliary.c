@@ -28,7 +28,7 @@ void aux_disable(aux_peripheral_t peripheral)
 
 bool aux_is_enabled(aux_peripheral_t peripheral)
 {
-	return mmio_read_field(&AUX->AUX_ENABLES, 0x1, (uint32_t)peripheral);
+	return (bool)mmio_read_field(&AUX->AUX_ENABLES, 0x1, (uint32_t)peripheral);
 }
 
 /** @} */

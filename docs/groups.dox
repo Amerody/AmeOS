@@ -1,0 +1,52 @@
+DRIVERS
+
+/**
+ * @defgroup drivers Drivers
+ * @brief Hardware drivers for the BCM2711 peripherals.
+ */
+
+/**
+ * @defgroup mmio MMIO Driver
+ * @ingroup drivers
+ * @brief Memory Mapped I/O read/write operations
+ */
+
+/**
+ * @defgroup gpio GPIO Driver
+ * @ingroup drivers
+ * @brief Pin function select, set/clear, pull configuration.
+ */
+
+/**
+ * @defgroup uart UART Driver
+ * @ingroup drivers
+ * @brief Public API for UART0-5 (UART1 is the mini UART).
+ *
+ * See docs/decisions/0002-mini-uart.md for the module layout.
+ */
+
+/**
+ * @defgroup aux AUX Peripherals
+ * @ingroup drivers
+ * @brief Shared AUX block (enables and IRQ status) used by the mini UART and SPI1/2.
+ */
+
+
+KERNEL
+
+/**
+ * @defgroup kernel Kernel
+ * @brief Kernel functions.
+ */
+
+/**
+ * @defgroup console Kernel Console
+ * @ingroup kernel
+ * @brief Kernel console
+ */
+
+/**
+ * @defgroup print Kernel Print Utilities
+ * @ingroup kernel
+ * @brief Kernel Print Utilities
+ */

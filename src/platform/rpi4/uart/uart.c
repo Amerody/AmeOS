@@ -23,7 +23,7 @@ uart_status_t uart_init(uart_t uart_id)
 	case 3:
 	case 4:
 	case 5:
-		uart_enable(uart_id); // TODO: implement
+		uart_pl011_enable(uart_id); // TODO: implement
 		break;
 	case 1:
 		uart_mini_enable();
@@ -34,11 +34,8 @@ uart_status_t uart_init(uart_t uart_id)
 	return UART_SUCCESS;
 }
 
-uart_status_t uart_puts(uart_t uart_id, const char* buffer)
+uart_status_t uart_putc(uart_t uart_id, char c)
 {
-	if(!buffer)
-		return UART_ERROR_NULL_STRING;
-
 	switch(uart_id)
 	{
 	case 0:
@@ -46,10 +43,10 @@ uart_status_t uart_puts(uart_t uart_id, const char* buffer)
 	case 3:
 	case 4:
 	case 5:
-		uart_enable(uart_id); // placeholder
+		uart_pl011_putc(uart_id);
 		break;
 	case 1:
-		uart_mini_puts(buffer);
+		uart_mini_putc(c);
 	default:
 		return UART_ERROR_INVALID_UART;
 	}

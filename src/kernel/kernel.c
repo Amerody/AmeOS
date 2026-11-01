@@ -1,12 +1,13 @@
 // #include <stddef.h>
 // #include <stdint.h>
 
-#include "platform/rpi4/uart.h"
+#include "kernel/console.h"
 
 void kernel_main()
 {
-	uart_init(1);
-	uart_puts(1, "Hello world!\n");
+	console_init();
+	console_puts("Hello world!\n");
+	console_puts("Welcome to AmeOS!\n");
 
 	while(1)
 		; // This is so kernel_main() doesn't return

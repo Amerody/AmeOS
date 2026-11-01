@@ -16,7 +16,7 @@
       "setupCommands": [
         { "text": "-enable-pretty-printing", "ignoreFailures": true },
         { "text": "hbreak _start" }
-      ]
+      ],
     }
-  ]
+  ],
 }

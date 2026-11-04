@@ -1,0 +1,8 @@
+Documentation:
+  CommentFormat: Doxygen
+
+Style:
+  QuotedHeaders: '.*'
+
+CompileFlags:
+  CompilationDatabase: "@CMAKE_BINARY_DIR@"

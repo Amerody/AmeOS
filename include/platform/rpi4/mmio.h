@@ -13,10 +13,18 @@
 
 #include <stdint.h>
 
-/// @brief Memory mapped register
-typedef volatile uint32_t* mmio_register_t;
+/// @brief Memory mapped 32-bit register
+typedef volatile uint32_t* mmio_register32_t;
+
+/// @brief Memory mapped 8-bit register
+typedef volatile uint8_t* mmio_register8_t;
 
 #define PERIPHERAL_BASE 0xFE000000UL ///< Peripheral base address (Low-Peripheral mode)
+// extern uint64_t PERIPHERAL_BASE; ///< Peripheral base address (Low-Peripheral mode)
+
+/// @brief Macro to calculate the offset to write on a register definition, use addresses aligned to 4 Bytes.
+/// @code uint32_t RESERVED_90_E0[CALC_OFFSET(0x90, 0xE0)]; ///< 84 Bytes gap between GPAFEN1 and GPIO_PUP_PDN_CNTRL_REG0 @endcode
+#define CALC_OFFSET(start, end) ((((end) - (start)) / 4) + 1)
 
 /**
  * @brief Reads a whole Memory Mapped I/O register
@@ -24,7 +32,7 @@ typedef volatile uint32_t* mmio_register_t;
  * @param reg Register to read from
  * @return Value read from the register
  */
-static inline uint32_t mmio_read(mmio_register_t reg) { return *reg; }
+static inline uint32_t mmio_read(mmio_register32_t reg) { return *reg; }
 
 /**
  * @brief Writes a whole Memory Mapped I/O register
@@ -36,7 +44,7 @@ static inline uint32_t mmio_read(mmio_register_t reg) { return *reg; }
  * @param reg Register to write to
  * @param value Value to write
  */
-static inline void mmio_write(mmio_register_t reg, uint32_t value) { *reg = value; }
+static inline void mmio_write(mmio_register32_t reg, uint32_t value) { *reg = value; }
 
 /**
  * @brief Reads a field of a Memory Mapped I/O register
@@ -49,7 +57,7 @@ static inline void mmio_write(mmio_register_t reg, uint32_t value) { *reg = valu
  * @param shift Bit position of the field's lowest bit
  * @return Field value, unshifted
  */
-static inline uint32_t mmio_read_field(mmio_register_t reg, uint32_t mask, uint32_t shift)
+static inline uint32_t mmio_read_field(mmio_register32_t reg, uint32_t mask, uint32_t shift)
 {
 	return (mmio_read(reg) >> shift) & mask;
 }
@@ -67,12 +75,32 @@ static inline uint32_t mmio_read_field(mmio_register_t reg, uint32_t mask, uint3
  * @param mask  Field mask, unshifted (e.g. 0x7 for a 3-bit field)
  * @param shift Bit position of the field's lowest bit
  */
-static inline void mmio_write_field(mmio_register_t reg, uint32_t value, uint32_t mask, uint32_t shift)
+static inline void mmio_write_field(mmio_register32_t reg, uint32_t value, uint32_t mask, uint32_t shift)
 {
 	uint32_t current_value = mmio_read(reg);
 	current_value &= ~(mask << shift);
 	current_value |= (value & mask) << shift;
 	mmio_write(reg, current_value);
 }
+
+/**
+ * @brief Writes a whole 8-bit Memory Mapped I/O register
+ *
+ * Does not read the register first, so it is safe for registers with
+ * write-1-to-clear or clear-on-read bits. Every bit is overwritten,
+ * including reserved ones: build the value according to the datasheet
+ *
+ * @param reg Register to write to
+ * @param value Value to write
+ */
+static inline void mmio_write8(mmio_register8_t reg, uint8_t value) { *reg = value; }
+
+/**
+ * @brief Reads a whole 8-bit Memory Mapped I/O register
+ *
+ * @param reg Register to read from
+ * @return Value read from the register
+ */
+static inline uint8_t mmio_read8(mmio_register8_t reg) { return *reg; }
 
 /** @} */

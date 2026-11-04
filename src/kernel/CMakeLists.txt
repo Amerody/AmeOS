@@ -1,6 +1,11 @@
 add_library(kernel_core OBJECT
     "kernel.c"
 
+<<<<<<< HEAD
+=======
+    "exceptions.c"
+
+>>>>>>> homeserver/Dev
     "kprintf.c"
     "panic.c"
 )

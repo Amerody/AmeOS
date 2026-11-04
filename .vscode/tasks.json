@@ -1,4 +1,7 @@
 {
+  // Works on Windows (PowerShell, the VS Code default) and Linux/macOS (bash/zsh).
+  // Requires qemu-system-aarch64 on PATH. On Windows the installer's folder
+  // (C:\Program Files\qemu) must be added to PATH, as in the install steps.
   "version": "2.0.0",
   "tasks": [
     {
@@ -13,7 +16,11 @@
       "type": "shell",
       "dependsOn": "build-kernel",
       "isBackground": true,
+<<<<<<< HEAD
       "command": "Write-Host 'QEMU_READY'; & 'C:/Program Files/qemu/qemu-system-aarch64.exe' -M raspi4b -display none -serial null -serial mon:stdio -kernel '${command:cmake.buildDirectory}/kernel.elf' -s -S",
+=======
+      "command": "echo QEMU_READY; qemu-system-aarch64 -M raspi4b -dtb '${workspaceFolder}/bcm2711-rpi-4-b.dtb' -display none -serial null -serial mon:stdio -kernel '${command:cmake.buildDirectory}/kernel8.img' -s -S",
+>>>>>>> homeserver/Dev
       "problemMatcher": {
         "pattern": {
           "regexp": "^$"

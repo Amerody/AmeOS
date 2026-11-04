@@ -29,7 +29,11 @@
  */
 static bool uart_mini_is_write_ready()
 {
+<<<<<<< HEAD
 	return (bool)mmio_read_field(&AUX->AUX_MU_LSR_REG, 0x1, 5); // Transmitter can accept a byte
+=======
+	return (bool)mmio_read_field(&AUX->MU_LSR_REG, 0x1, 5); // Transmitter can accept a byte
+>>>>>>> homeserver/Dev
 }
 
 void uart_mini_enable()
@@ -43,6 +47,7 @@ void uart_mini_enable()
 	}
 	aux_enable(AUX_PERIPHERAL_MU); // Enable the MU for register access
 
+<<<<<<< HEAD
 	mmio_write_field(&AUX->AUX_MU_LCR_REG, 0, 0b1, 7);  // DLAB bit clear
 	mmio_write_field(&AUX->AUX_MU_CNTL_REG, 0, 0x3, 0); // TX/RX off while configuring
 
@@ -53,13 +58,29 @@ void uart_mini_enable()
 	mmio_write_field(&AUX->AUX_MU_BAUD_REG, AUX_MU_BAUD(115200), 0xFFFF, 0); // Write the Baudrate
 
 	mmio_write_field(&AUX->AUX_MU_CNTL_REG, 0b11, 0x3, 0); // Enable TX/RX
+=======
+	mmio_write_field(&AUX->MU_LCR_REG, 0, 0b1, 7);  // DLAB bit clear
+	mmio_write_field(&AUX->MU_CNTL_REG, 0, 0x3, 0); // TX/RX off while configuring
+
+	mmio_write_field(&AUX->MU_IER_REG, 0, 0x3, 0); // Disable interrupts
+	mmio_write_field(&AUX->MU_LCR_REG, 1, 0x1, 0); // Enable 8-bit mode
+	mmio_write(&AUX->MU_IIR_REG, 0b110);           // Clear the receive and transmit FIFO
+
+	mmio_write_field(&AUX->MU_BAUD_REG, AUX_MU_BAUD(115200), 0xFFFF, 0); // Write the Baudrate
+
+	mmio_write_field(&AUX->MU_CNTL_REG, 0b11, 0x3, 0); // Enable TX/RX
+>>>>>>> homeserver/Dev
 }
 
 void uart_mini_putc(char c)
 {
 	while(!uart_mini_is_write_ready())
 		;
+<<<<<<< HEAD
 	mmio_write(&AUX->AUX_MU_IO_REG, (uint32_t)c);
+=======
+	mmio_write(&AUX->MU_IO_REG, (uint32_t)c);
+>>>>>>> homeserver/Dev
 }
 
 /** @} */

@@ -33,6 +33,8 @@ proc_hang:
     b proc_hang
 
 master: 
+    mov x19, x0 // Save the DTB pointer in callee-saved register x19 (see kernel_main for explanation on why we need the DTB pointer)
+
     mrs x0, CurrentEL
     lsr x0, x0, #2
     cmp x0, #3
@@ -69,6 +71,9 @@ in_el1:
     adr     x0, __stack_top
     mov     sp, x0
 
+    // Install the vector table before an interrupt can ocurr
+    bl install_vector_table // External function defined in vectors.S
+
     // Clear BSS (Uninitialized global variables)
     adr x0, __bss_start
     adr x1, __bss_end
@@ -82,6 +87,7 @@ clear_bss:
     cbnz x1, clear_bss
 
 run_main:
+    mov x0, x19 // Restore the DTB pointer into x0 as argument 1 for kernel_main (see kernel_main for explanation on why we need the DTB pointer)
     // Jump to C code, should not return
     bl kernel_main
 

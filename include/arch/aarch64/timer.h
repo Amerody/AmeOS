@@ -33,4 +33,26 @@ uint64_t timer_get_ticks();
  */
 void timer_sleep(uint32_t ms);
 
+<<<<<<< HEAD
+=======
+/**
+ * @brief Initializes the timer interrupts
+ *
+ * @param hz
+ */
+void timer_interrupt_init(uint32_t hz);
+
+/**
+ * @brief Enables the timer interrupts
+ *
+ */
+void timer_interrupt_enable();
+
+// /**
+//  * @brief
+//  *
+//  */
+// void timer_irq_handler();
+
+>>>>>>> homeserver/Dev
 /** @} */

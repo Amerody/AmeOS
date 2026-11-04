@@ -1,6 +1,8 @@
 add_library(kernel_core OBJECT
     "kernel.c"
 
+    "exceptions.c"
+
     "kprintf.c"
     "panic.c"
 )

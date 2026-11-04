@@ -22,3 +22,4 @@ Offset | Exception Source              | Exception Type
 0x680  |                               | IRQ
 0x700  |                               | FIQ
 0x780  |                               | SError
+Each entry must be 128 bytes (0x80) apart.

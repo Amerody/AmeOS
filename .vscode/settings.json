@@ -1,6 +1,5 @@
 {
     "clangd.arguments": [
-        "--compile-commands-dir=build/windows-rpi4-debug",
         "--query-driver=C:/Program Files/LLVM/bin/clang*",
         "--background-index",
         "--header-insertion=never",

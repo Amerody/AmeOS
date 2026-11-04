@@ -8,7 +8,10 @@
       "program": "${command:cmake.buildDirectory}/kernel.elf",
       "cwd": "${workspaceFolder}",
       "MIMode": "gdb",
-      "miDebuggerPath": "C:/ARM/bin/aarch64-none-elf-gdb.exe",
+      // Found through PATH on both OSes (Windows adds the .exe itself).
+      // Install the Arm GNU Toolchain and add its bin folder to PATH, or override
+      // below if you use gdb-multiarch on Linux.
+      "miDebuggerPath": "aarch64-none-elf-gdb",
       "miDebuggerServerAddress": "localhost:1234",
       "stopAtEntry": false,
       "targetArchitecture": "arm64",
@@ -17,6 +20,9 @@
         { "text": "-enable-pretty-printing", "ignoreFailures": true },
         { "text": "hbreak _start" }
       ],
+      // Optional per-OS override, if you'd rather not put gdb on PATH:
+      // "windows": { "miDebuggerPath": "C:/ARM/bin/aarch64-none-elf-gdb.exe" },
+      // "linux":   { "miDebuggerPath": "/usr/bin/gdb-multiarch" }
     }
-  ],
+  ]
 }

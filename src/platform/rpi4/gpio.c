@@ -17,7 +17,7 @@
 #include <stdint.h>
 
 /// @brief All the GPIO Registers
-/// @warning @p RESERVED_N are not to be used
+/// @warning @p RESERVED_* are not to be used
 typedef struct
 {
 	volatile uint32_t GPFSEL0; ///< GPIO Function Select 0
@@ -77,9 +77,9 @@ typedef struct
 	volatile uint32_t GPAFEN0; ///< GPIO Pin Async. Falling Edge Detect 0
 	volatile uint32_t GPAFEN1; ///< GPIO Pin Async. Falling Edge Detect 1 (0x8c)
 
-	uint32_t RESERVED_8C_E0[21]; ///< 84 Bytes gap between GPAFEN1 and GPIO_PUP_PDN_CNTRL_REG0
+	uint32_t RESERVED_90_E0[CALC_OFFSET(0x90, 0xE0)]; ///< 84 Bytes gap between GPAFEN1 and GPIO_PUP_PDN_CNTRL_REG0
 
-	volatile uint32_t GPIO_PUP_PDN_CNTRL_REG0; ///< GPIO Pull-up / Pull-down Register 0 (0xe4)
+	volatile uint32_t GPIO_PUP_PDN_CNTRL_REG0; ///< GPIO Pull-up / Pull-down Register 0
 	volatile uint32_t GPIO_PUP_PDN_CNTRL_REG1; ///< GPIO Pull-up / Pull-down Register 1
 	volatile uint32_t GPIO_PUP_PDN_CNTRL_REG2; ///< GPIO Pull-up / Pull-down Register 2
 	volatile uint32_t GPIO_PUP_PDN_CNTRL_REG3; ///< GPIO Pull-up / Pull-down Register 3
@@ -111,7 +111,7 @@ typedef enum
  * @retval GPIO_ERROR_INVALID_PIN @p pin is out of range
  * @retval GPIO_ERROR_INVALID_VALUE @p value is invalid for its field
  */
-gpio_status_t gpio_call(gpio_t pin, uint32_t value, mmio_register_t base_reg, gpio_field_size_t field_size)
+gpio_status_t gpio_call(gpio_t pin, uint32_t value, mmio_register32_t base_reg, gpio_field_size_t field_size)
 {
 	uint32_t field_mask = (1U << field_size) - 1U;
 
@@ -123,7 +123,7 @@ gpio_status_t gpio_call(gpio_t pin, uint32_t value, mmio_register_t base_reg, gp
 	unsigned int num_fields = 32U / field_size;
 
 	uint32_t reg_index = pin / num_fields;
-	mmio_register_t target_reg = base_reg + reg_index;
+	mmio_register32_t target_reg = base_reg + reg_index;
 	unsigned int shift = (pin % num_fields) * field_size;
 
 	mmio_write_field(target_reg, value, field_mask, shift);

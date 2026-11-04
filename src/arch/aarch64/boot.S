@@ -87,9 +87,9 @@ clear_bss:
     cbnz x1, clear_bss
 
 run_main:
-    mov x0, x19 // Restore the DTB pointer into x0 as argument 1 for kernel_main (see kernel_main for explanation on why we need the DTB pointer)
+    mov x0, x19 // Restore the DTB pointer into x0 as argument 1 for kmain (see kmain for explanation on why we need the DTB pointer)
     // Jump to C code, should not return
-    bl kernel_main
+    bl kmain
 
     // In case it does return, halt the master core too
     b proc_hang

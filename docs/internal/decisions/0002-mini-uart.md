@@ -1,4 +1,4 @@
-# 0002: Mini UART
+# 0002: Mini UART {#decision_0002-mini-uart}
 
 - Date: 2026-10-31
 - Status: accepted

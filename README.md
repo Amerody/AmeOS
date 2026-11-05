@@ -121,6 +121,5 @@ AmeOS/
 │   └── platform/rpi4/       # platform.c, linker.ld, boot/config.txt,
 │                            # gic400/, uart/, gpio/, aux/, mailbox/, mmio.h
 ├── user/                    # the OS side: init, shell, libc
-├── tools/                   # QEMU scripts, SD image, gdb scripts
 └── docs/                    # architecture notes, diagrams
 ```

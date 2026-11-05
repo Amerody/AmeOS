@@ -25,7 +25,7 @@ message(STATUS "Kernel platform: ${KERNEL_PLATFORM}")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # ------------------------------------------------------------------------------
-# Sources
+# Sources NOT UP TO DATE
 #
 # Expected layout:
 #   src/kernel/                  platform-independent kernel code
@@ -36,7 +36,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #
 # CONFIGURE_DEPENDS makes the build re-glob automatically when files are added.
 # ------------------------------------------------------------------------------
-set(KERNEL_LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/linker/${KERNEL_PLATFORM}.ld")
+set(KERNEL_LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/src/platform/${KERNEL_PLATFORM}/${KERNEL_PLATFORM}.ld")
 if(NOT EXISTS "${KERNEL_LINKER_SCRIPT}")
     message(FATAL_ERROR "Missing linker script: ${KERNEL_LINKER_SCRIPT}")
 endif()

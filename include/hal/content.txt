@@ -1,0 +1,2 @@
+the board contract. platform.h declares platform_init() and the memory map. 
+The other headers are one per peripheral class that core or the drivers use.

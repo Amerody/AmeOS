@@ -1,4 +1,4 @@
-# 0003: Timer
+# 0003: Timer {#decision_0003-timer}
 
 - Date: 2026-11-01
 - Status: accepted

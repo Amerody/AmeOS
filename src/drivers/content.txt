@@ -1,0 +1,2 @@
+drivers that only talk to hal_*. console/ holds the sink registry and the 
+UART sink, and fb/ holds the framebuffer text console.

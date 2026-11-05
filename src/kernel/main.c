@@ -23,7 +23,7 @@
  * 3. Future Proofing: If the peripheral base addresses change in future board revisions
  *    or QEMU targets, parsing this pointer prevents the kernel from instantly crashing.
  */
-void kernel_main(uint64_t dtb_ptr)
+void kmain(uint64_t dtb_ptr)
 {
 	// 	  (Optional but recommended) Parse the DTB structure here
 	//    Find the "soc" node or "ranges" property to extract the base.
@@ -31,16 +31,13 @@ void kernel_main(uint64_t dtb_ptr)
 	//    if (parsed_soc_base != 0) {
 	//        PERIPHERAL_BASE = parsed_soc_base;
 	//    }
+
 	console_init();
 
 	gic_init();                                       // boot core only
 	gic_cpu_init();                                   // every core
 	timer_init(1);                                    // 1 tick per second
 	__asm__ volatile("msr daifclr, #2" ::: "memory"); // finally unmask IRQs
-
-	// timer_init();
-	// timer_interrupt_init(1);
-	// timer_interrupt_enable();
 
 	kprintf("Hello World!\n");
 	kprintf("Welcome to AmeOS version %d.%d.%d!\n", 0, 1, 0);

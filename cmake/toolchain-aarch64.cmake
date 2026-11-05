@@ -1,10 +1,5 @@
 # Toolchain file: bare-metal AArch64 (aarch64-none-elf) using LLVM (Clang + lld).
 #
-# Used by every preset in CMakePresets.json, on both Windows and Linux.
-# CMake runs this file very early (and again for its internal compiler checks),
-# so it only sets up *which* compilers to use. Kernel-specific compile and link
-# flags live in the top-level CMakeLists.txt.
-#
 # Finding LLVM, in priority order:
 #   1. $LLVM_ROOT/bin           (set this env var if LLVM is in a custom location)
 #   2. %ProgramFiles%/LLVM/bin  (default Windows installer location)
@@ -35,8 +30,13 @@ set(CMAKE_C_COMPILER_TARGET   ${KERNEL_TRIPLE})
 set(CMAKE_CXX_COMPILER_TARGET ${KERNEL_TRIPLE})
 set(CMAKE_ASM_COMPILER_TARGET ${KERNEL_TRIPLE})
 
-# Directory containing clang; used later to find llvm-objcopy and friends.
 get_filename_component(KERNEL_LLVM_BIN "${KERNEL_CLANG}" DIRECTORY)
+
+find_program(KERNEL_OBJCOPY
+    NAMES llvm-objcopy
+    HINTS "${KERNEL_LLVM_BIN}"
+    REQUIRED
+)
 
 # There is no libc or startup code to link against, so CMake's "can the compiler
 # build a program?" check must only compile a static library, not link an executable.

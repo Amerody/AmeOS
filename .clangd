@@ -5,4 +5,4 @@ Style:
   QuotedHeaders: '.*'
 
 CompileFlags:
-  CompilationDatabase: "C:/Users/Admin/Documents/Dev/AmeOS/build/windows-rpi4-debug"
+  CompilationDatabase: "/home/amerody/Documents/Dev/AmeOS/build/rpi4-debug"

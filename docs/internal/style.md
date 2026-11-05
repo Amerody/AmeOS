@@ -1,4 +1,4 @@
-# Naming and style conventions
+# Naming and style conventions {#style}
 
 These rules apply to the whole project (C, C++, assembly, build files, docs). The goal is
 consistency: when a choice isn't covered here, follow the closest existing example, then

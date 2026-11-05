@@ -1,4 +1,5 @@
-# Hardware Notes
+# Hardware Notes {#hardware_notes}
+
 Some notes I took from the hardware functionality or ARM architecture
 
 ## Exception Vector Tables

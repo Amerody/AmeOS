@@ -1,4 +1,4 @@
-# NNNN: Title
+# NNNN: Title {#decision_0000-template}
 
 - Date: YYYY-MM-DD
 - Status: proposed | accepted | superseded by NNNN

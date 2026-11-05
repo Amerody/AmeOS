@@ -1,0 +1,3 @@
+boot.S (stack setup, BSS clear, dropping from EL2 to EL1, jump to kmain), 
+exception vectors and handlers, interrupt masking, context switch, MMU, 
+and the generic timer, which implements hal_timer.

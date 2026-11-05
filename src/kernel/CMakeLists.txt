@@ -1,5 +1,5 @@
 add_library(kernel_core OBJECT
-    "kernel.c"
+    "main.c"
 
     "exceptions.c"
 

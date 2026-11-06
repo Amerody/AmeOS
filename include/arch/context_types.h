@@ -28,10 +28,8 @@ struct cpu_context
  */
 struct trap_frame
 {
-	uint64_t x[31];  /* x0..x30 */
-	uint64_t sp;     /* SP_EL0 (the user stack when coming from EL0) */
-	uint64_t pc;     /* ELR_EL1: address to return to */
-	uint64_t pstate; /* SPSR_EL1: PSTATE to restore on return */
+	uint64_t x[31]; /* x0..x30 */
+	uint64_t sp;    /* SP_EL0 (the user stack when coming from EL0) */
+	uint64_t elr;   /* ELR_EL1: address to return to */
+	uint64_t spsr;  /* SPSR_EL1: PSTATE to restore on return */
 };
-
-_Static_assert(sizeof(struct trap_frame) % 16 == 0, "trap_frame must keep SP 16-byte aligned");

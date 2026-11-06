@@ -17,6 +17,14 @@
         }
     },
     {
+        "name": "rpi4",
+        "hidden": true,
+        "cacheVariables": {
+            "KERNEL_PLATFORM": "rpi4",
+            "KERNEL_ARCH": "aarch64"
+        }
+    },
+    {
         "name": "debug",
         "hidden": true,
         "cacheVariables": {
@@ -35,12 +43,12 @@
     {
         "name": "rpi4-debug",
         "displayName": "Raspberry Pi 4 | Debug",
-        "inherits": ["base", "debug"]
+        "inherits": ["base", "rpi4", "debug"]
     },
     {
         "name": "rpi4-release",
         "displayName": "Raspberry Pi 4 | Release",
-        "inherits": ["base", "release"]
+        "inherits": ["base", "rpi4",  "release"]
     }
   ],
   "buildPresets": [

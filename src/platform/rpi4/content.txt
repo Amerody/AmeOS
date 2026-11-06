@@ -1,5 +1,0 @@
-the implementations of hal_* plus the board glue. 
-Each peripheral gets a folder (uart/, gpio/, gic400/, aux/, mailbox/), 
-with its private register headers next to it. 
-linker.ld goes here because the load address is board-specific, and so 
-does the firmware config.txt

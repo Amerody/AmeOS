@@ -11,10 +11,17 @@
  * @brief UART1 (mini UART) driver header
  */
 
+#include <stdint.h>
+
 /**
  * @brief Enables the UART1 (mini UART)
+ *
+ * @param baud Requested baud rate, e.g. 115200.
+ *
+ * @return 0 on success, -ENODEV if the platform has no such port, -EINVAL if
+ *         the baud rate is outside what the hardware can produce.
  */
-void uart_mini_enable();
+int uart_mini_enable(uint32_t baud);
 
 /**
  * @brief Writes a character to the UART1 (mini UART)

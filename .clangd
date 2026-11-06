@@ -1,8 +1,0 @@
-Documentation:
-  CommentFormat: Doxygen
-
-Style:
-  QuotedHeaders: '.*'
-
-CompileFlags:
-  CompilationDatabase: "/home/amerody/Documents/Dev/AmeOS/build/rpi4-debug"

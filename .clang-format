@@ -277,7 +277,7 @@ SortIncludes:
   IgnoreExtension: false
 SortJavaStaticImport: Before
 SortUsingDeclarations: LexicographicNumeric
-SpaceAfterCStyleCast: false
+SpaceAfterCStyleCast: true
 SpaceAfterLogicalNot: false
 SpaceAfterOperatorKeyword: false
 SpaceAfterTemplateKeyword: true
@@ -289,7 +289,7 @@ SpaceBeforeCtorInitializerColon: true
 SpaceBeforeEnumUnderlyingTypeColon: true
 SpaceBeforeInheritanceColon: true
 SpaceBeforeJsonColon: false
-SpaceBeforeParens: false
+SpaceBeforeParens: true
 SpaceBeforeParensOptions:
   AfterControlStatements: false
   AfterForeachMacros: false

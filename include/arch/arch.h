@@ -7,6 +7,8 @@
  */
 #pragma once
 
+#include "arch/irq.h"
+
 #ifdef __cplusplus
 extern "C"
 {

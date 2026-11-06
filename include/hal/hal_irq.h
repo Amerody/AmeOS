@@ -37,6 +37,13 @@ extern "C"
 	typedef void (*hal_irq_handler_t)(void* arg);
 
 	/**
+	 * @brief Initializes the handling of interrupts
+	 *
+	 * In rpi4 this implies enabling the GIC-400
+	 */
+	void hal_irq_init();
+
+	/**
 	 * @brief Attach a handler to an interrupt source.
 	 *
 	 * Does not enable the source: register it first, then call hal_irq_enable(), so

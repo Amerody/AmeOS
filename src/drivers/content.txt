@@ -1,2 +1,5 @@
 drivers that only talk to hal_*. console/ holds the sink registry and the 
 UART sink, and fb/ holds the framebuffer text console.
+
+The rule of thumb is that SoC-integrated peripherals are HAL implementations in platform/, 
+and devices defined by a protocol, or built on top of other devices, are drivers.

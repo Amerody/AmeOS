@@ -27,7 +27,7 @@ extern "C"
 	 * Calling it again reconfigures the port (for example to change the baud rate).
 	 * The implementation picks the closest achievable baud rate.
 	 *
-	 * @param port  Platform UART number; 0 is the console UART.
+	 * @param port  Platform UART number
 	 * @param baud  Requested baud rate, e.g. 115200.
 	 * @return 0 on success, -ENODEV if the platform has no such port, -EINVAL if
 	 *         the baud rate is outside what the hardware can produce.

@@ -72,7 +72,7 @@ in_el1:
     mov     sp, x0
 
     // Install the vector table before an interrupt can ocurr
-    bl install_vector_table // External function defined in vectors.S
+    // bl install_vector_table // External function defined in vectors.S
 
     // Clear BSS (Uninitialized global variables)
     adr x0, __bss_start

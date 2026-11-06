@@ -11,7 +11,8 @@ enum
 {
 	SUCCESS = 0,
 
-	EINVAL,
-	EBUSY,
-	ENODEV,
+	EINVAL, ///< Invalid
+	EBUSY,  ///< Busy
+	ENODEV, ///< No device
+	ENOSPC, ///< No space
 };

@@ -1,2 +1,0 @@
-only needed once userland exists, for anything both sides must agree on, 
-like syscall numbers and struct layouts.

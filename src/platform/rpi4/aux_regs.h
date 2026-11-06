@@ -6,7 +6,7 @@
  */
 
 /**
- * @file regs.h
+ * @file aux_regs.h
  *
  * @brief Definition of the AUX Peripherals registers
  */
@@ -80,6 +80,6 @@ typedef struct
 } AUX_Registers;
 
 #define BASE (PERIPHERAL_BASE + 0x215000) ///< AUX Peripherals base address
-#define AUX ((AUX_Registers*)BASE)        ///< AUX Peripherals access
+#define AUX ((AUX_Registers*) BASE)       ///< AUX Peripherals access
 
 /** @} */

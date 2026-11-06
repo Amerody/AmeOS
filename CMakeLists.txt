@@ -15,10 +15,16 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # ------------------------------------------------------------------------------
 # Options
 # ------------------------------------------------------------------------------
-set(KERNEL_PLATFORM "rpi4")
-
 option(KERNEL_BUILD_DOCS "Generate Doxygen docs as part of the default build" ON)
 option(KERNEL_DOCS_INTERNAL "Include internal code in docs" OFF)
+
+if(NOT KERNEL_PLATFORM)
+    message(FATAL_ERROR "Kernel platform not set")
+endif()
+
+if(NOT KERNEL_ARCH)
+    message(FATAL_ERROR "Kernel architecture not set")
+endif()
 
 message(STATUS "Kernel platform: ${KERNEL_PLATFORM}")
 
@@ -43,6 +49,7 @@ endif()
 
 # shared flags and include root for every library
 add_library(kernel_flags INTERFACE)
+target_compile_definitions(kernel_flags INTERFACE "KERNEL_ARCH_NAME=\"${KERNEL_ARCH}\""  "KERNEL_PLATFORM_NAME=\"${KERNEL_PLATFORM}\"")
 target_include_directories(kernel_flags INTERFACE "${CMAKE_SOURCE_DIR}/include")
 target_compile_options(kernel_flags INTERFACE 
     -mcpu=cortex-a72
@@ -52,9 +59,15 @@ target_compile_options(kernel_flags INTERFACE
     -fno-omit-frame-pointer
     -fparse-all-comments
     -Wall -Wextra
+
+    # Release only optimizations
+    $<$<CONFIG:Release>:-O3>
+    $<$<CONFIG:Release>:-flto>
+
     # Don't compile kernel code with float/vector instructions
     # Kernel code will not use float
     $<$<COMPILE_LANGUAGE:C,CXX>:-mgeneral-regs-only>
+
     # C++ without a runtime (no unwinder, no RTTI, no thread-safe static guards)
     $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
     $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
@@ -71,8 +84,9 @@ target_link_libraries(kernel PRIVATE
     kernel_flags
 
     kernel_core    
-    aarch64
+    arch
     platform
+    drivers
 )
 
 
@@ -86,6 +100,7 @@ target_include_directories(kernel PRIVATE "${CMAKE_SOURCE_DIR}/include")
 target_link_options(kernel PRIVATE
     -fuse-ld=lld
     -nostdlib
+    $<$<CONFIG:Release>:-flto>
     "-Wl,-T,${KERNEL_LINKER_SCRIPT}"
     "-Wl,-Map=$<TARGET_FILE_DIR:kernel>/kernel.map"
     -Wl,--gc-sections)
@@ -173,11 +188,11 @@ macro(setup_doxygen_layout)
     # 3. Configure Internal build settings
     if(KERNEL_DOCS_INTERNAL)
         # Add the internal overview tab.
-        string(REGEX REPLACE
-            "<tab type=\"files\""
-            "<tab type=\"user\" url=\"internal_docs.html\" title=\"Internal implementation Overview\"/>\n      <tab type=\"files\""
-            LAYOUT_CONTENT "${LAYOUT_CONTENT}"
-        )
+        # string(REGEX REPLACE
+        #     "<tab type=\"files\""
+        #     "<tab type=\"user\" url=\"internal_docs.html\" title=\"Internal implementation Overview\"/>\n      <tab type=\"files\""
+        #     LAYOUT_CONTENT "${LAYOUT_CONTENT}"
+        # )
 
         message(STATUS "Generating internal decisions index...")
         message(STATUS "KERNEL_DOCS_INTERNAL = ${KERNEL_DOCS_INTERNAL}")
@@ -187,8 +202,6 @@ macro(setup_doxygen_layout)
         file(GLOB DECISION_FILES CONFIGURE_DEPENDS
             "${CMAKE_SOURCE_DIR}/docs/internal/decisions/[0-9][0-9][0-9][0-9]-*.md"
         )
-
-        list(FILTER DECISION_FILES EXCLUDE REGEX "/0000-template\\.md$")
 
         list(SORT DECISION_FILES)
 
@@ -278,7 +291,6 @@ if(KERNEL_BUILD_DOCS)
 
         if(KERNEL_DOCS_INTERNAL)
             set(DOXYGEN_ENABLED_SECTIONS "INTERNAL_DOCS")
-            set(DOXYGEN_EXCLUDE "docs/internal/0000-template.md")
         else()
             set(DOXYGEN_ENABLED_SECTIONS "")
             set(DOXYGEN_EXCLUDE "${CMAKE_SOURCE_DIR}/docs/internal") # don't include the internal documentation on Release

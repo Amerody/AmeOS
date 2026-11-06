@@ -1,1 +1,0 @@
-the CPU contract: interrupt masking, context switch, barriers, and MMU operations later.

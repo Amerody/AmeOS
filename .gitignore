@@ -1,5 +1,5 @@
 build/
 docs/html
 
-*.log
 .clangd
+*.log

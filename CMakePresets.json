@@ -7,118 +7,58 @@
   },
   "configurePresets": [
     {
-      "name": "base",
-      "hidden": true,
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/${presetName}",
-      "toolchainFile": "${sourceDir}/cmake/toolchain-aarch64.cmake",
-      "cacheVariables": {
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
-      }
+        "name": "base",
+        "hidden": true,
+        "generator": "Ninja",
+        "binaryDir": "${sourceDir}/build/${presetName}",
+        "toolchainFile": "${sourceDir}/cmake/toolchain-aarch64.cmake",
+        "cacheVariables": {
+            "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+        }
     },
     {
-      "name": "host-windows",
-      "hidden": true,
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      }
+        "name": "rpi4",
+        "hidden": true,
+        "cacheVariables": {
+            "KERNEL_PLATFORM": "rpi4",
+            "KERNEL_ARCH": "aarch64"
+        }
     },
     {
-      "name": "host-linux",
-      "hidden": true,
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
-      }
+        "name": "debug",
+        "hidden": true,
+        "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "Debug",
+            "KERNEL_DOCS_INTERNAL": "ON"
+        }
     },
     {
-      "name": "debug",
-      "hidden": true,
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
+        "name": "release",
+        "hidden": true,
+        "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "Release",
+            "KERNEL_DOCS_INTERNAL": "OFF"
+        }
     },
     {
-      "name": "release",
-      "hidden": true,
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
+        "name": "rpi4-debug",
+        "displayName": "Raspberry Pi 4 | Debug",
+        "inherits": ["base", "rpi4", "debug"]
     },
     {
-      "name": "windows-rpi4-debug",
-      "displayName": "Windows | Raspberry Pi 4 | Debug",
-      "inherits": ["base", "host-windows", "debug"],
-      "cacheVariables": {
-        "KERNEL_DOCS_INTERNAL": "ON"
-      }
-    },
-    {
-      "name": "windows-rpi4-release",
-      "displayName": "Windows | Raspberry Pi 4 | Release",
-      "inherits": ["base", "host-windows", "release"],
-      "cacheVariables": {
-        "KERNEL_DOCS_INTERNAL": "OFF"
-      }
-    },
-    {
-      "name": "linux-rpi4-debug",
-      "displayName": "Linux | Raspberry Pi 4 | Debug",
-      "inherits": ["base", "host-linux", "debug"],
-      "cacheVariables": {
-        "KERNEL_DOCS_INTERNAL": "ON"
-      }
-    },
-    {
-      "name": "linux-rpi4-release",
-      "displayName": "Linux | Raspberry Pi 4 | Release",
-      "inherits": ["base", "host-linux", "release"],
-      "cacheVariables": {
-        "KERNEL_DOCS_INTERNAL": "OFF"
-      }
+        "name": "rpi4-release",
+        "displayName": "Raspberry Pi 4 | Release",
+        "inherits": ["base", "rpi4",  "release"]
     }
   ],
   "buildPresets": [
     {
-      "name": "build-host-windows",
-      "hidden": true,
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      }
+        "name": "rpi4-debug",
+        "configurePreset": "rpi4-debug"
     },
     {
-      "name": "build-host-linux",
-      "hidden": true,
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
-      }
-    },
-    {
-      "name": "windows-rpi4-debug",
-      "inherits": "build-host-windows",
-      "configurePreset": "windows-rpi4-debug"
-    },
-    {
-      "name": "windows-rpi4-release",
-      "inherits": "build-host-windows",
-      "configurePreset": "windows-rpi4-release"
-    },
-    {
-      "name": "linux-rpi4-debug",
-      "inherits": "build-host-linux",
-      "configurePreset": "linux-rpi4-debug"
-    },
-    {
-      "name": "linux-rpi4-release",
-      "inherits": "build-host-linux",
-      "configurePreset": "linux-rpi4-release"
+        "name": "rpi4-release",
+        "configurePreset": "rpi4-release"
     }
   ]
 }

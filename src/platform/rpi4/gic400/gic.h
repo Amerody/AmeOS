@@ -1,5 +1,3 @@
-#pragma once
-
 /**
  * @file gic.h
  * @brief Public interface of the GICv2 (GIC-400) interrupt controller driver.
@@ -14,6 +12,8 @@
  *  - 1020-1023: special values (1023 = spurious)
  */
 
+#pragma once
+
 #include <stdint.h>
 
 /// @brief GIC Status codes
@@ -26,7 +26,8 @@ typedef enum
 	GIC_ERROR_INTID_NOT_SGI = -3,    ///< An interrupt id NOT corresponding to an SGI has been provided where it shouldn't be
 	GIC_ERROR_INTID_IS_SGI = -4,     ///< An interrupt id corresponding to an SGI has been provided where it shouldn't be
 	GIC_ERROR_INVALID_CPU_MASK = -5, ///< An invalid CPU mask has been provided
-	GIC_ERROR_INVALID_ARG = -6,      ///< An invalid argument has been provided (shouldn't happen)
+
+	GIC_ERROR_INVALID_ARG = -999, ///< An invalid argument has been provided (shouldn't happen)
 
 } gic_status_t;
 
@@ -374,3 +375,8 @@ gic_status_t gic_clear_sgi_pending(uint32_t intid, uint8_t src_cpu_mask);
  * @retval GIC_ERROR_INVALID_CPU_MASK @p cpu_mask is invalid (at least one of the upper 4 bits is set)
  */
 gic_status_t gic_send_sgi(uint32_t intid, gic_sgi_target_t target, uint8_t cpu_mask);
+
+/**
+ * @brief Number of interrupt IDs this GIC implements. 0 before gic_init().
+ */
+uint32_t gic_num_intids();

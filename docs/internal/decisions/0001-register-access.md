@@ -1,4 +1,4 @@
-# 0001: Register Access
+# 0001: Register Access {#decision_0001-register-access}
 
 - Date: 2026-10-30
 - Status: accepted

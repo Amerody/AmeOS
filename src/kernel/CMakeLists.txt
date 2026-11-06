@@ -1,12 +1,10 @@
 add_library(kernel_core OBJECT
-    "kernel.c"
+    "main.c"
 
-<<<<<<< HEAD
-=======
-    "exceptions.c"
+    # "exceptions.c"
 
->>>>>>> homeserver/Dev
-    "kprintf.c"
-    "panic.c"
+    "lib/console.c"
+    "lib/kprintf.c"
+    "lib/panic.c"
 )
 target_link_libraries(kernel_core PUBLIC kernel_flags)

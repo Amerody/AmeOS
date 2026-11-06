@@ -1,29 +1,16 @@
 #include "kernel/console.h"
 #include "kernel/kprintf.h"
-<<<<<<< HEAD
-#include "kernel/panic.h"
 
-#include "arch/aarch64/timer.h"
-
-#include <stddef.h>
-#include <stdint.h>
-
-static inline unsigned int get_current_el(void)
-{
-	unsigned long el;
-	__asm__ volatile("mrs %0, CurrentEL" : "=r"(el));
-	return (el >> 2) & 3;
-}
-=======
-
-#include "arch/aarch64/gic.h"
-#include "kernel/exceptions.h"
->>>>>>> homeserver/Dev
+#include "arch/arch.h"
+#include "drivers/console/console_uart.h"
+#include "hal/hal.h"
 
 #include <stddef.h>
 #include <stdint.h>
 
 // uint64_t PERIPHERAL_BASE = 0xFE000000UL; // Fallback value
+
+static void on_tick() { kprintf("[TICK]\n"); }
 
 /**
  * @brief Kernel Main Entry Point
@@ -39,47 +26,30 @@ static inline unsigned int get_current_el(void)
  * 3. Future Proofing: If the peripheral base addresses change in future board revisions
  *    or QEMU targets, parsing this pointer prevents the kernel from instantly crashing.
  */
-void kernel_main(uint64_t dtb_ptr)
+void kmain(uint64_t dtb_ptr)
 {
-<<<<<<< HEAD
-	console_init();
-	timer_init();
-
-	kprintf("Hello World!\n");
-	kprintf("Welcome to AmeOS version %d.%d.%d!\n", 0, 1, 0);
-	kprintf("Current EL: %d\n", get_current_el());
-	// while(1)
-	// 	; // This is so kernel_main() doesn't return
-
-	uint64_t count = 0;
-	while(1)
-	{
-		kprintf("Tick %ld\n", count++);
-
-		timer_sleep(1000); // 1 second delay
-=======
 	// 	  (Optional but recommended) Parse the DTB structure here
 	//    Find the "soc" node or "ranges" property to extract the base.
 	//
 	//    if (parsed_soc_base != 0) {
 	//        PERIPHERAL_BASE = parsed_soc_base;
 	//    }
+
+	arch_init();     // exception vectors installed, IRQs masked
+	platform_init(); // interrupt controller up, memory map valid
 	console_init();
+	console_uart_init(1);
+	kprintf("Architecture: %s\n", arch_name());
+	kprintf("Platform: %s\n", platform_name());
 
-	gic_init();                                       // boot core only
-	gic_cpu_init();                                   // every core
-	timer_init(1);                                    // 1 tick per second
-	__asm__ volatile("msr daifclr, #2" ::: "memory"); // finally unmask IRQs
+	if (hal_timer_init() < 0)
+		kprintf("Timer init failed\n");
+	hal_timer_set_tick(1, on_tick);
+	arch_irq_enable();
 
-	// timer_init();
-	// timer_interrupt_init(1);
-	// timer_interrupt_enable();
-
-	kprintf("Hello World!\n");
 	kprintf("Welcome to AmeOS version %d.%d.%d!\n", 0, 1, 0);
-	while(1)
+	while (1)
 	{
 		; // This is so kernel_main() doesn't return
->>>>>>> homeserver/Dev
 	}
 }

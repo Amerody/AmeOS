@@ -1,4 +1,4 @@
-# Code Comment decisions
+# Code Comment decisions {#comment_decisions}
 
 - Use `/** ... */` in headers, directly above the declaration.
 - `@brief` always. `@param` and `@return` only when not obvious.

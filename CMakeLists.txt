@@ -15,17 +15,23 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # ------------------------------------------------------------------------------
 # Options
 # ------------------------------------------------------------------------------
-set(KERNEL_PLATFORM "rpi4")
-
 option(KERNEL_BUILD_DOCS "Generate Doxygen docs as part of the default build" ON)
 option(KERNEL_DOCS_INTERNAL "Include internal code in docs" OFF)
+
+if(NOT KERNEL_PLATFORM)
+    message(FATAL_ERROR "Kernel platform not set")
+endif()
+
+if(NOT KERNEL_ARCH)
+    message(FATAL_ERROR "Kernel architecture not set")
+endif()
 
 message(STATUS "Kernel platform: ${KERNEL_PLATFORM}")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # ------------------------------------------------------------------------------
-# Sources
+# Sources NOT UP TO DATE
 #
 # Expected layout:
 #   src/kernel/                  platform-independent kernel code
@@ -36,13 +42,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #
 # CONFIGURE_DEPENDS makes the build re-glob automatically when files are added.
 # ------------------------------------------------------------------------------
-set(KERNEL_LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/linker/${KERNEL_PLATFORM}.ld")
+set(KERNEL_LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/src/platform/${KERNEL_PLATFORM}/${KERNEL_PLATFORM}.ld")
 if(NOT EXISTS "${KERNEL_LINKER_SCRIPT}")
     message(FATAL_ERROR "Missing linker script: ${KERNEL_LINKER_SCRIPT}")
 endif()
 
 # shared flags and include root for every library
 add_library(kernel_flags INTERFACE)
+target_compile_definitions(kernel_flags INTERFACE "KERNEL_ARCH_NAME=\"${KERNEL_ARCH}\""  "KERNEL_PLATFORM_NAME=\"${KERNEL_PLATFORM}\"")
 target_include_directories(kernel_flags INTERFACE "${CMAKE_SOURCE_DIR}/include")
 target_compile_options(kernel_flags INTERFACE 
     -mcpu=cortex-a72
@@ -52,9 +59,15 @@ target_compile_options(kernel_flags INTERFACE
     -fno-omit-frame-pointer
     -fparse-all-comments
     -Wall -Wextra
+
+    # Release only optimizations
+    $<$<CONFIG:Release>:-O3>
+    $<$<CONFIG:Release>:-flto>
+
     # Don't compile kernel code with float/vector instructions
     # Kernel code will not use float
     $<$<COMPILE_LANGUAGE:C,CXX>:-mgeneral-regs-only>
+
     # C++ without a runtime (no unwinder, no RTTI, no thread-safe static guards)
     $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
     $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
@@ -71,8 +84,9 @@ target_link_libraries(kernel PRIVATE
     kernel_flags
 
     kernel_core    
-    aarch64
+    arch
     platform
+    drivers
 )
 
 
@@ -86,6 +100,7 @@ target_include_directories(kernel PRIVATE "${CMAKE_SOURCE_DIR}/include")
 target_link_options(kernel PRIVATE
     -fuse-ld=lld
     -nostdlib
+    $<$<CONFIG:Release>:-flto>
     "-Wl,-T,${KERNEL_LINKER_SCRIPT}"
     "-Wl,-Map=$<TARGET_FILE_DIR:kernel>/kernel.map"
     -Wl,--gc-sections)
@@ -93,8 +108,6 @@ target_link_options(kernel PRIVATE
 # ------------------------------------------------------------------------------
 # Raspberry Pi: raw binary image (kernel8.img) for the SD card
 # ------------------------------------------------------------------------------
-find_program(KERNEL_OBJCOPY NAMES llvm-objcopy HINTS "${KERNEL_LLVM_BIN}")
-
 if(KERNEL_OBJCOPY)
     add_custom_command(TARGET kernel POST_BUILD
         COMMAND "${KERNEL_OBJCOPY}" -O binary
@@ -141,17 +154,113 @@ endif()
 
 # ------------------------------------------------------------------------------
 # Documentation (Doxygen), on by default; -DKERNEL_BUILD_DOCS=OFF to skip.
-# Output: <build dir>/docs/html/index.html
+# Output: docs/html/index.html
 # ------------------------------------------------------------------------------
+macro(setup_doxygen_layout)
+    # 1. Generate the default layout in the build folder so it doesn't pollute your source tree
+    set(BASE_LAYOUT "${CMAKE_CURRENT_BINARY_DIR}/DoxygenLayout.xml")
+    execute_process(
+        COMMAND ${DOXYGEN_EXECUTABLE} -l "${BASE_LAYOUT}"
+        RESULT_VARIABLE LAYOUT_RESULT
+        OUTPUT_QUIET
+    )
+
+    if(NOT LAYOUT_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to generate Doxygen layout")
+    endif()
+
+    # 2. Read the generated layout into a CMake string variable
+    file(READ "${BASE_LAYOUT}" LAYOUT_CONTENT)
+
+    # Rename navigation tabs.
+    string(REGEX REPLACE
+        "<tab type=\"pages\"[^>]*/>"
+        "<tab type=\"pages\" visible=\"yes\" title=\"Topics\"/>"
+        LAYOUT_CONTENT "${LAYOUT_CONTENT}"
+    )
+
+    string(REGEX REPLACE
+        "<tab type=\"classes\"[^>]*/>"
+        "<tab type=\"classes\" visible=\"yes\" title=\"Data Structures\"/>"
+        LAYOUT_CONTENT "${LAYOUT_CONTENT}"
+    )
+
+    # 3. Configure Internal build settings
+    if(KERNEL_DOCS_INTERNAL)
+        # Add the internal overview tab.
+        # string(REGEX REPLACE
+        #     "<tab type=\"files\""
+        #     "<tab type=\"user\" url=\"internal_docs.html\" title=\"Internal implementation Overview\"/>\n      <tab type=\"files\""
+        #     LAYOUT_CONTENT "${LAYOUT_CONTENT}"
+        # )
+
+        message(STATUS "Generating internal decisions index...")
+        message(STATUS "KERNEL_DOCS_INTERNAL = ${KERNEL_DOCS_INTERNAL}")
+        message(STATUS "CMAKE_CURRENT_BINARY_DIR = ${CMAKE_CURRENT_BINARY_DIR}")
+
+        # Find decision documents.
+        file(GLOB DECISION_FILES CONFIGURE_DEPENDS
+            "${CMAKE_SOURCE_DIR}/docs/internal/decisions/[0-9][0-9][0-9][0-9]-*.md"
+        )
+
+        list(SORT DECISION_FILES)
+
+        # Generate Decisions landing page.
+        set(DECISIONS_CONTENT
+            "# Decisions {#decisions}\n\nList of design and architecture decisions:\n\n"
+        )
+
+        foreach(filepath IN LISTS DECISION_FILES)
+
+            get_filename_component(filename "${filepath}" NAME_WE)
+
+            # Convert filename into a valid, predictable page ID.
+            set(page_id "decision_${filename}")
+
+            string(APPEND DECISIONS_CONTENT
+                "- @subpage ${page_id}\n"
+            )
+
+        endforeach()
+
+        # Generate the index in the build directory.
+        set(KERNEL_DECISIONS_INDEX_FILE
+            "${CMAKE_CURRENT_BINARY_DIR}/generated/decisions_index.md"
+        )
+
+        file(MAKE_DIRECTORY
+            "${CMAKE_CURRENT_BINARY_DIR}/generated"
+        )
+
+        file(WRITE
+            "${KERNEL_DECISIONS_INDEX_FILE}"
+            "${DECISIONS_CONTENT}"
+        )
+
+        if(EXISTS "${KERNEL_DECISIONS_INDEX_FILE}")
+            message(STATUS "Decisions index successfully created: ${KERNEL_DECISIONS_INDEX_FILE}")
+        else()
+            message(FATAL_ERROR "Failed to create decisions index: ${KERNEL_DECISIONS_INDEX_FILE}")
+        endif()
+
+        message(STATUS
+            "Generated Decisions index: ${KERNEL_DECISIONS_INDEX_FILE}"
+        )
+    else()
+        unset(KERNEL_DECISIONS_INDEX_FILE)
+    endif()
+
+    # 4. Save the modified layout and point Doxygen to it
+    set(ACTIVE_LAYOUT "${CMAKE_CURRENT_BINARY_DIR}/DoxygenLayout_active.xml")
+    file(WRITE "${ACTIVE_LAYOUT}" "${LAYOUT_CONTENT}")
+    
+    set(DOXYGEN_LAYOUT_FILE "${ACTIVE_LAYOUT}")
+endmacro()
+
 if(KERNEL_BUILD_DOCS)
     find_package(Doxygen OPTIONAL_COMPONENTS dot)
 
     if(DOXYGEN_FOUND)
-        #Style
-        # set(DOXYGEN_GENERATE_TREEVIEW   YES)
-        # set(DOXYGEN_HTML_EXTRA_STYLESHEET "${CMAKE_SOURCE_DIR}/docs/theme/doxygen-awesome.css")
-        # set(DOXYGEN_HTML_COLORSTYLE DARK) 
-        
         set(DOXYGEN_GENERATE_TREEVIEW YES)
         set(DOXYGEN_DISABLE_INDEX NO)
         set(DOXYGEN_FULL_SIDEBAR NO)
@@ -177,20 +286,29 @@ if(KERNEL_BUILD_DOCS)
         set(DOXYGEN_REPEAT_BRIEF          NO)
 
         # Sources
+        set(DOXYGEN_FILE_PATTERNS *.h *.c *.hpp *.cpp *.md *.dox)
+        set(_doc_inputs "${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/src")
+
         if(KERNEL_DOCS_INTERNAL)
-            set(DOXYGEN_FILE_PATTERNS *.h *.c *.hpp *.cpp *.md *.dox) # *.c/.cpp is not included to not publicly document internal functions
-            set(_doc_inputs "${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/src")
+            set(DOXYGEN_ENABLED_SECTIONS "INTERNAL_DOCS")
         else()
-            set(DOXYGEN_FILE_PATTERNS *.h *.hpp *.md *.dox) # *.c/.cpp is not included to not publicly document internal functions
-            set(_doc_inputs "${CMAKE_SOURCE_DIR}/include")
+            set(DOXYGEN_ENABLED_SECTIONS "")
+            set(DOXYGEN_EXCLUDE "${CMAKE_SOURCE_DIR}/docs/internal") # don't include the internal documentation on Release
         endif()
+
+        setup_doxygen_layout()
 
         if(EXISTS "${CMAKE_SOURCE_DIR}/docs")
             list(APPEND _doc_inputs "${CMAKE_SOURCE_DIR}/docs")
         endif()
         
-        if(EXISTS "${CMAKE_SOURCE_DIR}/docs/mainpage.md")
-            set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${CMAKE_SOURCE_DIR}/docs/mainpage.md")
+        if(EXISTS "${CMAKE_SOURCE_DIR}/README.md")
+            list(APPEND _doc_inputs "${CMAKE_SOURCE_DIR}/README.md")
+            set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${CMAKE_SOURCE_DIR}/README.md")
+        endif()
+
+        if(KERNEL_DOCS_INTERNAL AND KERNEL_DECISIONS_INDEX_FILE)
+            list(APPEND _doc_inputs "${CMAKE_CURRENT_BINARY_DIR}/generated")
         endif()
 
         doxygen_add_docs(docs ${_doc_inputs} ALL

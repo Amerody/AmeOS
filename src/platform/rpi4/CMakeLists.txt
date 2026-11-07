@@ -5,13 +5,16 @@ add_library(rpi4 OBJECT
     "uart/uart_mini.c"
     "uart/uart_pl011.c"
 
-    "auxiliary/aux_regs.h"
     "auxiliary/auxiliary.c"
 
     "gpio/gpio.c"
 
     "gic400/gic.c"
     "gic400/hal_irq.c"
+
+    "mailbox/mailbox.c"
+    
+    "framebuffer/fb.c"
 )
 target_link_libraries(rpi4 PUBLIC kernel_flags)
 

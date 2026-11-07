@@ -11,7 +11,7 @@
  *
  * @code
  * console_init();
- * console_uart_init(0);
+ * console_uart_init(1);
  * @endcode
  */
 #pragma once

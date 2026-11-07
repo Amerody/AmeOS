@@ -15,5 +15,12 @@
     "[cpp]": {
         "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
         "editor.formatOnSave": true
-    }
+    },
+    "python-envs.pythonProjects": [
+        {
+            "path": "src/platform/rpi4/uart",
+            "envManager": "ms-python.python:venv",
+            "packageManager": "ms-python.python:pip"
+        }
+    ]
 }

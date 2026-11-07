@@ -1,6 +1,7 @@
 #pragma once
 
-#include "hal/hal_irq.h"
-#include "hal/hal_timer.h"
-#include "hal/hal_uart.h"
-#include "hal/platform.h"
+#include "hal_fb.h"
+#include "hal_irq.h"
+#include "hal_timer.h"
+#include "hal_uart.h"
+#include "platform.h"

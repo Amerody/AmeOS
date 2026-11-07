@@ -1,9 +1,12 @@
 #include "kernel/console.h"
+#include "kernel/delay.h"
 #include "kernel/kprintf.h"
 
 #include <arch/arch.h>
 #include <arch/irq.h>
+#include <drivers/console/console_fb.h>
 #include <drivers/console/console_uart.h>
+#include <gfx/color.h>
 #include <hal/hal.h>
 
 #include <stddef.h>
@@ -11,7 +14,53 @@
 
 // uint64_t PERIPHERAL_BASE = 0xFE000000UL; // Fallback value
 
-static void on_tick() { kprintf("[TICK]\n"); }
+// #define TIMER_TEST
+
+#ifdef TIMER_TEST
+static void on_tick()
+{
+	kprintf("[TICK]\n");
+}
+#endif
+
+static void step(int rc, const char* fmt, ...) __attribute__((format(printf, 2, 3)));
+static void step(int rc, const char* fmt, ...)
+{
+	uint32_t color = (rc == 0) ? COLOR_GREEN : COLOR_RED;
+	console_set_color(color);
+	kprintf("%s", rc == 0 ? "[ OK ] " : "[FAIL] ");
+	console_set_color(COLOR_WHITE);
+
+	va_list ap;
+	va_start(ap, fmt);
+	kvprintf(fmt, ap);
+	va_end(ap);
+
+	if (rc != 0)
+		kprintf(" (error %d)", rc);
+	kprintf("\n");
+}
+
+static void init()
+{
+	arch_init();     // exception vectors installed, IRQs masked
+	platform_init(); // interrupt controller up, memory map valid
+	console_init();
+	console_uart_init(1);
+	console_fb_init();
+	console_set_scale(1);
+
+	step(0, "Architecture %s initialized", arch_name());
+	step(0, "Platform %s initialized", platform_name());
+
+	step(hal_timer_init(), "Timer initialized");
+
+#ifdef TIMER_TEST
+	hal_timer_set_tick(5, on_tick);
+	arch_irq_enable();
+	step(0, "IRQs unmasked on this CPU");
+#endif
+}
 
 /**
  * @brief Kernel Main Entry Point
@@ -36,19 +85,12 @@ void kmain(uint64_t dtb_ptr)
 	//        PERIPHERAL_BASE = parsed_soc_base;
 	//    }
 
-	arch_init();     // exception vectors installed, IRQs masked
-	platform_init(); // interrupt controller up, memory map valid
-	console_init();
-	console_uart_init(1);
-	kprintf("Architecture: %s\n", arch_name());
-	kprintf("Platform: %s\n", platform_name());
+	init();
 
-	if (hal_timer_init() < 0)
-		kprintf("Timer init failed\n");
-	hal_timer_set_tick(1, on_tick);
-	arch_irq_enable();
+	step(1, "Test error");
 
-	kprintf("Welcome to AmeOS version %d.%d.%d!\n", 0, 1, 0);
+	kprintf("Welcome to AmeOS version %d.%d.%d!\n", KERNEL_VERSION_MAJOR, KERNEL_VERSION_MINOR, KERNEL_VERSION_PATCH);
+
 	while (1)
 	{
 		; // This is so kernel_main() doesn't return

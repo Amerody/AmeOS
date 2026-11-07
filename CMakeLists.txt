@@ -49,7 +49,14 @@ endif()
 
 # shared flags and include root for every library
 add_library(kernel_flags INTERFACE)
+
 target_compile_definitions(kernel_flags INTERFACE "KERNEL_ARCH_NAME=\"${KERNEL_ARCH}\""  "KERNEL_PLATFORM_NAME=\"${KERNEL_PLATFORM}\"")
+target_compile_definitions(kernel_flags INTERFACE 
+    "KERNEL_VERSION_MAJOR=0"
+    "KERNEL_VERSION_MINOR=2"
+    "KERNEL_VERSION_PATCH=0"
+)
+
 target_include_directories(kernel_flags INTERFACE "${CMAKE_SOURCE_DIR}/include")
 target_compile_options(kernel_flags INTERFACE 
     -mcpu=cortex-a72
@@ -87,8 +94,9 @@ target_link_libraries(kernel PRIVATE
     arch
     platform
     drivers
+    gfx
+    lib
 )
-
 
 set_target_properties(kernel PROPERTIES
     OUTPUT_NAME kernel

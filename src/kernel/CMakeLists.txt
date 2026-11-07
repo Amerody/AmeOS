@@ -6,5 +6,6 @@ add_library(kernel_core OBJECT
     "lib/console.c"
     "lib/kprintf.c"
     "lib/panic.c"
+    "lib/delay.c"
 )
 target_link_libraries(kernel_core PUBLIC kernel_flags)

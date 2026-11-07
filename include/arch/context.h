@@ -25,7 +25,7 @@
 
 #include <stdint.h>
 
-#include <arch/context_types.h> /* struct cpu_context, struct trap_frame */
+#include "context_types.h" /* struct cpu_context, struct trap_frame */
 
 #ifdef __cplusplus
 extern "C"

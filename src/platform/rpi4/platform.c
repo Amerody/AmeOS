@@ -1,7 +1,7 @@
 #include "hal/platform.h"
 
-#include "arch/irq.h"
-#include "hal/hal_irq.h"
+#include <arch/irq.h>
+#include <hal/hal_irq.h>
 
 #include <stddef.h>
 

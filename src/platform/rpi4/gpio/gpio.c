@@ -1,4 +1,4 @@
-#include "platform/rpi4/gpio.h"
+#include "gpio.h"
 
 /**
  * @addtogroup gpio
@@ -11,7 +11,9 @@
  * @brief Implementation of the GPIO Driver
  */
 
-#include "platform/rpi4/mmio.h"
+#include "soc.h"
+#include <common/mmio.h>
+
 
 #include <stddef.h>
 #include <stdint.h>
@@ -86,7 +88,7 @@ typedef struct
 } GPIO_Registers;
 
 #define GPIO_BASE (PERIPHERAL_BASE + 0x200000) ///< GPIO base address
-#define GPIO ((GPIO_Registers*)GPIO_BASE)      ///< GPIO access
+#define GPIO ((GPIO_Registers*) GPIO_BASE)     ///< GPIO access
 
 #define GPIO_MAX_PIN 58
 
@@ -115,9 +117,9 @@ gpio_status_t gpio_call(gpio_t pin, uint32_t value, mmio_register32_t base_reg, 
 {
 	uint32_t field_mask = (1U << field_size) - 1U;
 
-	if(pin > GPIO_MAX_PIN)
+	if (pin > GPIO_MAX_PIN)
 		return GPIO_ERROR_INVALID_PIN;
-	if(value > field_mask)
+	if (value > field_mask)
 		return GPIO_ERROR_INVALID_VALUE;
 
 	unsigned int num_fields = 32U / field_size;

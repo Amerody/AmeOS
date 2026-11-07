@@ -16,11 +16,11 @@
 /// @brief Memory mapped 32-bit register
 typedef volatile uint32_t* mmio_register32_t;
 
+/// @brief Memory mapped 16-bit register
+typedef volatile uint16_t* mmio_register16_t;
+
 /// @brief Memory mapped 8-bit register
 typedef volatile uint8_t* mmio_register8_t;
-
-#define PERIPHERAL_BASE 0xFE000000UL ///< Peripheral base address (Low-Peripheral mode)
-// extern uint64_t PERIPHERAL_BASE; ///< Peripheral base address (Low-Peripheral mode)
 
 /// @brief Macro to calculate the offset to write on a register definition, use addresses aligned to 4 Bytes.
 /// @code uint32_t RESERVED_90_E0[CALC_OFFSET(0x90, 0xE0)]; ///< 84 Bytes gap between GPAFEN1 and GPIO_PUP_PDN_CNTRL_REG0 @endcode

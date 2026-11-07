@@ -1,6 +1,6 @@
 #include "gic.h"
-
-#include "platform/rpi4/mmio.h"
+#include "soc.h"
+#include <common/mmio.h>
 
 #include <stdint.h>
 

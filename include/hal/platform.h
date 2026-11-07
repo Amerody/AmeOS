@@ -26,6 +26,7 @@
  * Implementation detail (register layouts, pin muxing, clock setup, firmware
  * quirks) never appears in these headers. It stays private to the platform.
  */
+
 #pragma once
 
 #include <stddef.h>

@@ -11,7 +11,8 @@
  * @brief Definition of the AUX Peripherals registers
  */
 
-#include "platform/rpi4/mmio.h"
+#include "common/mmio.h"
+#include "soc.h"
 #include <stdint.h>
 
 /// @brief All the AUX Peripherals Registers

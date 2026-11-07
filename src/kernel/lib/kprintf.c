@@ -1,15 +1,14 @@
 #include "kernel/kprintf.h"
 #include "kernel/console.h"
 #include <stdarg.h>
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
 static void print_str(const char* s)
 {
-	if(!s)
+	if (!s)
 		s = "(null)";
-	while(*s)
+	while (*s)
 		console_putc(*s++);
 }
 
@@ -24,28 +23,28 @@ static void print_uint(uint64_t value, unsigned base, bool upper)
 		buf[i++] = digits[value % base];
 		value /= base;
 	}
-	while(value);
+	while (value);
 
-	while(i) // digits came out reversed
+	while (i) // digits came out reversed
 		console_putc(buf[--i]);
 }
 
 static void print_int(int64_t value)
 {
-	if(value < 0)
+	if (value < 0)
 	{
 		console_putc('-');
-		print_uint(0 - (uint64_t)value, 10, false); // also correct for INT64_MIN
+		print_uint(0 - (uint64_t) value, 10, false); // also correct for INT64_MIN
 	}
 	else
-		print_uint((uint64_t)value, 10, false);
+		print_uint((uint64_t) value, 10, false);
 }
 
 void kvprintf(const char* fmt, va_list ap)
 {
-	for(; *fmt; fmt++)
+	for (; *fmt; fmt++)
 	{
-		if(*fmt != '%')
+		if (*fmt != '%')
 		{
 			console_putc(*fmt);
 			continue;
@@ -53,16 +52,16 @@ void kvprintf(const char* fmt, va_list ap)
 
 		fmt++;
 		bool wide = false; // 'l' / 'z' -> 64-bit argument
-		while(*fmt == 'l' || *fmt == 'z')
+		while (*fmt == 'l' || *fmt == 'z')
 		{
 			wide = true;
 			fmt++;
 		}
 
-		switch(*fmt)
+		switch (*fmt)
 		{
 		case 'c':
-			console_putc((char)va_arg(ap, int));
+			console_putc((char) va_arg(ap, int));
 			break;
 		case 's':
 			print_str(va_arg(ap, const char*));
@@ -78,7 +77,7 @@ void kvprintf(const char* fmt, va_list ap)
 			break;
 		case 'p':
 			print_str("0x");
-			print_uint((uintptr_t)va_arg(ap, void*), 16, false);
+			print_uint((uintptr_t) va_arg(ap, void*), 16, false);
 			break;
 		case '%':
 			console_putc('%');

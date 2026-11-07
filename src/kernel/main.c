@@ -1,9 +1,10 @@
 #include "kernel/console.h"
 #include "kernel/kprintf.h"
 
-#include "arch/arch.h"
-#include "drivers/console/console_uart.h"
-#include "hal/hal.h"
+#include <arch/arch.h>
+#include <arch/irq.h>
+#include <drivers/console/console_uart.h>
+#include <hal/hal.h>
 
 #include <stddef.h>
 #include <stdint.h>

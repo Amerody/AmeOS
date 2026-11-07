@@ -1,5 +1,4 @@
 #include "kernel/panic.h"
-
 #include "kernel/kprintf.h"
 #include <stdarg.h>
 
@@ -11,6 +10,6 @@ void panic(const char* fmt, ...)
 	kvprintf(fmt, ap);
 	va_end(ap);
 	kprintf("\n");
-	for(;;)
+	for (;;)
 		__asm__ volatile("wfe");
 }

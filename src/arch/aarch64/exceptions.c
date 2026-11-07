@@ -5,11 +5,11 @@
  */
 
 #include "exceptions.h"
-
 #include "arch/arch.h"
 #include "arch/context.h"
-#include "hal/hal_irq.h"
-#include "kernel/kprintf.h"
+
+#include <hal/hal_irq.h>
+#include <kernel/kprintf.h>
 
 #include <stdint.h>
 

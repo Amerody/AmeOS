@@ -14,7 +14,7 @@
  * inside a critical section to outside it.
  */
 
-#include <arch/irq.h>
+#include "arch/irq.h"
 
 #include <stdint.h>
 

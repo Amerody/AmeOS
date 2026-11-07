@@ -5,7 +5,8 @@ add_library(rpi4 OBJECT
     "uart/uart_mini.c"
     "uart/uart_pl011.c"
 
-    "auxiliary.c"
+    "auxiliary/aux_regs.h"
+    "auxiliary/auxiliary.c"
 
     "gpio/gpio.c"
 
@@ -13,3 +14,9 @@ add_library(rpi4 OBJECT
     "gic400/hal_irq.c"
 )
 target_link_libraries(rpi4 PUBLIC kernel_flags)
+
+target_include_directories(rpi4
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}        # src/platform/rpi4 -> "gpio/gpio.h", "soc.h"
+        ${CMAKE_CURRENT_SOURCE_DIR}/..     # src/platform      -> "common/mmio.h"
+)

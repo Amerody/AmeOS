@@ -16,9 +16,9 @@
  */
 
 #include "arch/irq.h"
-#include "hal/hal_irq.h"
-#include "hal/hal_timer.h"
-#include "kernel/errno.h"
+#include <hal/hal_irq.h>
+#include <hal/hal_timer.h>
+#include <kernel/errno.h>
 
 #include <stddef.h>
 #include <stdint.h>

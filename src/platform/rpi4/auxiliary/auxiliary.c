@@ -1,7 +1,6 @@
-#include "platform/rpi4/auxiliary.h"
-
+#include "auxiliary.h"
 #include "aux_regs.h"
-#include "platform/rpi4/mmio.h"
+#include <common/mmio.h>
 
 /**
  * @addtogroup aux

@@ -1,8 +1,8 @@
 #include "drivers/console/console_uart.h"
 
-#include "hal/hal_uart.h"
-#include "kernel/console.h"
-#include "kernel/errno.h"
+#include <hal/hal_uart.h>
+#include <kernel/console.h>
+#include <kernel/errno.h>
 
 #define UART_BAUD_RATE 115200
 

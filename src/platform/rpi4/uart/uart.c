@@ -1,6 +1,6 @@
-#include "hal/hal_uart.h"
+#include <hal/hal_uart.h>
 
-#include "kernel/errno.h"
+#include <kernel/errno.h>
 
 /**
  * @addtogroup uart

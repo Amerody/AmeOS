@@ -11,10 +11,10 @@
  * @brief UART1 (mini UART) driver implementation
  */
 
-#include "../aux_regs.h"
-#include "kernel/errno.h"
-#include "platform/rpi4/auxiliary.h"
-#include "platform/rpi4/gpio.h"
+#include "auxiliary/aux_regs.h"
+#include "auxiliary/auxiliary.h"
+#include "gpio/gpio.h"
+#include <kernel/errno.h>
 
 #define PIN_START 14U ///< Start pin to configure
 #define PIN_END 17U   ///< End pin to configure

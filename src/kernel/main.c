@@ -14,14 +14,16 @@
 
 // uint64_t PERIPHERAL_BASE = 0xFE000000UL; // Fallback value
 
-// #define TIMER_TEST
-
-#ifdef TIMER_TEST
 static void on_tick()
 {
-	kprintf("[TICK]\n");
+	static uint32_t s_tick = 0;
+	s_tick++;
+	if (s_tick >= 1000)
+	{
+		kprintf("[TICK]\n");
+		s_tick = 0;
+	}
 }
-#endif
 
 static void step(int rc, const char* fmt, ...) __attribute__((format(printf, 2, 3)));
 static void step(int rc, const char* fmt, ...)
@@ -54,12 +56,8 @@ static void init()
 	step(0, "Platform %s initialized", platform_name());
 
 	step(hal_timer_init(), "Timer initialized");
-
-#ifdef TIMER_TEST
-	hal_timer_set_tick(5, on_tick);
+	hal_timer_set_tick(1000, on_tick);
 	arch_irq_enable();
-	step(0, "IRQs unmasked on this CPU");
-#endif
 }
 
 /**

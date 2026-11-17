@@ -29,6 +29,16 @@ typedef enum
 } aux_peripheral_t;
 
 /**
+ * @brief Initializes the AUX peripherals
+ *
+ * Sets the interrupt handler to manage all three cases:
+ * MU, SPI1 and SPI2
+ */
+void aux_init();
+
+void aux_set_callback(aux_peripheral_t peripheral, void (*callback)());
+
+/**
  * @brief Enables an AUX peripheral
  *
  * Must be called before accessing any of the peripheral's registers.

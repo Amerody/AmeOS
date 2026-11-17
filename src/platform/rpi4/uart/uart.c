@@ -75,6 +75,7 @@ void hal_uart_putc(unsigned port, char c)
 		break;
 	case 1:
 		uart_mini_putc(c);
+		break;
 	default:
 		return;
 	}

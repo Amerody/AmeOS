@@ -11,9 +11,13 @@ The codebase is organized as follows:
   * **`hal/`**: Hardware Abstraction Layer interfaces (UART, timers, IRQ) implemented by the platform layer.
   * **`arch/`**: Architecture-specific interfaces (context switching, MMU) implemented by the architecture layer.
   * **`kernel/`**: Internal APIs such as memory allocation, scheduling, and standard library functions.
+  * **`drivers/`**: Kernel drivers such as the console
+  * **`gfx`**: Graphics-related files such as the font header and the font defining
 * **`src/`**: Contains all implementation code.
   * **`kernel/`**: Platform-independent core components (scheduler, memory management, system calls).
   * **`drivers/`**: Portable device drivers built on top of the HAL.
+  * **`gfx/`**: Graphics-related implementations
+  * **`lib`**: Kernel libraries such as String 
   * **`arch/aarch64/`**: CPU-specific code for ARM64, including boot stubs, exception vectors, and traps.
   * **`platform/rpi4/`**: Board-specific implementations mapping HAL definitions to the BCM2711 SoC.
 
@@ -93,33 +97,4 @@ flowchart TB
   archimpl -. implements .-> arch
   plat --> HW
   archimpl --> HW
-```
-
-## File structure
-```text
-AmeOS/
-├── CMakeLists.txt
-├── CMakePresets.json        # Windows and Linux presets: ARCH, PLATFORM, toolchain
-├── cmake/toolchains/        # aarch64-none-elf.cmake (x86_64 later)
-├── include/                 # contracts only
-│   ├── hal/                 # implemented by platform/*
-│   ├── arch/                # implemented by arch/*
-│   ├── kernel/              # kernel-internal API
-│   │   └── kprintf.h  console.h  panic.h  string.h  kmalloc.h ...
-│   └── uapi/                # syscall numbers, ABI shared with userland
-├── src/
-│   ├── kernel/              # hardware-agnostic core
-│   │   ├── main.c           # kmain(): init order
-│   │   ├── lib/             # kprintf, string/mem functions, list, ...
-│   │   ├── mm/              # memory allocator
-│   │   ├── sched/           # scheduler
-│   │   └── syscall/         # system calls
-│   ├── drivers/             # portable, built only on include/hal
-│   │   ├── console/         # console registry + UART sink
-│   │   └── fb/              # framebuffer text console, drawing primitives
-│   ├── arch/aarch64/        # boot.S, vectors, exceptions, irq, timer, context
-│   └── platform/rpi4/       # platform.c, linker.ld, boot/config.txt,
-│                            # gic400/, uart/, gpio/, aux/, mailbox/, mmio.h
-├── user/                    # the OS side: init, shell, libc
-└── docs/                    # architecture notes, diagrams
 ```

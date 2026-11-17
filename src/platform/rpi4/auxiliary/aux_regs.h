@@ -80,7 +80,7 @@ typedef struct
 	volatile uint32_t SPI2_TXHOLD_REGd; ///< SPI 2 Extended Data
 } AUX_Registers;
 
-#define BASE (PERIPHERAL_BASE + 0x215000) ///< AUX Peripherals base address
-#define AUX ((AUX_Registers*) BASE)       ///< AUX Peripherals access
+#define AUX_BASE (PERIPHERAL_BASE + 0x215000) ///< AUX Peripherals base address
+#define AUX ((AUX_Registers*) AUX_BASE)       ///< AUX Peripherals access
 
 /** @} */

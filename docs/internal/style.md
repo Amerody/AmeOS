@@ -30,17 +30,6 @@ Where a rule is a real design decision (not just taste), record it as an ADR in
 | Docs | lowercase kebab-case `.md` | `hardware-notes.md` |
 | Decision records | `NNNN-short-title.md` (zero-padded, kebab-case) | `0001-platform-layer.md` |
 
-Source layout:
-
-```
-include/                      public headers, Doxygen comments live here
-src/kernel/                   platform-independent kernel code
-src/arch/aarch64/             CPU-specific code (boot, vectors, context switch)
-src/platform/<platform>/      board-specific code; private headers stay here
-linker/<platform>.ld          one linker script per platform
-docs/                         style.md, hardware-notes.md, decisions/, mainpage.md
-```
-
 A header and its source share a base name (`pmm.h` / `pmm.c`). One subsystem per header.
 
 ## 3. C identifiers

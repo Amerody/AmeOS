@@ -14,15 +14,12 @@
 
 // uint64_t PERIPHERAL_BASE = 0xFE000000UL; // Fallback value
 
+#define TIMER_POLL_HZ 1000
+
+static uint32_t s_tick = 0;
 static void on_tick()
 {
-	static uint32_t s_tick = 0;
 	s_tick++;
-	if (s_tick >= 1000)
-	{
-		kprintf("[TICK]\n");
-		s_tick = 0;
-	}
 }
 
 static void step(int rc, const char* fmt, ...) __attribute__((format(printf, 2, 3)));
@@ -56,8 +53,9 @@ static void init()
 	step(0, "Platform %s initialized", platform_name());
 
 	step(hal_timer_init(), "Timer initialized");
-	hal_timer_set_tick(1000, on_tick);
+	hal_timer_set_tick(TIMER_POLL_HZ, on_tick);
 	arch_irq_enable();
+	step(1, "Test error");
 }
 
 /**
@@ -91,6 +89,10 @@ void kmain(uint64_t dtb_ptr)
 
 	while (1)
 	{
-		; // This is so kernel_main() doesn't return
+		if (s_tick >= 1000)
+		{
+			kprintf("[TICK]\n");
+			s_tick = 0;
+		}; // This is so kernel_main() doesn't return
 	}
 }

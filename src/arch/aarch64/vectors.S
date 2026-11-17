@@ -37,7 +37,7 @@ vector_table:
     .balign 0x80
     b   exception_hang  // Synchronous
     .balign 0x80
-    b   exception_hang   // IRQ ← Our handler
+    b   exception_hang   // IRQ
     .balign 0x80
     b   exception_hang   // FIQ
     .balign 0x80
@@ -89,8 +89,8 @@ vector_table:
     msr     spsr_el1, x1
 
     // Restore x30 (LR) and SP_EL0
-    ldp     x30, x0,   [sp, #248]
-    msr     elr_el1, x0
+    ldp     x30, x0,   [sp, #240]
+    msr     sp_el0, x0
 
     // Restore general purpose registers
     ldp     x0,  x1,  [sp, #0]

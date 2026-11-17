@@ -16,7 +16,7 @@
       "type": "shell",
       "dependsOn": "build-kernel",
       "isBackground": true,
-      "command": "echo QEMU_READY; qemu-system-aarch64 -M raspi4b -dtb '${workspaceFolder}/src/platform/rpi4/bcm2711-rpi-4-b.dtb'-serial null -serial mon:stdio -kernel '${command:cmake.buildDirectory}/kernel8.img' -s -S",
+      "command": "echo QEMU_READY; qemu-system-aarch64 -M raspi4b -dtb '${workspaceFolder}/src/platform/rpi4/bcm2711-rpi-4-b.dtb' -serial null -serial mon:stdio -kernel '${command:cmake.buildDirectory}/kernel8.img' -s -S",
       "problemMatcher": {
         "pattern": {
           "regexp": "^$"

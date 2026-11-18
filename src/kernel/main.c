@@ -12,7 +12,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <drivers/console/console_uart.h>
 // uint64_t PERIPHERAL_BASE = 0xFE000000UL; // Fallback value
 
 #define TIMER_POLL_HZ 1000

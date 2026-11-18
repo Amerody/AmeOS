@@ -28,7 +28,7 @@ void console_init()
  * may live on the caller's stack. Output written before registration is not
  * replayed.
  *
- * @param con  Sink description; @c putc must not be NULL.
+ * @param con  Sink description; @c putc must not be NULL, @c getc may be.
  *
  * @return Status of the operation
  * @retval 0 The operation was completed successfully
@@ -45,6 +45,7 @@ int console_register(const struct console* con)
 
 	s_consoles[s_sinks_registered].name = con->name;
 	s_consoles[s_sinks_registered].putc = con->putc;
+	s_consoles[s_sinks_registered].getc = con->getc;
 
 	s_sinks_registered++;
 
@@ -84,16 +85,27 @@ void console_write(const char* buf, size_t len)
 }
 
 /**
- * @brief Gets one byte from the UART 1
+ * @brief Take one received byte from the first sink that has one. Never
+ *        blocks.
  *
- * @param c
- * @return
+ * Sinks are asked in registration order; those without a @c getc are
+ * skipped. Waiting for input means calling this in a loop.
+ *
+ * Unlike console_putc(), not for interrupt handlers: the drivers' input
+ * buffers have a single consumer, so read from one context only.
+ *
+ * @param[out] c  Where the byte is stored; untouched if there is none.
+ *
+ * @retval true A byte was stored in @p c
+ * @retval false No sink had a byte
  */
 bool console_getc(char* c)
 {
 	for (size_t i = 0; i < s_sinks_registered; i++)
 	{
-		if (s_consoles[i].getc)
-			s_consoles[i].getc(c);
+		if (s_consoles[i].getc != NULL && s_consoles[i].getc(c))
+			return true;
 	}
+
+	return false;
 }

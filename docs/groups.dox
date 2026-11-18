@@ -22,7 +22,7 @@ DRIVERS
  * @ingroup drivers
  * @brief Public API for UART0-5 (UART1 is the mini UART).
  *
- * See docs/decisions/0002-mini-uart.md for the module layout.
+ * See decision 0004 (docs/internal/decisions/0004-uart-layout.md) for the module layout.
  */
 
 /**

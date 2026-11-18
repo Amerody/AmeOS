@@ -1,7 +1,9 @@
 #include "auxiliary.h"
 #include "aux_regs.h"
+#include <arch/irq.h>
 #include <common/mmio.h>
 #include <hal/hal_irq.h>
+#include <kernel/errno.h>
 
 /**
  * @addtogroup aux
@@ -17,113 +19,110 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define AUX_NUM_PERIPHERALS 3u
-#define AUX_INTERRUPT_NUM 29u
+/**
+ * @brief GIC interrupt ID of the shared AUX interrupt line
+ *
+ * AUX is VideoCore peripheral IRQ 29, and the VideoCore peripheral IRQs start
+ * at GIC SPI ID 96 (BCM2711 ARM Peripherals, chapter 6), so 96 + 29.
+ */
+#define AUX_IRQ_INTID 125u
 
-// interrupt masks
-#define AUX_MU_IRQ_MASK 0b001
-#define AUX_SPI1_IRQ_MASK 0b010
-#define AUX_SPI2_IRQ_MASK 0b100
+#define AUX_PERIPHERAL_COUNT 3u ///< Number of AUX peripherals (MU, SPI1, SPI2)
 
-// AUX_MU_IIR Interrupt ID
-#define AUX_MU_IIR_NO_IRQ 0b00
-#define AUX_MU_IIR_TX_EMPTY 0b01
-#define AUX_MU_IIR_RX_VALID_BYTE 0b10
+#define AUX_MU_IIR_CLEAR_RX_FIFO (1u << 1) ///< AUX_MU_IIR_REG write: clear the receive FIFO
 
-// AUX_MU_IIR acknowledge bits
-#define AUX_MU_IIR_CLEAR_RX_FIFO 0b010
-#define AUX_MU_IIR_CLEAR_TX_FIFO 0b100
+static_assert(AUX_PERIPHERAL_MU == 0 && AUX_PERIPHERAL_SP1 == 1 && AUX_PERIPHERAL_SP2 == 2, "aux_peripheral_t values must be the AUX_IRQ / AUX_ENABLES bit positions");
 
-typedef struct
+/// @brief Interrupt handler registered for one AUX peripheral
+struct aux_handler_entry
 {
-	aux_callback_t callback;
-	void* args;
-} aux_rsi_entry_t;
+	aux_callback_t callback; ///< Handler to call, NULL if none
+	void* arg;               ///< Passed back to @p callback
+};
 
-static aux_rsi_entry_t aux_cbs[AUX_NUM_PERIPHERALS];
+/// @brief Registered handlers, indexed by aux_peripheral_t. Also read from the IRQ path
+static struct aux_handler_entry s_handlers[AUX_PERIPHERAL_COUNT];
+
+/// @brief Whether aux_init() already registered the AUX line
+static bool s_is_initialized = false;
 
 /**
- * @brief Manages the selection and acknowledge of the MU interrupt
+ * @brief Tries to silence a peripheral that raised an interrupt with no handler
  *
- * @p entry should always be set before calling this function. @see aux_ISR;
+ * AUX_IRQ is read-only: an AUX interrupt only goes away once the peripheral
+ * that raised it is serviced. For the mini UART, flushing the receive FIFO
+ * deasserts the receive interrupt (the bytes are lost). Anything still pending
+ * after that can't be cleared from here (the mini UART transmit-empty
+ * interrupt stays asserted while its FIFO is empty; SPI1/SPI2 aren't handled
+ * yet), so the whole AUX line is disabled to stop an interrupt storm.
  *
- * @param entry
+ * Runs in interrupt context.
+ *
+ * @param peripheral Peripheral whose AUX_IRQ bit is set
  */
-void aux_mu_irq(aux_rsi_entry_t* entry)
+static void silence_unhandled(aux_peripheral_t peripheral)
 {
-	aux_interrupt_t interrupt; // Type of interrupt
-	// Check AUX_MU_IIR for what kind of interrupt it is
-	uint32_t aux_mu_iir_reg = mmio_read_field(&AUX->MU_IIR_REG, 0b11, 1);
-	switch (aux_mu_iir_reg)
-	{
-	case AUX_MU_IIR_TX_EMPTY:
-		mmio_write(&AUX->MU_IIR_REG, AUX_MU_IIR_CLEAR_TX_FIFO);
-		interrupt = AUX_MU_TRANSMIT;
-		break;
-	case AUX_MU_IIR_RX_VALID_BYTE:
+	if (peripheral == AUX_PERIPHERAL_MU)
 		mmio_write(&AUX->MU_IIR_REG, AUX_MU_IIR_CLEAR_RX_FIFO);
-		interrupt = AUX_MU_RECIEVE;
-		break;
-	default: // No interrupt or invalid (0b11)
-		return;
-	}
 
-	entry->callback(interrupt, entry->args);
+	if (mmio_read_field(&AUX->IRQ, 0x1, (uint32_t) peripheral))
+		hal_irq_disable(AUX_IRQ_INTID);
 }
 
 /**
- * @brief ISR for the AUX interrupt
+ * @brief Handler of the shared AUX interrupt line, registered with hal_irq
  *
- * It dispatches the callbacks for each of the peripherals
- * depending on the AUX_IRQ register. It also aknowledges
- * the corresponding interrupt, so the registered ISR doesn't
- * have to.
+ * Reads AUX_IRQ once and calls the handler of every peripheral whose bit is
+ * set (more than one can be pending at a time). Each handler quiets its own
+ * device; peripherals without a handler go to silence_unhandled().
+ *
+ * Runs in interrupt context with CPU IRQs masked.
+ *
+ * @param arg Unused (NULL)
  */
-void aux_ISR(void*)
+static void aux_irq_handler(void* arg)
 {
-	aux_rsi_entry_t* entry; // entry from aux_cbs to use
+	(void) arg;
 
-	// first check AUX_IRQ register
-	uint32_t aux_irq_reg = mmio_read(&AUX->IRQ);
+	uint32_t pending = mmio_read(&AUX->IRQ);
 
-	// we do it this way in case there are multiple interrupts waiting
-	if (aux_irq_reg & AUX_MU_IRQ_MASK)
+	for (uint32_t i = 0; i < AUX_PERIPHERAL_COUNT; i++)
 	{
-		entry = &aux_cbs[(size_t) AUX_PERIPHERAL_MU];
-		aux_mu_irq(entry);
-	}
+		if ((pending & (1u << i)) == 0)
+			continue;
 
-	if (aux_irq_reg & AUX_SPI1_IRQ_MASK)
-	{
-		entry = &aux_cbs[(size_t) AUX_PERIPHERAL_SP1];
-		entry->callback(AUX_SPI1, entry->args);
-		// TODO: Acknowledge the interrupt
-		// for now SPI1 is not enabled
-	}
-
-	if (aux_irq_reg & AUX_SPI2_IRQ_MASK)
-	{
-		entry = &aux_cbs[(size_t) AUX_PERIPHERAL_SP2];
-		entry->callback(AUX_SPI2, entry->args);
-		// TODO: Acknowledge the interrupt
-		// for now SPI2 is not enabled
+		struct aux_handler_entry* entry = &s_handlers[i];
+		if (entry->callback != NULL)
+			entry->callback(entry->arg);
+		else
+			silence_unhandled((aux_peripheral_t) i);
 	}
 }
 
-void aux_init()
+int aux_init()
 {
-	hal_irq_register(AUX_INTERRUPT_NUM, aux_ISR, NULL);
-	for (size_t i = 0; i < AUX_NUM_PERIPHERALS; i++)
-	{
-		aux_cbs[i].callback = NULL;
-		aux_cbs[i].args = NULL;
-	}
+	if (s_is_initialized)
+		return SUCCESS;
+
+	int rc = hal_irq_register(AUX_IRQ_INTID, aux_irq_handler, NULL);
+	if (rc != SUCCESS)
+		return rc;
+
+	hal_irq_enable(AUX_IRQ_INTID);
+	s_is_initialized = true;
+
+	return SUCCESS;
 }
 
-void aux_set_callback(aux_peripheral_t peripheral, aux_callback_t callback, void* args)
+void aux_set_callback(aux_peripheral_t peripheral, aux_callback_t callback, void* arg)
 {
-	aux_cbs[(size_t) peripheral].callback = callback;
-	aux_cbs[(size_t) peripheral].args = args;
+	if ((uint32_t) peripheral >= AUX_PERIPHERAL_COUNT)
+		return;
+
+	arch_irq_flags_t flags = arch_irq_save(); // The table is also read from the IRQ path
+	s_handlers[peripheral].callback = callback;
+	s_handlers[peripheral].arg = arg;
+	arch_irq_restore(flags);
 }
 
 void aux_enable(aux_peripheral_t peripheral)

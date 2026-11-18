@@ -7,8 +7,9 @@
  * block, pin muxing, clocks and baud divisors are its private business, and
  * callers only ask for a port at a baud rate.
  *
- * Ports are numbered by the platform. Port 0 is always the primary (console)
- * UART. Other numbers exist only if the platform has more UARTs.
+ * Ports are numbered by the platform, using its hardware UART numbers (on rpi4
+ * port N is UARTN, so the mini UART is port 1). Which port is the console is
+ * chosen by the caller (see decision 0004).
  *
  * See platform.h for the shared conventions (errors, contexts, init order).
  */
@@ -30,7 +31,8 @@ extern "C"
 	 * @param port  Platform UART number
 	 * @param baud  Requested baud rate, e.g. 115200.
 	 * @return 0 on success, -ENODEV if the platform has no such port, -EINVAL if
-	 *         the baud rate is outside what the hardware can produce.
+	 *         the baud rate is outside what the hardware can produce, or another
+	 *         negative error if the UART's receive interrupt can't be set up.
 	 */
 	int hal_uart_init(unsigned port, uint32_t baud);
 
@@ -51,17 +53,23 @@ extern "C"
 	void hal_uart_putc(unsigned port, char c);
 
 	/**
-	 * @brief Recieve one byte.
+	 * @brief Take one received byte, if there is one. Never blocks.
 	 *
-	 * Gets the byte from the UART. There is no guarantee there is a byte.
+	 * The implementation buffers received bytes from hal_uart_init() on (on
+	 * rpi4 the UART's receive interrupt fills a ring buffer), and this takes
+	 * the oldest one. When that buffer was full, newer bytes were dropped.
 	 *
-	 * Valid after a successful hal_uart_init() on the same port. Output to an
-	 * uninitialised or non-existent port is undefined.
+	 * Only one context may read a port (the buffer has a single consumer), so
+	 * don't call it from interrupt handlers.
 	 *
-	 * @param port  Platform UART number.
-	 * @param c     Byte to recieve.
+	 * Valid after a successful hal_uart_init() on the same port. Reading an
+	 * uninitialised or non-existent port returns false.
 	 *
-	 * @return @p true if a byte was recieved. @p false otherwise
+	 * @param port   Platform UART number.
+	 * @param[out] c Where the byte is stored; untouched if there is none.
+	 *
+	 * @retval true A byte was stored in @p c
+	 * @retval false No byte was available
 	 */
 	bool hal_uart_getc(unsigned port, char* c);
 

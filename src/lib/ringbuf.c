@@ -1,5 +1,10 @@
 #include "lib/ringbuf.h"
 
+/**
+ * @file ringbuf.c
+ * @brief Single-producer / single-consumer byte ring buffer (see ringbuf.h)
+ */
+
 void ringbuf_init(struct ringbuf* rb, uint8_t* storage, size_t capacity)
 {
 	// TODO: assert capacity is a power of 2

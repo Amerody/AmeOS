@@ -9,11 +9,12 @@
 static unsigned s_port = 0xFF;
 
 /**
- * @brief Small wrapper to use hal_uart_putc()
+ * @brief Console @c putc of the UART sink: sends one byte with hal_uart_putc()
  *
- * No check if @p s_port is invalid, since it's guaranteed to be at this point
+ * No check that @ref s_port is valid: the console only calls this after
+ * console_uart_init() set it.
  *
- * @param c Character to print
+ * @param c Byte to send
  */
 static void console_uart_putc(char c)
 {
@@ -21,11 +22,16 @@ static void console_uart_putc(char c)
 }
 
 /**
- * @brief Small wrapper to use hal_uart_putc()
+ * @brief Console @c getc of the UART sink: takes one received byte with
+ *        hal_uart_getc(). Never blocks.
  *
- * No check if @p s_port is invalid, since it's guaranteed to be at this point
+ * No check that @ref s_port is valid: the console only calls this after
+ * console_uart_init() set it.
  *
- * @param c Character to print
+ * @param[out] c Where the byte is stored; untouched if there is none.
+ *
+ * @retval true A byte was stored in @p c
+ * @retval false No byte was available
  */
 static bool console_uart_getc(char* c)
 {
@@ -36,7 +42,8 @@ static bool console_uart_getc(char* c)
  * @brief Initialise a UART and register it as a console sink.
  *
  * Calls hal_uart_init(`port`, `baud`) (8N1) and then `console_register()` with
- * a sink named "uart" that sends bytes through hal_uart_putc().
+ * a sink named "uart" that sends bytes through hal_uart_putc() and reads
+ * received bytes through hal_uart_getc().
  *
  * Newline handling is done here: every '\n' is sent as "\r\n" so serial
  * terminals start a new line at column 0. A lone '\r' is passed through

@@ -55,7 +55,8 @@ static inline void mmio_write(mmio_register32_t reg, uint32_t value) { *reg = va
  * @param reg   Register to read from
  * @param mask  Field mask, unshifted (e.g. 0x7 for a 3-bit field)
  * @param shift Bit position of the field's lowest bit
- * @return Field value, shifted
+ * @return Field value, moved down to bit 0 (same form as mmio_write_field()'s
+ *         @p value)
  */
 static inline uint32_t mmio_read_field(mmio_register32_t reg, uint32_t mask, uint32_t shift)
 {
@@ -71,7 +72,8 @@ static inline uint32_t mmio_read_field(mmio_register32_t reg, uint32_t mask, uin
  * use mmio_write instead.
  *
  * @param reg   Register to modify
- * @param value Field value, unshifted. Truncated to the field width
+ * @param value Field value, starting at bit 0 (not shifted into place).
+ *              Truncated to the field width
  * @param mask  Field mask, unshifted (e.g. 0x7 for a 3-bit field)
  * @param shift Bit position of the field's lowest bit
  */

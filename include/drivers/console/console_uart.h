@@ -1,6 +1,6 @@
 /**
  * @file console_uart.h
- * @brief Console sink that writes to a serial port.
+ * @brief Console sink that writes to a serial port and reads what it receives.
  *
  * Implemented by src/drivers/console/console_uart.c. It is portable: it uses
  * only hal_uart_*, so it works unchanged on any platform that provides a UART.
@@ -27,7 +27,8 @@ extern "C"
 	 * @brief Initialise a UART and register it as a console sink.
 	 *
 	 * Calls hal_uart_init(`port`, `baud`) (8N1) and then `console_register()` with
-	 * a sink named "uart" that sends bytes through hal_uart_putc().
+	 * a sink named "uart" that sends bytes through hal_uart_putc() and reads
+	 * received bytes through hal_uart_getc().
 	 *
 	 * Newline handling is done here: every '\n' is sent as "\r\n" so serial
 	 * terminals start a new line at column 0. A lone '\r' is passed through

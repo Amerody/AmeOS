@@ -36,7 +36,7 @@ extern "C"
 	 * Only one UART console is supported: the port is kept in a private static, so
 	 * a second call returns -EBUSY.
 	 *
-	 * @param port  Platform UART number; 0 is the console UART.
+	 * @param port Platform UART number; 1 is the console UART.
 	 * @return 0 on success, -EBUSY if already initialised, or the error from
 	 *         hal_uart_init() (-ENODEV, -EINVAL) or console_register() (-ENOSPC).
 	 */

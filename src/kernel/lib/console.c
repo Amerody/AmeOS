@@ -82,3 +82,18 @@ void console_write(const char* buf, size_t len)
 		console_putc(buf[i]);
 	}
 }
+
+/**
+ * @brief Gets one byte from the UART 1
+ *
+ * @param c
+ * @return
+ */
+bool console_getc(char* c)
+{
+	for (size_t i = 0; i < s_sinks_registered; i++)
+	{
+		if (s_consoles[i].getc)
+			s_consoles[i].getc(c);
+	}
+}

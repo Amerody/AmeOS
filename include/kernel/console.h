@@ -48,6 +48,12 @@ extern "C"
 		 * the console.
 		 */
 		void (*putc)(char c);
+
+		/**
+		 * Recieves one byte from the device and returns true if a byte was recieved.
+		 * False otherwise. Must not call back into the console
+		 */
+		bool (*getc)(char* c);
 	};
 
 	/**
@@ -91,6 +97,16 @@ extern "C"
 	 * @param len  Number of bytes.
 	 */
 	void console_write(const char* buf, size_t len);
+
+	/**
+	 * @brief Send one byte to every registered sink.
+	 *
+	 * With no sinks registered the byte is silently discarded, so kprintf() is
+	 * always safe to call, even before any sink exists.
+	 *
+	 * @param c  Byte to output, passed through untouched.
+	 */
+	bool console_getc(char* c);
 
 #ifdef __cplusplus
 }

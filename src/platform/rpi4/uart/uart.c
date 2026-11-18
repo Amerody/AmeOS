@@ -71,13 +71,43 @@ void hal_uart_putc(unsigned port, char c)
 	case 3:
 	case 4:
 	case 5:
-		uart_pl011_putc(port); // Todo: implement
+		uart_pl011_putc(port, c); // Todo: implement
 		break;
 	case 1:
 		uart_mini_putc(c);
 		break;
 	default:
 		return;
+	}
+}
+
+/**
+ * @brief Recieve one byte.
+ *
+ * Gets the byte from the UART. There is no guarantee there is a byte.
+ *
+ * Valid after a successful hal_uart_init() on the same port. Output to an
+ * uninitialised or non-existent port is undefined.
+ *
+ * @param port  Platform UART number.
+ * @param c     Byte to recieve.
+ *
+ * @return @p true if a byte was recieved. @p false otherwise
+ */
+bool hal_uart_getc(unsigned port, char* c)
+{
+	switch (port)
+	{
+	case 0:
+	case 2:
+	case 3:
+	case 4:
+	case 5:
+		return uart_pl011_getc(port, c); // Todo: implement
+	case 1:
+		return uart_mini_getc(c);
+	default:
+		return false;
 	}
 }
 

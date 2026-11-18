@@ -50,6 +50,21 @@ extern "C"
 	 */
 	void hal_uart_putc(unsigned port, char c);
 
+	/**
+	 * @brief Recieve one byte.
+	 *
+	 * Gets the byte from the UART. There is no guarantee there is a byte.
+	 *
+	 * Valid after a successful hal_uart_init() on the same port. Output to an
+	 * uninitialised or non-existent port is undefined.
+	 *
+	 * @param port  Platform UART number.
+	 * @param c     Byte to recieve.
+	 *
+	 * @return @p true if a byte was recieved. @p false otherwise
+	 */
+	bool hal_uart_getc(unsigned port, char* c);
+
 #ifdef __cplusplus
 }
 #endif

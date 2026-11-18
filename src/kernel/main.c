@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <drivers/console/console_uart.h>
 // uint64_t PERIPHERAL_BASE = 0xFE000000UL; // Fallback value
 
 #define TIMER_POLL_HZ 1000
@@ -19,7 +20,11 @@
 static uint32_t s_tick = 0;
 static void on_tick()
 {
-	s_tick++;
+	if (++s_tick >= 1000)
+	{
+		// kprintf("[TICK]\n");
+		s_tick = 0;
+	};
 }
 
 static void step(int rc, const char* fmt, ...) __attribute__((format(printf, 2, 3)));
@@ -89,10 +94,9 @@ void kmain(uint64_t dtb_ptr)
 
 	while (1)
 	{
-		if (s_tick >= 1000)
-		{
-			kprintf("[TICK]\n");
-			s_tick = 0;
-		}; // This is so kernel_main() doesn't return
+		char c = 0;
+		if (console_getc(&c))
+			kprintf("%c\n", c);
+		// This is so kernel_main() doesn't return
 	}
 }

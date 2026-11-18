@@ -21,6 +21,18 @@ static void console_uart_putc(char c)
 }
 
 /**
+ * @brief Small wrapper to use hal_uart_putc()
+ *
+ * No check if @p s_port is invalid, since it's guaranteed to be at this point
+ *
+ * @param c Character to print
+ */
+static bool console_uart_getc(char* c)
+{
+	return hal_uart_getc(s_port, c);
+}
+
+/**
  * @brief Initialise a UART and register it as a console sink.
  *
  * Calls hal_uart_init(`port`, `baud`) (8N1) and then `console_register()` with
@@ -33,7 +45,7 @@ static void console_uart_putc(char c)
  * Only one UART console is supported: the port is kept in a private static, so
  * a second call returns -EBUSY.
  *
- * @param port  Platform UART number; 0 is the console UART.
+ * @param port Platform UART number; 1 is the console UART.
  * @return 0 on success, -EBUSY if already initialised, or the error from
  *         hal_uart_init() (-ENODEV, -EINVAL) or console_register() (-ENOSPC).
  */
@@ -47,6 +59,7 @@ int console_uart_init(unsigned port)
 	static struct console uart_console;
 	uart_console.name = "uart";
 	uart_console.putc = console_uart_putc;
+	uart_console.getc = console_uart_getc;
 	console_register(&uart_console);
 
 	return hal_uart_init(s_port, UART_BAUD_RATE);

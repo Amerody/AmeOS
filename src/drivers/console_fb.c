@@ -94,6 +94,7 @@ int console_fb_init()
 	static struct console fb_console;
 	fb_console.name = "fb";
 	fb_console.putc = console_fb_putc;
+	fb_console.getc = NULL;
 	console_register(&fb_console);
 
 	int error = hal_fb_init(1920, 1080, 32);

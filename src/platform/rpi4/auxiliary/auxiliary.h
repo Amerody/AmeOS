@@ -20,6 +20,19 @@ typedef enum
 
 } aux_status_t;
 
+/// @brief Type of interrupt. Useful to distinguish between MU transmition or recieve interrupt
+typedef enum
+{
+	AUX_MU_TRANSMIT,
+	AUX_MU_RECIEVE,
+	AUX_SPI1,
+	AUX_SPI2,
+} aux_interrupt_t;
+
+/// @brief Callback to use. It is mandatory to take the type of interrupt before other arguments
+/// mainly to distinguish between MU transmition or recieve interrupt
+typedef void (*aux_callback_t)(aux_interrupt_t, void*);
+
 /// @brief AUX Peripherals
 typedef enum
 {
@@ -36,7 +49,14 @@ typedef enum
  */
 void aux_init();
 
-void aux_set_callback(aux_peripheral_t peripheral, void (*callback)());
+/**
+ * @brief Sets a callback to call in the ISR
+ *
+ * @param peripheral Peripherical to set the callback for
+ * @param callback Callback to set
+ * @param args Arguments for the callback
+ */
+void aux_set_callback(aux_peripheral_t peripheral, aux_callback_t callback, void* args);
 
 /**
  * @brief Enables an AUX peripheral

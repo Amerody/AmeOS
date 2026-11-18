@@ -30,4 +30,13 @@ int uart_mini_enable(uint32_t baud);
  */
 void uart_mini_putc(char c);
 
+/**
+ * @brief Recieve one byte from the UART1 (mini UART)
+ *
+ * @param c Byte to recieve.
+ *
+ * @return @p true if a byte was recieved. @p false otherwise
+ */
+bool uart_mini_getc(char* c);
+
 /** @} */

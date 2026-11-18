@@ -280,9 +280,9 @@ if(KERNEL_BUILD_DOCS)
         set(DOXYGEN_OUTPUT_DIRECTORY      "${CMAKE_SOURCE_DIR}/docs")
         set(DOXYGEN_RECURSIVE             YES)
         set(DOXYGEN_OPTIMIZE_OUTPUT_FOR_C YES)   # remove once C++ is used
-        set(DOXYGEN_EXTRACT_ALL           NO)    #only documented items appear
+        set(DOXYGEN_EXTRACT_ALL           NO)    # only documented items appear
         set(DOXYGEN_EXTRACT_STATIC        YES)
-        set(DOXYGEN_WARN_IF_UNDOCUMENTED  NO)
+        set(DOXYGEN_WARN_IF_UNDOCUMENTED  YES)
         set(DOXYGEN_WARN_IF_DOC_ERROR     YES)
         set(DOXYGEN_WARN_NO_PARAMDOC      YES)
         set(DOXYGEN_WARN_AS_ERROR         NO)    # switch to YES once the docs are clean

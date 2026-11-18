@@ -4,7 +4,4 @@ docs/html
 .clangd
 *.log
 
-CLAUDE.md
 docs/bcm2711-peripherals.pdf
-tools/run.sh
-.claude/

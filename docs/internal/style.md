@@ -5,7 +5,7 @@ consistency: when a choice isn't covered here, follow the closest existing examp
 **add the rule to this file in the same commit**.
 
 Where a rule is a real design decision (not just taste), record it as an ADR in
-`docs/decisions/`.
+`docs/internal/decisions/`.
 
 ## 1. Guiding principles
 
@@ -55,8 +55,8 @@ Function verbs, used consistently: `init`, `alloc`/`free`, `map`/`unmap`, `read`
 ### Constants and macros
 
 - Prefer `enum`, `static const`, or `constexpr` over `#define` for typed constants.
-- Hardware registers: `<DEVICE>-><REGISTER>` for offsets/addresses and
-  `<DEVICE>_<REGISTER>_<FIELD>` for bits and masks if needed.
+- Hardware registers: Specific registers are defined as the example below and bits and masks are defined as
+  `<DEVICE>_<REGISTER>_<FIELD>` if needed.
 ```c
 #define UART_DR            0x00
 #define UART_FR            0x18
@@ -100,7 +100,7 @@ typedef struct
 
 ### Error handling
 
-- Functions that can fail return either `int`: `0` on success and a negative `ERR_*` code on failure or a `<system>_status_t` enum for hardware implementations.
+- Functions that can fail return either `int`: `0` on success and a negative `ERROR_*` code on failure or a `<system>_status_t` enum for hardware implementations.
 ```c
 /// @brief GIC Status codes
 typedef enum
@@ -117,7 +117,7 @@ typedef enum
 
 } gic_status_t;
 ```
-- Error constants are `<SYSTEM>_ERR_<NAME>` (`GIC_ERROR_INVALID_INTID`).
+- Error constants are `<SYSTEM>_ERROR_<NAME>` (`GIC_ERROR_INVALID_INTID`).
 - Functions that return a pointer or address return `NULL` / `0` on failure, and say so in
   their Doxygen `@return` or `@retval`.
 
@@ -150,7 +150,7 @@ typedef enum
 
 ## 7. Documentation comments
 
-- Doxygen `/** ... */` in headers, directly above the declaration.
+- Doxygen `/** ... */` in headers, directly above the declaration. `///<` to describe a enum value or struct member. For compile-time constants either is fine.
 - `@brief` always; `@param` / `@return` or `@retval` when not obvious. Prefer `@retval`.
 - State context (IRQ-safe? may block?), preconditions, ownership, and hardware references.
 - One `@defgroup` per subsystem, with lowercase names: `hal`, `mm`, `sched`, `drivers`.

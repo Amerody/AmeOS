@@ -126,6 +126,7 @@ AmeOS is primarily a learning project: the goal is to understand OS internals by
 * `CLAUDE.md`: Project context and rules for Claude Code, including the instruction to explain and review rather than write kernel code.
 * `.claude/skills/decision/`: A skill that interviews the maintainer and writes a decision record.
 * `.claude/skills/document/`: A skill that writes Doxygen comments across the code base and reports to the mantainer the added comments for review.
+* `.claude/skills/bug-hunt/`: A skill that checks the whole code base, or a given directory, for possible bugs, writes the corresponding `@bug` and reports back to the mantainer.
 * `.claude/skills/kernel-review/`: A skill that checks the given directories or uncommited changes for issues and reports them.
 * `claude/agents/concurrency-reviewer.md`: An agent that checks the given code for concurrency and memory-ordering bugs.
 * `docs/internal/style.md`: The coding style guide.

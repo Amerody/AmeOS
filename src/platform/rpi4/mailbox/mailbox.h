@@ -52,5 +52,12 @@ extern volatile uint32_t mailbox_buffer[36] __attribute__((aligned(16)));
  *
  * @retval 0 The firmware answered with the success response code
  * @retval -1 The firmware answered with an error
+ *
+ * @bug No barrier between filling mailbox_buffer (RAM) and writing the WRITE register
+ *      (a different peripheral), and none between reading the matching reply and
+ *      reading mailbox_buffer. Device-nGnRnE ordering only holds within one peripheral,
+ *      so a @c dsb is needed on both sides (Arm ARM, Device memory ordering). Harmless
+ *      in QEMU; once the MMU maps RAM as cacheable, the buffer also needs a clean before
+ *      the request and an invalidate after the reply.
  */
 int mailbox_call(uint8_t channel);

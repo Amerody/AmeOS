@@ -45,6 +45,11 @@ typedef struct
  * @bug The requested width, height and depth are stored before the request is made.
  *      If it fails, hal_fb_get_info() reports that size with a NULL buffer, and the
  *      drawing functions then write through the NULL pointer instead of doing nothing.
+ * @bug rpi4: only the overall response code and the ALLOCATE address are checked. The
+ *      width, height and depth the firmware actually set (it may adjust them), the
+ *      per-tag response bits and the returned buffer size are ignored, so if the
+ *      firmware picks a smaller size or a 16-bit depth, the drawing functions (which
+ *      clip to the requested size and assume 32 bpp) write past the end of the buffer.
  */
 int hal_fb_init(uint32_t width, uint32_t height, uint32_t depth);
 
@@ -67,6 +72,10 @@ void hal_fb_set_pixel(uint32_t x, uint32_t y, uint32_t color);
  * @param w Width in pixels
  * @param h Height in pixels
  * @param color Colour in the framebuffer's pixel format
+ *
+ * @bug rpi4: @p x + @p w and @p y + @p h are computed in 32 bits and can wrap, so a very
+ *      large size (e.g. UINT32_MAX for "up to the edge") draws nothing instead of being
+ *      clipped to the screen.
  */
 void hal_fb_fill_rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t color);
 

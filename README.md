@@ -6,20 +6,20 @@ An Operating System for the Raspberry Pi 4 (for now!), built completely from scr
 AmeOS is designed with a modular architecture to support future porting to different platforms and architectures. The project separates hardware-agnostic logic from hardware-specific implementations. The current primary platform is the Raspberry Pi 4 (`rpi4`).
 
 The codebase is organized as follows:
-* **`cmake/`**: Contains toolchain files for cross-compiling (currently `aarch64`).
-* **`include/`**: Defines public contracts and APIs. 
-  * **`hal/`**: Hardware Abstraction Layer interfaces (UART, timers, IRQ) implemented by the platform layer.
-  * **`arch/`**: Architecture-specific interfaces (context switching, MMU) implemented by the architecture layer.
-  * **`kernel/`**: Internal APIs such as memory allocation, scheduling, and standard library functions.
-  * **`drivers/`**: Kernel drivers such as the console
-  * **`gfx`**: Graphics-related files such as the font header and the font defining
-* **`src/`**: Contains all implementation code.
-  * **`kernel/`**: Platform-independent core components (scheduler, memory management, system calls).
-  * **`drivers/`**: Portable device drivers built on top of the HAL.
-  * **`gfx/`**: Graphics-related implementations
-  * **`lib`**: Kernel libraries such as String 
-  * **`arch/aarch64/`**: CPU-specific code for ARM64, including boot stubs, exception vectors, and traps.
-  * **`platform/rpi4/`**: Board-specific implementations mapping HAL definitions to the BCM2711 SoC.
+* `cmake/`: Contains toolchain files for cross-compiling (currently `aarch64`).
+* `include/`: Defines public contracts and APIs. 
+  * `hal/`: Hardware Abstraction Layer interfaces (UART, timers, IRQ) implemented by the platform layer.
+  * `arch/`: Architecture-specific interfaces (context switching, MMU) implemented by the architecture layer.
+  * `kernel/`: Internal APIs such as memory allocation, scheduling, and standard library functions.
+  * `drivers/`: Kernel drivers such as the console
+  * `gfx`: Graphics-related files such as the font header and the font defining
+* `src/`: Contains all implementation code.
+  * `kernel/`: Platform-independent core components (scheduler, memory management, system calls).
+  * `drivers/`: Portable device drivers built on top of the HAL.
+  * `gfx/`: Graphics-related implementations
+  * `lib`: Kernel libraries such as String 
+  * `arch/aarch64/`: CPU-specific code for ARM64, including boot stubs, exception vectors, and traps.
+  * `platform/rpi4/`: Board-specific implementations mapping HAL definitions to the BCM2711 SoC.
 
 ## Build Instructions
 AmeOS uses CMake and Ninja to manage cross-compilation. You can build the kernel via the command line or directly through Visual Studio Code.
@@ -123,9 +123,12 @@ AmeOS is primarily a learning project: the goal is to understand OS internals by
 * Real-hardware testing on a Raspberry Pi 4 is planned. Until then, behavior that QEMU does not emulate accurately is untested.
 
 ### AI configuration in this repository
-* **`CLAUDE.md`**: Project context and rules for Claude Code, including the instruction to explain and review rather than write kernel code.
-* **`.claude/skills/decision/`**: A skill that interviews the maintainer and writes a decision record.
-* **`docs/internal/style.md`**: The coding style guide.
+* `CLAUDE.md`: Project context and rules for Claude Code, including the instruction to explain and review rather than write kernel code.
+* `.claude/skills/decision/`: A skill that interviews the maintainer and writes a decision record.
+* `.claude/skills/document/`: A skill that writes Doxygen comments across the code base and reports to the mantainer the added comments for review.
+* `.claude/skills/kernel-review/`: A skill that checks the given directories or uncommited changes for issues and reports them.
+* `claude/agents/concurrency-reviewer.md`: An agent that checks the given code for concurrency and memory-ordering bugs.
+* `docs/internal/style.md`: The coding style guide.
 
 ### Contributing
 Contributions made with the help of AI tools are welcome, as long as AI is used the way it is in the rest of the project: as a tool for learning, reviewing, and debugging, not as a way to generate code. Kernel code should be written by hand. AI-written tooling and documentation are fine if disclosed in the pull request. You are expected to understand every change you submit, be able to explain it, and have built and tested it before opening a pull request.

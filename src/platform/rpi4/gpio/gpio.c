@@ -86,6 +86,8 @@ typedef struct
 #define GPIO ((GPIO_Registers*) GPIO_BASE)     ///< GPIO access
 
 /// @brief Highest pin number the functions accept
+/// @bug Off by one: the BCM2711 has GPIO0 to GPIO57 (58 pins), so pin 58 is accepted
+///      although it doesn't exist.
 #define GPIO_MAX_PIN 58
 
 /// @brief GPIO field sizes in bits

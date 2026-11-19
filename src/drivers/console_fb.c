@@ -112,6 +112,11 @@ static void newline(void)
  * @c '\\n' moves to the next row; any other byte is drawn at the cursor, which then
  * advances, wrapping to the next row at the end of a line.
  *
+ * @bug @c '\\r' is also treated as a newline, which contradicts this description and the
+ *      file description in console_fb.h ("every other byte, including '\\r', is drawn as
+ *      a glyph"). Output written as "\r\n" moves down two rows. A carriage return
+ *      would normally only move the cursor back to column 0.
+ *
  * @param c Byte to output
  */
 static void console_fb_putc(char c)

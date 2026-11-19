@@ -4,8 +4,7 @@
  * @ingroup lib
  *
  * The kernel is built without libc, so it provides its own versions of these. They keep
- * the libc names and behaviour, but lengths are @c uint32_t instead of @c size_t.
- * A string is a sequence of bytes ended by a NUL (@c '\0').
+ * the libc names and behaviour. A string is a sequence of bytes ended by a NUL (@c '\0').
  *
  * Context: they touch no global state and never block, so they can be called from any
  * context, including interrupt handlers.
@@ -47,6 +46,10 @@ int strcmp(const char* s1, const char* s2);
  * @return 0 if the compared bytes are equal (always the case when @p n is 0), otherwise the
  *         difference between the first two bytes that differ: negative if @p s1 sorts
  *         before @p s2, positive if after
+ *
+ * @bug Compares as @c char, while strcmp() compares as @c uint8_t and libc requires
+ *      unsigned char. Harmless on aarch64, where @c char is unsigned, but on a target
+ *      with signed @c char (e.g. x86_64) bytes >= 0x80 sort before ASCII.
  */
 int strncmp(const char* s1, const char* s2, size_t n);
 

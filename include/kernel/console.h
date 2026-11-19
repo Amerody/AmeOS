@@ -93,6 +93,13 @@ extern "C"
 	 * always safe to call, even before any sink exists.
 	 *
 	 * @param c  Byte to output, passed through untouched.
+	 *
+	 * @bug The file description says this is safe from interrupt handlers, but the
+	 *      framebuffer sink (console_fb.c) does unprotected read-modify-writes of its
+	 *      cursor and scrolls with a long memmove(). Output from an interrupt handler
+	 *      that lands in the middle of normal-context output can scroll twice (losing a
+	 *      line), overwrite characters or corrupt the scrolled image. The UART sink has
+	 *      a similar race (see uart_mini_putc()). Latent: no handler prints today.
 	 */
 	void console_putc(char c);
 

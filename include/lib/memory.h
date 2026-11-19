@@ -4,8 +4,7 @@
  * @ingroup lib
  *
  * The kernel is built without libc, so it provides its own versions of these. They keep
- * the libc names and behaviour, but the length parameter is a @c uint32_t instead of a
- * @c size_t. They work one byte at a time, with no alignment or word-size optimisation.
+ * the libc names and behaviour. They work one byte at a time, with no alignment or word-size optimisation.
  *
  * Context: they touch no global state and never block, so they can be called from any
  * context, including interrupt handlers.

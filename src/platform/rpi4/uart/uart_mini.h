@@ -33,6 +33,11 @@ int uart_mini_enable(uint32_t baud);
  * Busy-waits until the transmitter can accept a byte. Uses no kernel service, so it
  * can be called from interrupt handlers and the panic path.
  *
+ * @bug Check-then-act race: the LSR "can accept a byte" check and the MU_IO_REG write
+ *      are not done with IRQs masked. If an interrupt handler prints in between and
+ *      fills the 8-byte transmit FIFO again, this writes into a full FIFO and the byte
+ *      is lost. Latent: no interrupt handler prints today.
+ *
  * @param c Character to write
  */
 void uart_mini_putc(char c);

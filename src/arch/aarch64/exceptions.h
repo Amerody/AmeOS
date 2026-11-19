@@ -43,6 +43,10 @@ void irq_handler(struct trap_frame* tf);
  *
  * Prints the exception details and the registers, then halts the CPU.
  *
+ * @bug Never runs: boot.S enters EL1 with D, A, I and F masked (SPSR 0x3c5) and only
+ *      the I bit is ever cleared (arch_irq_enable()), so FIQs stay masked and this
+ *      diagnostic cannot fire.
+ *
  * @param tf Frame saved by vectors.S
  */
 void fiq_handler(struct trap_frame* tf);
@@ -51,6 +55,10 @@ void fiq_handler(struct trap_frame* tf);
  * @brief SError (asynchronous abort): always fatal.
  *
  * Prints the exception details and the registers, then halts the CPU.
+ *
+ * @bug Never runs: PSTATE.A stays masked from boot.S on (only I is ever cleared), so an
+ *      asynchronous abort (e.g. a bad MMIO access on real hardware) stays pending
+ *      silently instead of panicking. Unmasking A after arch_init() would enable it.
  *
  * @param tf Frame saved by vectors.S
  */

@@ -52,6 +52,11 @@ extern "C"
 	 *      output.
 	 * @bug The sink is registered before hal_fb_init(). If hal_fb_init() fails, the
 	 *      sink stays registered on a framebuffer that isn't set up.
+	 * @bug The column count is computed as width / FONT_HEIGHT instead of width / cell
+	 *      width (FONT_WIDTH * scale), and the row count ignores the scale too. With the
+	 *      8x14 font that gives 57 columns instead of 100, so lines wrap early. kmain()
+	 *      hides it today by calling console_set_scale(1) right after, which recomputes
+	 *      both.
 	 */
 	int console_fb_init();
 

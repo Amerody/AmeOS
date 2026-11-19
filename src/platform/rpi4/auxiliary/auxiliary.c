@@ -6,14 +6,9 @@
 #include <kernel/errno.h>
 
 /**
- * @addtogroup aux
- * @{
- */
-
-/**
  * @file auxiliary.c
- *
  * @brief Implementation of the AUX Peripherals Driver
+ * @ingroup aux
  */
 
 #include <stddef.h>
@@ -139,5 +134,3 @@ bool aux_is_enabled(aux_peripheral_t peripheral)
 {
 	return (bool) mmio_read_field(&AUX->ENABLES, 0x1, (uint32_t) peripheral);
 }
-
-/** @} */

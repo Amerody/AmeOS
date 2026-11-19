@@ -1,6 +1,7 @@
 /**
  * @file gic.h
  * @brief Public interface of the GICv2 (GIC-400) interrupt controller driver.
+ * @ingroup gic
  *
  * Register names mentioned in the documentation follow the ARM GICv2
  * specification (ARM IHI 0048B) and the GIC-400 TRM.
@@ -45,6 +46,7 @@ typedef enum
 /// @brief Extracts the source CPU ID (bits [12:10]) from a raw GICC_IAR value. Only meaningful for SGIs
 #define GIC_IAR_CPUID(iar) (((iar) >> 10) & 0x7u)
 
+/// @brief Most interrupt IDs the driver handles: its register arrays cover IDs 0-511
 #define GIC_MAX_NUM_INTERRUPTS 512u
 #define GIC_INTID_SPURIOUS 1023u ///< Returned by GICC_IAR when nothing is pending
 
@@ -378,5 +380,8 @@ gic_status_t gic_send_sgi(uint32_t intid, gic_sgi_target_t target, uint8_t cpu_m
 
 /**
  * @brief Number of interrupt IDs this GIC implements. 0 before gic_init().
+ *
+ * @return 32 * (GICD_TYPER.ITLinesNumber + 1), capped at GIC_MAX_NUM_INTERRUPTS.
+ *         Valid IDs are 0 to this value minus 1.
  */
 uint32_t gic_num_intids();

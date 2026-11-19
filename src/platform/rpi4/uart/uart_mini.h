@@ -1,14 +1,9 @@
 #pragma once
 
 /**
- * @addtogroup uart
- * @{
- */
-
-/**
  * @file uart_mini.h
- *
  * @brief UART1 (mini UART) driver header
+ * @ingroup uart
  */
 
 #include <stdint.h>
@@ -35,6 +30,9 @@ int uart_mini_enable(uint32_t baud);
 /**
  * @brief Writes a character to the UART1 (mini UART)
  *
+ * Busy-waits until the transmitter can accept a byte. Uses no kernel service, so it
+ * can be called from interrupt handlers and the panic path.
+ *
  * @param c Character to write
  */
 void uart_mini_putc(char c);
@@ -54,5 +52,3 @@ void uart_mini_putc(char c);
  * @retval false No byte was available
  */
 bool uart_mini_getc(char* c);
-
-/** @} */

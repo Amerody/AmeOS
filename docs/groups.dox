@@ -37,6 +37,24 @@ DRIVERS
  * @brief ARMv8-A timer Driver
  */
 
+/**
+ * @defgroup gic GIC-400 Driver
+ * @ingroup drivers
+ * @brief GICv2 (GIC-400) interrupt controller, and the hal_irq implementation on top of it.
+ */
+
+/**
+ * @defgroup mailbox Mailbox Driver
+ * @ingroup drivers
+ * @brief VideoCore mailbox: property-tag requests to the firmware.
+ */
+
+/**
+ * @defgroup framebuffer Framebuffer Driver
+ * @ingroup drivers
+ * @brief hal_fb implementation: a framebuffer allocated through the mailbox, and pixel drawing.
+ */
+
 
 
 KERNEL

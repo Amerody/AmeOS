@@ -1,14 +1,9 @@
 #include "gpio.h"
 
 /**
- * @addtogroup gpio
- * @{
- */
-
-/**
  * @file gpio.c
- *
  * @brief Implementation of the GPIO Driver
+ * @ingroup gpio
  */
 
 #include "soc.h"
@@ -90,19 +85,29 @@ typedef struct
 #define GPIO_BASE (PERIPHERAL_BASE + 0x200000) ///< GPIO base address
 #define GPIO ((GPIO_Registers*) GPIO_BASE)     ///< GPIO access
 
+/// @brief Highest pin number the functions accept
 #define GPIO_MAX_PIN 58
 
 /// @brief GPIO field sizes in bits
 typedef enum
 {
+	/// @brief GPSETn: 1 bit per pin
 	GPIO_SET_FIELD_SIZE = 1,
+	/// @brief GPCLRn: 1 bit per pin
 	GPIO_CLR_FIELD_SIZE = 1,
+	/// @brief GPIO_PUP_PDN_CNTRL_REGn: 2 bits per pin
 	GPIO_PULL_FIELD_SIZE = 2,
+	/// @brief GPFSELn: 3 bits per pin
 	GPIO_FSEL_FIELF_SIZE = 3
 } gpio_field_size_t;
 
 /**
  * @brief Generalized call to a gpio operation
+ *
+ * Finds the register of the block that holds @p pin's field (32 / @p field_size
+ * fields per register) and writes @p value into it with mmio_write_field().
+ *
+ * Only used inside this file, but not @c static, and not declared in gpio.h.
  *
  * @param pin Pin to use
  * @param value Value to write
@@ -137,5 +142,3 @@ gpio_status_t gpio_set(gpio_t pin) { return gpio_call(pin, 1, &GPIO->GPSET0, GPI
 gpio_status_t gpio_clr(gpio_t pin) { return gpio_call(pin, 1, &GPIO->GPCLR0, GPIO_CLR_FIELD_SIZE); }
 gpio_status_t gpio_set_resistor(gpio_t pin, gpio_resistor_t value) { return gpio_call(pin, value, &GPIO->GPIO_PUP_PDN_CNTRL_REG0, GPIO_PULL_FIELD_SIZE); }
 gpio_status_t gpio_select_function(gpio_t pin, gpio_function_t func) { return gpio_call(pin, func, &GPIO->GPFSEL0, GPIO_FSEL_FIELF_SIZE); }
-
-/** @} */

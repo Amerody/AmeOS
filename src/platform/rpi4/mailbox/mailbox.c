@@ -3,6 +3,13 @@
 #include <common/mmio.h>
 #include <soc.h>
 
+/**
+ * @file mailbox.c
+ * @brief VideoCore mailbox driver: mailbox_call() and the shared request buffer
+ *        (see mailbox.h)
+ * @ingroup mailbox
+ */
+
 /// @brief All the relevant VideoCore Mailbox Registers
 /// @note There is not a lot of publicly available documentation so this is only the required registers sourced from tutorials
 /// @warning @p RESERVED_* are not to be used
@@ -22,8 +29,11 @@ typedef struct
 #define VC_MBOX_BASE (PERIPHERAL_BASE + 0x0000B880) ///< VideoCore Mailbox base address
 #define VC_MBOX ((VC_MBOX_Registers*) VC_MBOX_BASE) ///< VideoCore Mailbox access
 
+/// @brief Response code in mailbox_buffer[1] when the firmware processed the request
 #define MBOX_RESPONSE 0x80000000
+/// @brief STATUS bit: the write mailbox is full, so no message can be sent yet
 #define MBOX_FULL 0x80000000
+/// @brief STATUS bit: the read mailbox is empty, so no reply has arrived yet
 #define MBOX_EMPTY 0x40000000
 
 volatile uint32_t mailbox_buffer[36];

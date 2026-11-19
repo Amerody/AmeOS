@@ -1,14 +1,9 @@
 #include "uart_mini.h"
 
 /**
- * @addtogroup uart
- * @{
- */
-
-/**
  * @file uart_mini.c
- *
  * @brief UART1 (mini UART) driver implementation
+ * @ingroup uart
  */
 
 #include "auxiliary/aux_regs.h"
@@ -135,5 +130,3 @@ bool uart_mini_getc(char* c)
 {
 	return ringbuf_get(&s_rx_buffer, (uint8_t*) c);
 }
-
-/** @} */

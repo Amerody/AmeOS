@@ -1,14 +1,9 @@
 #pragma once
 
 /**
- * @addtogroup aux
- * @{
- */
-
-/**
  * @file aux_regs.h
- *
  * @brief Definition of the AUX Peripherals registers
+ * @ingroup aux
  */
 
 #include "common/mmio.h"
@@ -82,5 +77,3 @@ typedef struct
 
 #define AUX_BASE (PERIPHERAL_BASE + 0x215000) ///< AUX Peripherals base address
 #define AUX ((AUX_Registers*) AUX_BASE)       ///< AUX Peripherals access
-
-/** @} */

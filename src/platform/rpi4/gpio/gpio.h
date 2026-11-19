@@ -1,14 +1,13 @@
 #pragma once
 
 /**
- * @addtogroup gpio
- * @{
- */
-
-/**
  * @file gpio.h
- *
  * @brief Public GPIO Driver header
+ * @ingroup gpio
+ *
+ * Context: every function does a non-atomic read-modify-write of the register that
+ * holds the pin's field (mmio_write_field()). Calls that touch pins sharing a register
+ * from different contexts (an interrupt handler and normal code) can lose a change.
  */
 
 /// @brief Type to reference a pin
@@ -87,5 +86,3 @@ gpio_status_t gpio_set_resistor(gpio_t pin, gpio_resistor_t value);
  * @retval GPIO_ERROR_INVALID_PIN @p pin is out of range
  */
 gpio_status_t gpio_select_function(gpio_t pin, gpio_function_t func);
-
-/** @} */

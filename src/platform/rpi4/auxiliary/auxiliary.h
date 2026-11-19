@@ -1,14 +1,9 @@
 #pragma once
 
 /**
- * @addtogroup aux
- * @{
- */
-
-/**
  * @file auxiliary.h
- *
  * @brief Public AUX Peripherals Driver header
+ * @ingroup aux
  *
  * Owns the registers the AUX peripherals share (AUX_IRQ, AUX_ENABLES) and the
  * shared AUX interrupt line. Each peripheral's own registers belong to its
@@ -119,5 +114,3 @@ void aux_disable(aux_peripheral_t peripheral);
  * @return true if enabled, false otherwise
  */
 bool aux_is_enabled(aux_peripheral_t peripheral);
-
-/** @} */

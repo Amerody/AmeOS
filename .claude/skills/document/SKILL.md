@@ -60,6 +60,9 @@ When a public function is documented with Doxygen in both its header and its sou
 ### Existing documentation
 You may rewrite existing documentation that is wrong or incomplete. **Every such change must be listed in the final summary with a one-line reason**, so the user can check it. Don't rewrite comments only to change their wording.
 
+### Possible bugs
+You may add `@bug` describing the possible bug, but include them in the final user report.
+
 ### Formatting
 - Keep comment lines within 100 columns and match the surrounding indentation (4 spaces, no tabs).
 - Don't run `clang-format` on whole files, because it could change code formatting and pollute the diff.

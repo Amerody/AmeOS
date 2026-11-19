@@ -7,7 +7,7 @@
  * The registry (src/kernel/lib/console.c) knows nothing about devices. It keeps
  * a small list of sinks and sends every byte to all of them. A sink may also
  * provide input (a @c getc), which console_getc() reads. Concrete sinks
- * (UART, framebuffer, ...) live in src/drivers/console/; kmain() initialises
+ * (UART, framebuffer, ...) live in src/drivers/; kmain() initialises
  * the registry and then asks each driver it wants to register its sink:
  *
  * @code

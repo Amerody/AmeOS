@@ -4,8 +4,16 @@
 #include <kernel/console.h>
 #include <kernel/errno.h>
 
+/**
+ * @file console_uart.c
+ * @brief UART console sink: connects the console registry to hal_uart (see console_uart.h)
+ * @ingroup console
+ */
+
+/// @brief Baud rate the console UART is set up with
 #define UART_BAUD_RATE 115200
 
+/// @brief Port of the UART console; 0xFF until console_uart_init() is called
 static unsigned s_port = 0xFF;
 
 /**
@@ -38,24 +46,6 @@ static bool console_uart_getc(char* c)
 	return hal_uart_getc(s_port, c);
 }
 
-/**
- * @brief Initialise a UART and register it as a console sink.
- *
- * Calls hal_uart_init(`port`, `baud`) (8N1) and then `console_register()` with
- * a sink named "uart" that sends bytes through hal_uart_putc() and reads
- * received bytes through hal_uart_getc().
- *
- * Newline handling is done here: every '\n' is sent as "\r\n" so serial
- * terminals start a new line at column 0. A lone '\r' is passed through
- * unchanged.
- *
- * Only one UART console is supported: the port is kept in a private static, so
- * a second call returns -EBUSY.
- *
- * @param port Platform UART number; 1 is the console UART.
- * @return 0 on success, -EBUSY if already initialised, or the error from
- *         hal_uart_init() (-ENODEV, -EINVAL) or console_register() (-ENOSPC).
- */
 int console_uart_init(unsigned port)
 {
 	if (s_port != 0xFF)

@@ -59,7 +59,6 @@ static void init()
 	step(hal_timer_init(), "Timer initialized");
 	hal_timer_set_tick(TIMER_POLL_HZ, on_tick);
 	arch_irq_enable();
-	step(1, "Test error");
 }
 
 /**
@@ -95,7 +94,7 @@ void kmain(uint64_t dtb_ptr)
 	{
 		char c = 0;
 		if (console_getc(&c))
-			kprintf("%c\n", c);
+			kprintf("%c", c);
 		// This is so kernel_main() doesn't return
 	}
 }

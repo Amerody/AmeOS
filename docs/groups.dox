@@ -57,3 +57,12 @@ KERNEL
  * @ingroup kernel
  * @brief Kernel Print Utilities
  */
+
+
+LIB
+
+/**
+ * @defgroup lib Kernel Library
+ * @brief Freestanding helpers with no hardware access: string and memory functions
+ *        (the kernel has no libc) and generic data structures.
+ */

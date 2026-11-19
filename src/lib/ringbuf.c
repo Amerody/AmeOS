@@ -3,6 +3,7 @@
 /**
  * @file ringbuf.c
  * @brief Single-producer / single-consumer byte ring buffer (see ringbuf.h)
+ * @ingroup lib
  */
 
 void ringbuf_init(struct ringbuf* rb, uint8_t* storage, size_t capacity)

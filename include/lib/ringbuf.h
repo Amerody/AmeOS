@@ -3,6 +3,7 @@
 /**
  * @file ringbuf.h
  * @brief Byte ring buffer with one producer and one consumer.
+ * @ingroup lib
  *
  * Lock-free for exactly one producer (e.g. an interrupt handler) and exactly
  * one consumer (e.g. normal kernel code): the producer only writes @c head,
@@ -34,7 +35,8 @@ struct ringbuf
  *
  * @param rb Pointer to the ring buffer instance
  * @param storage Array of storage; must outlive @p rb
- * @param capacity Capacity of the buffer in bytes. Must be a power of 2
+ * @param capacity Capacity of the buffer in bytes. Must be a power of 2 (so at least 1);
+ *                 this is not checked yet
  */
 void ringbuf_init(struct ringbuf* rb, uint8_t* storage, size_t capacity);
 

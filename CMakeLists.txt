@@ -288,6 +288,8 @@ if(KERNEL_BUILD_DOCS)
         set(DOXYGEN_WARN_AS_ERROR         NO)    # switch to YES once the docs are clean
         set(DOXYGEN_GENERATE_LATEX        NO)
         set(DOXYGEN_INCLUDE_GRAPH         NO)   # only drawn if Graphviz is installed
+        set(DOXYGEN_INCLUDED_BY_GRAPH     NO)
+        set(DOXYGEN_SHOW_INCLUDE_FILES    NO)
         set(DOXYGEN_CALL_GRAPH            NO)
         set(DOXYGEN_GROUP_GRAPHS          NO)
         set(DOXYGEN_STRIP_FROM_PATH       "${CMAKE_SOURCE_DIR}")

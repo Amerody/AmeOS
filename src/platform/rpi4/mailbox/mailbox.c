@@ -17,7 +17,7 @@ typedef struct
 {
 	volatile uint32_t READ; ///< VideoCore Mailbox Read Register
 
-	uint32_t RESERVED_04_0F[CALC_OFFSET(0x04, 0x0F)]; ///< 12 Bytes gap between READ and POLL
+	uint32_t RESERVED_04_0C[CALC_OFFSET(0x04, 0x0C)]; ///< 12 Bytes gap between READ and POLL
 
 	volatile uint32_t POLL;   ///< VideoCore Mailbox Poll Register
 	volatile uint32_t SENDER; ///< VideoCore Mailbox Sender Register

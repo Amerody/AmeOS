@@ -3,6 +3,7 @@
         "--background-index",
         "--header-insertion=never",
     ],
+    "debug.allowBreakpointsEverywhere": true,
     "C_Cpp.intelliSenseEngine": "disabled",
     "C_Cpp.hover": "default",
     "chat.disableAIFeatures": true,

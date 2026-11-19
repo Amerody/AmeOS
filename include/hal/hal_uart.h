@@ -37,7 +37,7 @@ extern "C"
 	 * @bug rpi4: ports 0 and 2-5 return 0 although the PL011 driver is only a
 	 *      placeholder, so a caller (e.g. console_uart_init()) believes the port works
 	 *      and all its output is silently dropped. -ENODEV would match the contract.
-	 * @bug rpi4: -EINVAL is never returned. The mini UART divisor
+	 * @bug rpi4: -EINVAL is never returned for a bad @p baud (only from aux_init()). The divisor
 	 *      500 MHz / (8 * baud) - 1 is not range-checked: @p baud 0 divides by zero,
 	 *      rates below ~954 baud need more than the 16 bits of AUX_MU_BAUD_REG and
 	 *      are silently truncated by mmio_write_field(), and very high rates

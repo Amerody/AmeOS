@@ -81,6 +81,10 @@ extern "C"
 	 * which is also the case before console_fb_init().
 	 *
 	 * @param scale Scale factor; 1 is the font's native size
+	 *
+	 * @bug The fit check computes FONT_WIDTH * @p scale and FONT_HEIGHT * @p scale in 32
+	 *      bits. For @p scale 0x80000000 both wrap to 0, the check passes, and the column
+	 *      and row counts then divide by a cell size of 0 (undefined behaviour in C).
 	 */
 	void console_set_scale(uint32_t scale);
 

@@ -64,6 +64,11 @@ extern "C"
 	 * handler must not be enabled.
 	 *
 	 * @param irq Platform IRQ number. Out-of-range numbers are ignored.
+	 *
+	 * @bug rpi4: nothing is routed "to this CPU": only GICD_ISENABLERn is written, so an
+	 *      SPI keeps the target gic_init() gave it (core 0, GICD_ITARGETSRn). Latent: only
+	 *      core 0 runs today; a secondary core enabling an SPI would never receive it
+	 *      (GICv2 spec, 4.3.12 GICD_ITARGETSRn).
 	 */
 	void hal_irq_enable(unsigned irq);
 

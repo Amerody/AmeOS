@@ -293,6 +293,9 @@ if(KERNEL_BUILD_DOCS)
         set(DOXYGEN_STRIP_FROM_PATH       "${CMAKE_SOURCE_DIR}")
         set(DOXYGEN_REPEAT_BRIEF          NO)
 
+        set(DOXYGEN_MACRO_EXPANSION YES)
+        set(DOXYGEN_PREDEFINED "__attribute__(x)=")
+
         # Sources
         set(DOXYGEN_FILE_PATTERNS *.h *.c *.hpp *.cpp *.md *.dox)
         set(_doc_inputs "${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/src")

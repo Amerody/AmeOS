@@ -1,6 +1,13 @@
 #include "kernel/panic.h"
 #include "kernel/kprintf.h"
+#include <arch/arch.h>
 #include <stdarg.h>
+
+/**
+ * @file panic.c
+ * @brief panic() implementation (see panic.h)
+ * @ingroup print
+ */
 
 void panic(const char* fmt, ...)
 {
@@ -10,6 +17,5 @@ void panic(const char* fmt, ...)
 	kvprintf(fmt, ap);
 	va_end(ap);
 	kprintf("\n");
-	for (;;)
-		__asm__ volatile("wfe");
+	arch_halt();
 }

@@ -2,6 +2,7 @@
  * @file console.h
  * @brief Kernel console: a registry of output sinks that kprintf() writes to,
  *        which can also be read from.
+ * @ingroup console
  *
  * The registry (src/kernel/lib/console.c) knows nothing about devices. It keeps
  * a small list of sinks and sends every byte to all of them. A sink may also
@@ -77,8 +78,11 @@ extern "C"
 	 * replayed.
 	 *
 	 * @param con  Sink description; @c putc must not be NULL, @c getc may be.
-	 * @return 0 on success, -EINVAL if @p con or its @c putc is NULL, -ENOSPC if
-	 *         CONSOLE_MAX_SINKS sinks are already registered.
+	 *
+	 * @retval 0 The sink was registered
+	 * @retval -EINVAL @p con or its @c putc is NULL
+	 * @retval -ENOSPC CONSOLE_MAX_SINKS sinks are already registered (checked first, so
+	 *                 this is returned even when @p con is invalid)
 	 */
 	int console_register(const struct console* con);
 

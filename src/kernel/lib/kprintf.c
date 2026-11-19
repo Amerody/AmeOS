@@ -4,6 +4,18 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/**
+ * @file kprintf.c
+ * @brief kprintf() / kvprintf() implementation: a format-string parser that writes each
+ *        character to console_putc()
+ * @ingroup print
+ */
+
+/**
+ * @brief Writes a string to the console.
+ *
+ * @param s NUL-terminated string; NULL prints @c "(null)"
+ */
 static void print_str(const char* s)
 {
 	if (!s)
@@ -12,6 +24,14 @@ static void print_str(const char* s)
 		console_putc(*s++);
 }
 
+/**
+ * @brief Writes an unsigned number to the console in the given base, without prefix or
+ *        padding.
+ *
+ * @param value Number to print
+ * @param base Base, from 2 to 16
+ * @param upper true to use @c A-F for digits above 9, false for @c a-f
+ */
 static void print_uint(uint64_t value, unsigned base, bool upper)
 {
 	const char* digits = upper ? "0123456789ABCDEF" : "0123456789abcdef";
@@ -29,6 +49,11 @@ static void print_uint(uint64_t value, unsigned base, bool upper)
 		console_putc(buf[--i]);
 }
 
+/**
+ * @brief Writes a signed number to the console in decimal, with a leading @c - if negative.
+ *
+ * @param value Number to print; every value works, including @c INT64_MIN
+ */
 static void print_int(int64_t value)
 {
 	if (value < 0)

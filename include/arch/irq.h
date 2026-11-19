@@ -1,6 +1,7 @@
 /**
  * @file irq.h
  * @brief CPU-level interrupt masking (this CPU only).
+ * @ingroup arch
  *
  * This is NOT the interrupt controller. An interrupt reaches the kernel only if
  * all three of these allow it:
@@ -12,7 +13,7 @@
  * On aarch64 this is the PSTATE.I bit (DAIF register). FIQ, SError and debug
  * exceptions are not affected by anything here.
  *
- * Implemented by src/arch/<ARCH>/.
+ * Implemented by src/arch/\<ARCH\>/.
  */
 #pragma once
 
@@ -81,6 +82,9 @@ extern "C"
 	 *
 	 * Intended for assertions (for example "must be called with IRQs masked");
 	 * do not use it to make locking decisions.
+	 *
+	 * @retval true IRQs are unmasked
+	 * @retval false IRQs are masked
 	 */
 	bool arch_irqs_enabled();
 

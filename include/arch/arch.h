@@ -1,8 +1,9 @@
 /**
  * @file arch.h
  * @brief CPU-architecture contract: bring-up, idle and halt.
+ * @ingroup arch
  *
- * Implemented by src/arch/<ARCH>/. Core and portable drivers may include this
+ * Implemented by src/arch/\<ARCH\>/. Core and portable drivers may include this
  * header; they must never include anything from src/arch/ directly.
  */
 #pragma once

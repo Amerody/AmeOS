@@ -1,4 +1,27 @@
-// AArch64 mode
+/*
+ * boot.S: kernel entry point (_start) for aarch64.
+ *
+ * Linked first in the image (section .text.boot), so the firmware jumps here.
+ * In order:
+ *   1. Only CPU 0 (MPIDR_EL1 Aff0 == 0) continues; the others wait forever
+ *      in a wfe loop (proc_hang).
+ *   2. Drops to EL1h from EL3 or EL2, whichever it was started in (prepare_el1
+ *      sets up the EL2 controls and SCTLR_EL1 first). The eret paths enter EL1
+ *      with D, A, I and F masked. When started directly in EL1, nothing is
+ *      dropped and DAIF is left as it was.
+ *   3. Enables FP/SIMD at EL1 and EL0 (CPACR_EL1), sets SP to __stack_top
+ *      and zeroes .bss 8 bytes at a time (__bss_start and __bss_end from the
+ *      linker script).
+ *   4. Calls kmain(dtb). If kmain() returns, CPU 0 also waits in proc_hang.
+ *
+ * Register conventions:
+ *   x0   On entry: the DTB pointer from the firmware. Passed back to kmain()
+ *        as its first argument. Otherwise used as scratch.
+ *   x1   Scratch.
+ *   x19  Holds the DTB pointer from entry until kmain() is called.
+ *
+ * The vector table is not installed here: arch_init() does that from kmain().
+ */
 
 // To keep this in the first portion of the binary.
 .section ".text.boot"
@@ -33,7 +56,7 @@ proc_hang:
     b proc_hang
 
 master: 
-    mov x19, x0 // Save the DTB pointer in callee-saved register x19 (see kernel_main for explanation on why we need the DTB pointer)
+    mov x19, x0 // Save the DTB pointer in callee-saved register x19 (see kmain for explanation on why we need the DTB pointer)
 
     mrs x0, CurrentEL
     lsr x0, x0, #2

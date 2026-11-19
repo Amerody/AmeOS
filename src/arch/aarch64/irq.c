@@ -1,6 +1,7 @@
 /**
  * @file irq.c
  * @brief CPU-level IRQ masking on aarch64 (PSTATE.I via the DAIF register).
+ * @ingroup arch
  *
  * Only the I bit (IRQ) is touched. Debug, SError and FIQ masks are left alone.
  * The contract and its documentation live in include/arch/irq.h.
@@ -18,6 +19,7 @@
 
 #include <stdint.h>
 
+/// @brief I bit (IRQ mask) of the DAIF register, as read with "mrs x, daif"
 #define DAIF_I (1ul << 7)
 
 void arch_irq_enable()

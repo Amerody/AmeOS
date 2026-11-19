@@ -66,3 +66,13 @@ LIB
  * @brief Freestanding helpers with no hardware access: string and memory functions
  *        (the kernel has no libc) and generic data structures.
  */
+
+
+
+ARCH
+
+/**
+ * @defgroup arch CPU Architecture
+ * @brief CPU-architecture layer (include/arch, src/arch/\<ARCH\>): boot, exception
+ *        vectors and handlers, CPU interrupt masking, saved execution state.
+ */

@@ -1,14 +1,17 @@
 #pragma once
 
 /**
- * @addtogroup mmio
- * @{
- */
-
-/**
  * @file mmio.h
- *
  * @brief Memory Mapped I/O Read/Write operations
+ * @ingroup mmio
+ *
+ * Shared by every platform under src/platform/. Each helper is one access through a
+ * @c volatile pointer, so the compiler can't remove, merge or reorder it against
+ * other volatile accesses. They contain no CPU memory barrier (@c dsb / @c dmb):
+ * where the hardware needs ordering between accesses, the caller adds it.
+ *
+ * Context: a single read or write is safe from any context, including interrupt
+ * handlers. mmio_write_field() is not atomic; see its warning.
  */
 
 #include <stdint.h>
@@ -22,8 +25,25 @@ typedef volatile uint16_t* mmio_register16_t;
 /// @brief Memory mapped 8-bit register
 typedef volatile uint8_t* mmio_register8_t;
 
-/// @brief Macro to calculate the offset to write on a register definition, use addresses aligned to 4 Bytes.
-/// @code uint32_t RESERVED_90_E0[CALC_OFFSET(0x90, 0xE0)]; ///< 84 Bytes gap between GPAFEN1 and GPIO_PUP_PDN_CNTRL_REG0 @endcode
+/**
+ * @brief Number of 32-bit words from @p start to @p end, both included: the size of a
+ *        reserved gap or of a register array in a register struct.
+ *
+ * Both are byte offsets of 32-bit words, so they must be 4-byte aligned. @p end is the
+ * offset of the last word, not of the register after it.
+ *
+ * @code
+ * uint32_t RESERVED_90_E0[CALC_OFFSET(0x90, 0xE0)];      // 21 words: 84 bytes
+ * volatile uint32_t IGROUPR[CALC_OFFSET(0x080, 0x0BC)];  // 16 registers
+ * @endcode
+ *
+ * In a register struct, each such line ends with a @c ///\< comment (the gap size in
+ * bytes for a reserved gap), as described in style.md, section 3.
+ *
+ * @param start Offset of the first word
+ * @param end Offset of the last word
+ * @return (@p end - @p start) / 4 + 1
+ */
 #define CALC_OFFSET(start, end) ((((end) - (start)) / 4) + 1)
 
 /**
@@ -55,7 +75,8 @@ static inline void mmio_write(mmio_register32_t reg, uint32_t value) { *reg = va
  * @param reg   Register to read from
  * @param mask  Field mask, unshifted (e.g. 0x7 for a 3-bit field)
  * @param shift Bit position of the field's lowest bit
- * @return Field value, unshifted
+ * @return Field value, moved down to bit 0 (same form as mmio_write_field()'s
+ *         @p value)
  */
 static inline uint32_t mmio_read_field(mmio_register32_t reg, uint32_t mask, uint32_t shift)
 {
@@ -65,13 +86,14 @@ static inline uint32_t mmio_read_field(mmio_register32_t reg, uint32_t mask, uin
 /**
  * @brief Writes a field of a Memory Mapped I/O register, preserving all other bits
  *
- * Performs a NON-ATOMIC read-modify-write. An ISR or another core
+ * @warning Performs a NON-ATOMIC read-modify-write. An ISR or another core
  * modifying the same register in between will have its change lost.
  * Do not use on registers with write-1-to-clear or clear-on-read bits;
- * use mmio_write instead.
+ * use mmio_write() instead.
  *
  * @param reg   Register to modify
- * @param value Field value, unshifted. Truncated to the field width
+ * @param value Field value, starting at bit 0 (not shifted into place).
+ *              Truncated to the field width
  * @param mask  Field mask, unshifted (e.g. 0x7 for a 3-bit field)
  * @param shift Bit position of the field's lowest bit
  */
@@ -102,5 +124,3 @@ static inline void mmio_write8(mmio_register8_t reg, uint8_t value) { *reg = val
  * @return Value read from the register
  */
 static inline uint8_t mmio_read8(mmio_register8_t reg) { return *reg; }
-
-/** @} */

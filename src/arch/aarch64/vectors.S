@@ -1,3 +1,26 @@
+/*
+ * vectors.S: EL1 exception vector table and the trap-frame entry/exit code.
+ *
+ * vector_table has the 16 slots of 0x80 bytes each, in 4 groups of 4
+ * (synchronous, IRQ, FIQ, SError), and is 2 KB aligned as VBAR_EL1 requires.
+ * Only the "current EL with SP_ELx" group, i.e. exceptions taken from EL1
+ * itself, is handled: each of its slots branches to a handler_entry stub. Every
+ * other slot branches to exception_hang, which waits forever in a wfe loop
+ * without printing anything.
+ *
+ * handler_entry stub (one per handled slot):
+ *   - pushes a struct trap_frame (272 bytes, see include/arch/context_types.h)
+ *     on the current stack (SP_EL1): x0-x30, SP_EL0, ELR_EL1, SPSR_EL1, in
+ *     that order;
+ *   - calls the C handler (exceptions.h) with x0 = the frame's address;
+ *   - restores everything from the frame, so changes the handler made to it
+ *     take effect, then returns with eret.
+ *   All general-purpose registers are preserved across the exception.
+ *
+ * install_vector_table: writes vector_table's address to VBAR_EL1. Clobbers
+ * x0. Called by arch_init(); its C prototype is in arch.c.
+ */
+
     .section .text.vectors, "ax"
     .balign 0x800
     .global vector_table

@@ -1,14 +1,13 @@
 #pragma once
 
 /**
- * @addtogroup gpio
- * @{
- */
-
-/**
  * @file gpio.h
- *
  * @brief Public GPIO Driver header
+ * @ingroup gpio
+ *
+ * Context: every function does a non-atomic read-modify-write of the register that
+ * holds the pin's field (mmio_write_field()). Calls that touch pins sharing a register
+ * from different contexts (an interrupt handler and normal code) can lose a change.
  */
 
 /// @brief Type to reference a pin
@@ -51,6 +50,12 @@ typedef enum
  * @return Status of the operation
  * @retval GPIO_SUCCESS if the operation was successful
  * @retval GPIO_ERROR_INVALID_PIN @p pin is out of range
+ *
+ * @bug GPSETn is write-only (BCM2711 ARM Peripherals, chapter 5, Table 70: type WO),
+ *      but this does a read-modify-write through mmio_write_field(). Whatever the read
+ *      returns is written back, so any 1 bit in it also sets that other pin. It should
+ *      be a single mmio_write() of (1 << bit); the set/clear registers exist precisely
+ *      to avoid read-modify-write.
  */
 gpio_status_t gpio_set(gpio_t pin);
 
@@ -61,6 +66,9 @@ gpio_status_t gpio_set(gpio_t pin);
  * @return Status of the operation
  * @retval GPIO_SUCCESS The operation was successful
  * @retval GPIO_ERROR_INVALID_PIN @p pin is out of range
+ *
+ * @bug GPCLRn is write-only (BCM2711 ARM Peripherals, chapter 5, GPCLR0 table: type WO),
+ *      but this does a read-modify-write; see gpio_set().
  */
 gpio_status_t gpio_clr(gpio_t pin);
 
@@ -73,6 +81,9 @@ gpio_status_t gpio_clr(gpio_t pin);
  * @return Status of the operation
  * @retval GPIO_SUCCESS The operation was successful
  * @retval GPIO_ERROR_INVALID_PIN @p pin is out of range
+ *
+ * @bug A @p value of 3 passes the check (it fits the 2-bit field) although 0b11 is
+ *      Reserved in GPIO_PUP_PDN_CNTRL_REGn (BCM2711 ARM Peripherals, Table 90).
  */
 gpio_status_t gpio_set_resistor(gpio_t pin, gpio_resistor_t value);
 
@@ -87,5 +98,3 @@ gpio_status_t gpio_set_resistor(gpio_t pin, gpio_resistor_t value);
  * @retval GPIO_ERROR_INVALID_PIN @p pin is out of range
  */
 gpio_status_t gpio_select_function(gpio_t pin, gpio_function_t func);
-
-/** @} */

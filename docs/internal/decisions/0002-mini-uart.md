@@ -1,7 +1,7 @@
 # 0002: Mini UART {#decision_0002-mini-uart}
 
 - Date: 2026-10-31
-- Status: accepted
+- Status: superseded by 0004
 
 ## Context
 The `mini_uart (UART1)` uses the `AUX_*` registers while the rest of the `UART[02345]` use their respective `UART` registers.

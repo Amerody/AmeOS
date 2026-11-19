@@ -1,6 +1,12 @@
 #include "lib/memory.h"
 
-void* memcpy(void* dest, const void* src, uint32_t n)
+/**
+ * @file memory.c
+ * @brief Byte-at-a-time implementation of the freestanding memory functions (see memory.h)
+ * @ingroup lib
+ */
+
+void* memcpy(void* dest, const void* src, size_t n)
 {
 	uint8_t* d = (uint8_t*) dest;
 	const uint8_t* s = (const uint8_t*) src;
@@ -9,16 +15,15 @@ void* memcpy(void* dest, const void* src, uint32_t n)
 	return dest;
 }
 
-void* memset(void* s, int c, uint32_t n)
+void* memset(void* s, uint8_t c, size_t n)
 {
 	uint8_t* p = (uint8_t*) s;
-	uint8_t val = (uint8_t) c;
 	while (n--)
-		*p++ = (uint8_t) val;
+		*p++ = (uint8_t) c;
 	return s;
 }
 
-void* memmove(void* dest, const void* src, uint32_t n)
+void* memmove(void* dest, const void* src, size_t n)
 {
 	uint8_t* d = (uint8_t*) dest;
 	const uint8_t* s = (const uint8_t*) src;

@@ -3,3 +3,5 @@ docs/html
 
 .clangd
 *.log
+
+docs/bcm2711-peripherals.pdf

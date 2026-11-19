@@ -22,7 +22,7 @@ DRIVERS
  * @ingroup drivers
  * @brief Public API for UART0-5 (UART1 is the mini UART).
  *
- * See docs/decisions/0002-mini-uart.md for the module layout.
+ * See decision 0004 (docs/internal/decisions/0004-uart-layout.md) for the module layout.
  */
 
 /**
@@ -35,6 +35,24 @@ DRIVERS
  * @defgroup timer Timer Driver
  * @ingroup drivers
  * @brief ARMv8-A timer Driver
+ */
+
+/**
+ * @defgroup gic GIC-400 Driver
+ * @ingroup drivers
+ * @brief GICv2 (GIC-400) interrupt controller, and the hal_irq implementation on top of it.
+ */
+
+/**
+ * @defgroup mailbox Mailbox Driver
+ * @ingroup drivers
+ * @brief VideoCore mailbox: property-tag requests to the firmware.
+ */
+
+/**
+ * @defgroup framebuffer Framebuffer Driver
+ * @ingroup drivers
+ * @brief hal_fb implementation: a framebuffer allocated through the mailbox, and pixel drawing.
  */
 
 
@@ -56,4 +74,23 @@ KERNEL
  * @defgroup print Kernel Print Utilities
  * @ingroup kernel
  * @brief Kernel Print Utilities
+ */
+
+
+LIB
+
+/**
+ * @defgroup lib Kernel Library
+ * @brief Freestanding helpers with no hardware access: string and memory functions
+ *        (the kernel has no libc) and generic data structures.
+ */
+
+
+
+ARCH
+
+/**
+ * @defgroup arch CPU Architecture
+ * @brief CPU-architecture layer (include/arch, src/arch/\<ARCH\>): boot, exception
+ *        vectors and handlers, CPU interrupt masking, saved execution state.
  */

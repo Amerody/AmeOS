@@ -6,16 +6,20 @@ An Operating System for the Raspberry Pi 4 (for now!), built completely from scr
 AmeOS is designed with a modular architecture to support future porting to different platforms and architectures. The project separates hardware-agnostic logic from hardware-specific implementations. The current primary platform is the Raspberry Pi 4 (`rpi4`).
 
 The codebase is organized as follows:
-* **`cmake/`**: Contains toolchain files for cross-compiling (currently `aarch64`).
-* **`include/`**: Defines public contracts and APIs. 
-  * **`hal/`**: Hardware Abstraction Layer interfaces (UART, timers, IRQ) implemented by the platform layer.
-  * **`arch/`**: Architecture-specific interfaces (context switching, MMU) implemented by the architecture layer.
-  * **`kernel/`**: Internal APIs such as memory allocation, scheduling, and standard library functions.
-* **`src/`**: Contains all implementation code.
-  * **`kernel/`**: Platform-independent core components (scheduler, memory management, system calls).
-  * **`drivers/`**: Portable device drivers built on top of the HAL.
-  * **`arch/aarch64/`**: CPU-specific code for ARM64, including boot stubs, exception vectors, and traps.
-  * **`platform/rpi4/`**: Board-specific implementations mapping HAL definitions to the BCM2711 SoC.
+* `cmake/`: Contains toolchain files for cross-compiling (currently `aarch64`).
+* `include/`: Defines public contracts and APIs. 
+  * `hal/`: Hardware Abstraction Layer interfaces (UART, timers, IRQ) implemented by the platform layer.
+  * `arch/`: Architecture-specific interfaces (context switching, MMU) implemented by the architecture layer.
+  * `kernel/`: Internal APIs such as memory allocation, scheduling, and standard library functions.
+  * `drivers/`: Kernel drivers such as the console
+  * `gfx`: Graphics-related files such as the font header and the font defining
+* `src/`: Contains all implementation code.
+  * `kernel/`: Platform-independent core components (scheduler, memory management, system calls).
+  * `drivers/`: Portable device drivers built on top of the HAL.
+  * `gfx/`: Graphics-related implementations
+  * `lib`: Kernel libraries such as String 
+  * `arch/aarch64/`: CPU-specific code for ARM64, including boot stubs, exception vectors, and traps.
+  * `platform/rpi4/`: Board-specific implementations mapping HAL definitions to the BCM2711 SoC.
 
 ## Build Instructions
 AmeOS uses CMake and Ninja to manage cross-compilation. You can build the kernel via the command line or directly through Visual Studio Code.
@@ -95,31 +99,37 @@ flowchart TB
   archimpl --> HW
 ```
 
-## File structure
-```text
-AmeOS/
-├── CMakeLists.txt
-├── CMakePresets.json        # Windows and Linux presets: ARCH, PLATFORM, toolchain
-├── cmake/toolchains/        # aarch64-none-elf.cmake (x86_64 later)
-├── include/                 # contracts only
-│   ├── hal/                 # implemented by platform/*
-│   ├── arch/                # implemented by arch/*
-│   ├── kernel/              # kernel-internal API
-│   │   └── kprintf.h  console.h  panic.h  string.h  kmalloc.h ...
-│   └── uapi/                # syscall numbers, ABI shared with userland
-├── src/
-│   ├── kernel/              # hardware-agnostic core
-│   │   ├── main.c           # kmain(): init order
-│   │   ├── lib/             # kprintf, string/mem functions, list, ...
-│   │   ├── mm/              # memory allocator
-│   │   ├── sched/           # scheduler
-│   │   └── syscall/         # system calls
-│   ├── drivers/             # portable, built only on include/hal
-│   │   ├── console/         # console registry + UART sink
-│   │   └── fb/              # framebuffer text console, drawing primitives
-│   ├── arch/aarch64/        # boot.S, vectors, exceptions, irq, timer, context
-│   └── platform/rpi4/       # platform.c, linker.ld, boot/config.txt,
-│                            # gic400/, uart/, gpio/, aux/, mailbox/, mmio.h
-├── user/                    # the OS side: init, shell, libc
-└── docs/                    # architecture notes, diagrams
-```
+## AI Use
+
+AmeOS is primarily a learning project: the goal is to understand OS internals by building one. The kernel code is written by hand. AI tools, mainly [Claude Code](https://docs.claude.com/en/docs/claude-code/overview) by Anthropic, act as a tutor, reviewer and documentation writer rather than as the author of the kernel.
+
+### How AI is used
+* **Explaining concepts**: Working through how things like exception levels, interrupt controllers, and memory management work, before writing the code for them.
+* **Pointing to documentation**: Hardware and architecture details are looked up in the primary sources (the BCM2711 ARM Peripherals document, the Arm Architecture Reference Manual, and the GIC-400/GICv2 specifications). The AI is asked to cite which section or register to read instead of supplying values directly.
+* **Code review**: Reviewing changes for bugs such as missing `volatile` qualifiers or barriers on MMIO accesses, wrong register offsets, alignment problems, incorrect exception-level assumptions, and kernel code that bypasses the HAL.
+* **Design discussion**: Deciding where new code belongs within the layered architecture (kernel core, drivers, HAL, platform, and architecture code).
+* **Debugging**: Helping interpret QEMU output, exception information, and GDB sessions.
+* **Documentation**: Written partly by Claude Code and partly by the maintainer. All of it is reviewed by the maintainer.
+* **Decision records**: Architecture decision records in `docs/internal/decisions/` are written by Claude Code from an interview with the maintainer. The decisions, alternatives, and reasoning are the maintainer's; the AI asks the questions and writes up the answers.
+
+### Authorship
+* **Kernel code**: All kernel code, including drivers, the HAL, and libraries, is written by the maintainer. AI may suggest small fixes during review, but the code is typed and understood by hand.
+* **Tooling**: `tools/run.sh` (QEMU test runner) and `tools/bdf2inc.py` (font conversion) were written by Claude Code.
+* **Documentation**: Written by both Claude Code and the maintainer, and of course reviewed by the maintainer. This includes both `.md` files and doxygen comments in the source.
+
+### How correctness is checked
+* Changes are built and run in QEMU (`raspi4b`) using `tools/run.sh` before being committed.
+* Register addresses, offsets, and bit fields are verified against the official documentation, not taken from the AI's answers.
+* Real-hardware testing on a Raspberry Pi 4 is planned. Until then, behavior that QEMU does not emulate accurately is untested.
+
+### AI configuration in this repository
+* `CLAUDE.md`: Project context and rules for Claude Code, including the instruction to explain and review rather than write kernel code.
+* `.claude/skills/decision/`: A skill that interviews the maintainer and writes a decision record.
+* `.claude/skills/document/`: A skill that writes Doxygen comments across the code base and reports to the mantainer the added comments for review.
+* `.claude/skills/bug-hunt/`: A skill that checks the whole code base, or a given directory, for possible bugs, writes the corresponding `@bug` and reports back to the mantainer.
+* `.claude/skills/kernel-review/`: A skill that checks the given directories or uncommited changes for issues and reports them.
+* `claude/agents/concurrency-reviewer.md`: An agent that checks the given code for concurrency and memory-ordering bugs.
+* `docs/internal/style.md`: The coding style guide.
+
+### Contributing
+Contributions made with the help of AI tools are welcome, as long as AI is used the way it is in the rest of the project: as a tool for learning, reviewing, and debugging, not as a way to generate code. Kernel code should be written by hand. AI-written tooling and documentation are fine if disclosed in the pull request. You are expected to understand every change you submit, be able to explain it, and have built and tested it before opening a pull request.

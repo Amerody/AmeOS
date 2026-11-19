@@ -1,16 +1,19 @@
 /**
  * @file console.h
- * @brief Kernel console: a registry of output sinks that kprintf() writes to.
+ * @brief Kernel console: a registry of output sinks that kprintf() writes to,
+ *        which can also be read from.
+ * @ingroup console
  *
  * The registry (src/kernel/lib/console.c) knows nothing about devices. It keeps
- * a small list of sinks and sends every byte to all of them. Concrete sinks
- * (UART, framebuffer, ...) live in src/drivers/console/; kmain() initialises
+ * a small list of sinks and sends every byte to all of them. A sink may also
+ * provide input (a @c getc), which console_getc() reads. Concrete sinks
+ * (UART, framebuffer, ...) live in src/drivers/; kmain() initialises
  * the registry and then asks each driver it wants to register its sink:
  *
  * @code
  * console_init();
- * console_uart_init(0, 115200);   // driver registers its sink
- * // console_fb_init(...);        // later
+ * console_uart_init(1);           // driver registers its sink (UART1)
+ * console_fb_init();
  * kprintf("hello\n");             // kprintf() ends up in console_write()
  * @endcode
  *
@@ -35,7 +38,7 @@ extern "C"
 /** @brief Maximum number of sinks that can be registered at once. */
 #define CONSOLE_MAX_SINKS 4
 
-	/** @brief An output sink. */
+	/** @brief An output sink, optionally also an input source. */
 	struct console
 	{
 		/** Short name for diagnostics, e.g. "uart". Must stay valid (use a string
@@ -48,6 +51,14 @@ extern "C"
 		 * the console.
 		 */
 		void (*putc)(char c);
+
+		/**
+		 * Take one received byte from the device, if there is one. Must never
+		 * block: return false when nothing is available. NULL for output-only
+		 * devices (e.g. the framebuffer). Must not call back into the console.
+		 * Returns true if a byte was stored in @p c.
+		 */
+		bool (*getc)(char* c);
 	};
 
 	/**
@@ -66,9 +77,12 @@ extern "C"
 	 * may live on the caller's stack. Output written before registration is not
 	 * replayed.
 	 *
-	 * @param con  Sink description; @c putc must not be NULL.
-	 * @return 0 on success, -EINVAL if @p con or its @c putc is NULL, -ENOSPC if
-	 *         CONSOLE_MAX_SINKS sinks are already registered.
+	 * @param con  Sink description; @c putc must not be NULL, @c getc may be.
+	 *
+	 * @retval 0 The sink was registered
+	 * @retval -EINVAL @p con or its @c putc is NULL
+	 * @retval -ENOSPC CONSOLE_MAX_SINKS sinks are already registered (checked first, so
+	 *                 this is returned even when @p con is invalid)
 	 */
 	int console_register(const struct console* con);
 
@@ -79,6 +93,13 @@ extern "C"
 	 * always safe to call, even before any sink exists.
 	 *
 	 * @param c  Byte to output, passed through untouched.
+	 *
+	 * @bug The file description says this is safe from interrupt handlers, but the
+	 *      framebuffer sink (console_fb.c) does unprotected read-modify-writes of its
+	 *      cursor and scrolls with a long memmove(). Output from an interrupt handler
+	 *      that lands in the middle of normal-context output can scroll twice (losing a
+	 *      line), overwrite characters or corrupt the scrolled image. The UART sink has
+	 *      a similar race (see uart_mini_putc()). Latent: no handler prints today.
 	 */
 	void console_putc(char c);
 
@@ -91,6 +112,23 @@ extern "C"
 	 * @param len  Number of bytes.
 	 */
 	void console_write(const char* buf, size_t len);
+
+	/**
+	 * @brief Take one received byte from the first sink that has one. Never
+	 *        blocks.
+	 *
+	 * Sinks are asked in registration order; those without a @c getc are
+	 * skipped. Waiting for input means calling this in a loop.
+	 *
+	 * Unlike console_putc(), not for interrupt handlers: the drivers' input
+	 * buffers have a single consumer, so read from one context only.
+	 *
+	 * @param[out] c  Where the byte is stored; untouched if there is none.
+	 *
+	 * @retval true A byte was stored in @p c
+	 * @retval false No sink had a byte
+	 */
+	bool console_getc(char* c);
 
 #ifdef __cplusplus
 }

@@ -2,18 +2,16 @@
  * @file hal_irq.c
  * @brief hal_irq implementation for the Raspberry Pi 4, on top of the GIC-400
  *        driver (gic.h).
+ * @ingroup gic
  *
  * The contract and its documentation live in include/hal/hal_irq.h. IRQ numbers
  * are GIC interrupt IDs (0-15 SGIs, 16-31 PPIs, 32+ SPIs).
  *
  * This file only adds what the GIC driver does not have: the table of
  * registered handlers and the acknowledge / run / end-of-interrupt sequence.
- * The GIC itself is brought up by platform_init(), which must call
- *
- *     gic_init();       // distributor, once
- *     gic_cpu_init();   // this core's CPU interface
- *
- * before any function in this file is used.
+ * The GIC itself is brought up by hal_irq_init(), which platform_init() calls. It
+ * runs gic_init() (the distributor) and gic_cpu_init() (the calling core's CPU
+ * interface only), so other cores would still have to call gic_cpu_init().
  */
 
 #include <arch/irq.h>
@@ -25,15 +23,19 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define GIC_INTID_SPECIAL_MIN 1020u /* 1020..1023 are never real sources */
+#define GIC_INTID_SPECIAL_MIN 1020u ///< 1020..1023 are never real sources
 
+/// @brief Handler registered for one interrupt ID
 struct irq_entry
 {
+	/// @brief Handler to call; NULL if none is registered
 	hal_irq_handler_t fn;
+	/// @brief Passed back to @c fn unchanged
 	void* arg;
 };
 
-/* Sized for the driver's maximum; gic_num_intids() is always <= this. */
+/// @brief Registered handlers, indexed by interrupt ID. Also read from the IRQ path.
+/// Sized for the driver's maximum; gic_num_intids() is always <= this.
 static struct irq_entry s_handlers[GIC_MAX_NUM_INTERRUPTS];
 
 void hal_irq_init()

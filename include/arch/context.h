@@ -1,6 +1,7 @@
 /**
  * @file context.h
  * @brief Execution-context contract: kernel context switch and trap frames.
+ * @ingroup arch
  *
  * Two different saved states exist, for two different situations:
  *
@@ -15,11 +16,11 @@
  * cpu_context per thread) and passes them to the functions below.
  *
  * The struct layouts come from <arch/context_types.h>, which is provided by the
- * selected arch (src/arch/<ARCH>/ include/arch/context_types.h) and added to the
+ * selected arch (src/arch/\<ARCH\>/ include/arch/context_types.h) and added to the
  * include path by CMake. It is the one place where an arch's data layout is
  * visible to the rest of the kernel; it contains layout only, no logic.
  *
- * Implemented by src/arch/<ARCH>/.
+ * Implemented by src/arch/\<ARCH\>/.
  */
 #pragma once
 
@@ -50,6 +51,8 @@ extern "C"
 	 *                   16-byte aligned (aarch64 requirement).
 	 * @param entry      Function the thread starts in.
 	 * @param arg        Argument passed to @p entry.
+	 *
+	 * @todo Not implemented yet: no arch provides arch_context_init().
 	 */
 	void arch_context_init(struct cpu_context* ctx, void* stack_top, void (*entry)(void* arg), void* arg);
 
@@ -71,6 +74,8 @@ extern "C"
 	 *
 	 * @param from Where to save the running context.
 	 * @param to   Context to resume.
+	 *
+	 * @todo Not implemented yet: no arch provides arch_context_switch().
 	 */
 	void arch_context_switch(struct cpu_context* from, struct cpu_context* to);
 
@@ -85,6 +90,7 @@ extern "C"
 	 * instruction that would have run next.
 	 *
 	 * @param tf Frame saved by the exception vectors.
+	 * @return The saved program counter (ELR_EL1 on aarch64)
 	 */
 	uintptr_t arch_trap_frame_pc(const struct trap_frame* tf);
 

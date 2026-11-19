@@ -1,7 +1,3 @@
 enable_uart=1
-<<<<<<< HEAD
-arm_64bit=1
-=======
 arm_64bit=1
 enable_gic=1
->>>>>>> homeserver/Dev

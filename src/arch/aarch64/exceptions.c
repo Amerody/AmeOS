@@ -2,6 +2,7 @@
  * @file exceptions.c
  * @brief aarch64 exception handlers called from the vector table, plus the
  *        trap-frame helpers declared in include/arch/context.h.
+ * @ingroup arch
  */
 
 #include "exceptions.h"
@@ -15,6 +16,11 @@
 
 /* ---- helpers ----------------------------------------------------------- */
 
+/**
+ * @brief Reads a system register with @c mrs and evaluates to its 64-bit value.
+ *
+ * @param name Register name as the assembler spells it, e.g. @c esr_el1
+ */
 #define READ_SYSREG(name)                              \
 	({                                                 \
 		uint64_t _v;                                   \
@@ -22,19 +28,36 @@
 		_v;                                            \
 	})
 
+/// @brief Exception class (EC) field of an ESR_EL1 value, bits [31:26]
 #define ESR_EC(esr) ((uint32_t) (((esr) >> 26) & 0x3Fu))
+/// @brief Instruction-specific syndrome (ISS) field of an ESR_EL1 value, bits [24:0]
 #define ESR_ISS(esr) ((uint32_t) ((esr) & 0x1FFFFFFu))
 
+/// @brief Exception class: unknown reason
 #define EC_UNKNOWN 0x00u
+/// @brief Exception class: SVC instruction executed in AArch64 state
 #define EC_SVC64 0x15u
+/// @brief Exception class: instruction abort from a lower exception level
 #define EC_IABORT_LOWER 0x20u
+/// @brief Exception class: instruction abort taken without a change of exception level
 #define EC_IABORT_CURRENT 0x21u
+/// @brief Exception class: PC alignment fault
 #define EC_PC_ALIGNMENT 0x22u
+/// @brief Exception class: data abort from a lower exception level
 #define EC_DABORT_LOWER 0x24u
+/// @brief Exception class: data abort taken without a change of exception level
 #define EC_DABORT_CURRENT 0x25u
+/// @brief Exception class: SP alignment fault
 #define EC_SP_ALIGNMENT 0x26u
+/// @brief Exception class: BRK instruction executed in AArch64 state
 #define EC_BRK64 0x3Cu
 
+/**
+ * @brief Human-readable name of an exception class, for the panic output.
+ *
+ * @param ec Exception class, from ESR_EC()
+ * @return A static string; "other" for classes without a name here
+ */
 static const char* ec_name(uint32_t ec)
 {
 	switch (ec)
@@ -62,7 +85,13 @@ static const char* ec_name(uint32_t ec)
 	}
 }
 
-/* FAR_EL1 only holds a meaningful address for these exception classes. */
+/**
+ * @brief Tells whether FAR_EL1 holds a meaningful address for an exception class.
+ *
+ * @param ec Exception class, from ESR_EC()
+ * @retval 1 Instruction abort, data abort or PC alignment fault: FAR_EL1 is meaningful
+ * @retval 0 Any other class
+ */
 static int far_is_valid(uint32_t ec)
 {
 	return ec == EC_IABORT_LOWER || ec == EC_IABORT_CURRENT || ec == EC_PC_ALIGNMENT || ec == EC_DABORT_LOWER || ec == EC_DABORT_CURRENT;
@@ -83,8 +112,16 @@ void arch_trap_frame_dump(const struct trap_frame* tf)
 	kprintf("ELR=%lx SPSR=%lx SP_EL0=%lx\n", tf->elr, tf->spsr, tf->sp);
 }
 
-/* Print everything useful about the exception and stop. Used for every
- * exception we cannot recover from. */
+/**
+ * @brief Prints everything useful about the exception and stops. Never returns.
+ *
+ * Used for every exception we cannot recover from. Prints the exception kind, the
+ * exception class and syndrome from ESR_EL1, FAR_EL1 when it is meaningful (see
+ * far_is_valid()) and the registers in @p tf, then calls arch_halt().
+ *
+ * @param kind Exception kind for the first line, e.g. "SYNC"
+ * @param tf Frame saved by vectors.S
+ */
 __attribute__((noreturn)) static void exception_panic(const char* kind, struct trap_frame* tf)
 {
 	uint64_t esr = READ_SYSREG(esr_el1);

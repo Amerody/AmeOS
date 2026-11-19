@@ -19,7 +19,11 @@
 static uint32_t s_tick = 0;
 static void on_tick()
 {
-	s_tick++;
+	if (++s_tick >= 1000)
+	{
+		// kprintf("[TICK]\n");
+		s_tick = 0;
+	};
 }
 
 static void step(int rc, const char* fmt, ...) __attribute__((format(printf, 2, 3)));
@@ -55,7 +59,6 @@ static void init()
 	step(hal_timer_init(), "Timer initialized");
 	hal_timer_set_tick(TIMER_POLL_HZ, on_tick);
 	arch_irq_enable();
-	step(1, "Test error");
 }
 
 /**
@@ -89,10 +92,9 @@ void kmain(uint64_t dtb_ptr)
 
 	while (1)
 	{
-		if (s_tick >= 1000)
-		{
-			kprintf("[TICK]\n");
-			s_tick = 0;
-		}; // This is so kernel_main() doesn't return
+		char c = 0;
+		if (console_getc(&c))
+			kprintf("%c", c);
+		// This is so kernel_main() doesn't return
 	}
 }

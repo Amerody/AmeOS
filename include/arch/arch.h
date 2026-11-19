@@ -1,8 +1,9 @@
 /**
  * @file arch.h
  * @brief CPU-architecture contract: bring-up, idle and halt.
+ * @ingroup arch
  *
- * Implemented by src/arch/<ARCH>/. Core and portable drivers may include this
+ * Implemented by src/arch/\<ARCH\>/. Core and portable drivers may include this
  * header; they must never include anything from src/arch/ directly.
  */
 #pragma once
@@ -52,6 +53,12 @@ extern "C"
 	 * Masks interrupts and parks the CPU in a low-power loop. Used by panic() and
 	 * other unrecoverable paths. Safe to call from any context, including
 	 * exception handlers.
+	 *
+	 * @bug Not actually low-power: a pending interrupt wakes @c wfi even with IRQs
+	 *      masked (the same rule arch_cpu_idle() relies on). The virtual timer stays
+	 *      enabled, so after a panic its level interrupt stays pending and the loop
+	 *      spins at full speed (one host core busy in QEMU). Turning off the timer or
+	 *      the GIC CPU interface first would fix it.
 	 */
 	void arch_halt() __attribute__((noreturn));
 

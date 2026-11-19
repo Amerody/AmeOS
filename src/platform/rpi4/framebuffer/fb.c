@@ -3,10 +3,21 @@
 #include <common/mmio.h>
 #include <mailbox/mailbox.h>
 
+/**
+ * @file fb.c
+ * @brief hal_fb implementation for the Raspberry Pi 4: the framebuffer is requested
+ *        from the firmware through the mailbox (see hal_fb.h)
+ * @ingroup framebuffer
+ */
+
+/// @brief Absolute value of @p x
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
+/// @brief The framebuffer description returned by hal_fb_get_info()
 static framebuffer_t fb_info;
 
+// One property request with the tags SET_PHYS_WH, SET_VIRT_WH, SET_DEPTH, SET_VIRT_OFF,
+// GET_PITCH and ALLOCATE. Every failure (mailbox error, or no buffer allocated) returns -1.
 int hal_fb_init(uint32_t width, uint32_t height, uint32_t depth)
 {
 	fb_info.width = width;

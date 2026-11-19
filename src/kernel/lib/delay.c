@@ -1,6 +1,13 @@
 #include "kernel/delay.h"
 #include <hal/hal_timer.h>
 
+/**
+ * @file delay.c
+ * @brief delay_ns() implementation: spins until hal_timer_now_ns() passes the deadline
+ *        (see delay.h)
+ * @ingroup kernel
+ */
+
 void delay_ns(uint64_t ns)
 {
 	uint64_t end = hal_timer_now_ns() + ns;

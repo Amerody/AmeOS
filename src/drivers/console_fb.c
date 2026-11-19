@@ -8,19 +8,42 @@
 
 #include <lib/memory.h>
 
+/**
+ * @file console_fb.c
+ * @brief Framebuffer console sink: draws console output as text on hal_fb (see console_fb.h)
+ * @ingroup console
+ */
+
+/// @brief Meant to be non-zero once console_fb_init() has run; never set yet
 static int s_init = 0;
 
+/// @brief Cursor column, in cells
 static uint32_t s_cursor_x = 0;
+/// @brief Cursor row, in cells
 static uint32_t s_cursor_y = 0;
+/// @brief Number of columns on the screen
 static uint32_t s_max_cols = 0;
+/// @brief Number of rows on the screen
 static uint32_t s_max_rows = 0;
 
+/// @brief Text colour, set by console_set_color()
 static uint32_t s_color = COLOR_WHITE;
+/// @brief Size on screen of one font pixel, in pixels; set by console_set_scale()
 static uint32_t s_scale = 1;
 
+/// @brief Width of one character cell at the current scale
+/// @return Width in pixels
 static inline uint32_t cell_w(void) { return FONT_WIDTH * s_scale; }
+/// @brief Height of one character cell at the current scale
+/// @return Height in pixels
 static inline uint32_t cell_h(void) { return FONT_HEIGHT * s_scale; }
 
+/**
+ * @brief Scrolls the screen up by one row of cells and clears the bottom row.
+ *
+ * Moves the framebuffer contents directly, then puts the cursor on the last row.
+ * Does nothing if the framebuffer has no buffer.
+ */
 static void console_fb_scroll()
 {
 	framebuffer_t* fb = hal_fb_get_info();
@@ -39,6 +62,16 @@ static void console_fb_scroll()
 	s_cursor_y = s_max_rows - 1;
 }
 
+/**
+ * @brief Draws one character cell: a black background, then the glyph in #s_color.
+ *
+ * Each glyph row is one byte, with the leftmost pixel in bit 7. Runs of lit pixels in
+ * a row are drawn as one rectangle.
+ *
+ * @param px X position of the cell's top-left corner, in pixels
+ * @param py Y position of the cell's top-left corner, in pixels
+ * @param c Character to draw
+ */
 static void draw_glyph(uint32_t px, uint32_t py, char c)
 {
 	const uint8_t* glyph = font_get_glyph(c);
@@ -65,6 +98,7 @@ static void draw_glyph(uint32_t px, uint32_t py, char c)
 	}
 }
 
+/// @brief Moves the cursor to the start of the next row, scrolling if it was on the last one
 static void newline(void)
 {
 	s_cursor_x = 0;
@@ -72,9 +106,22 @@ static void newline(void)
 		console_fb_scroll();
 }
 
+/**
+ * @brief Console @c putc of the framebuffer sink.
+ *
+ * @c '\\n' moves to the next row; any other byte is drawn at the cursor, which then
+ * advances, wrapping to the next row at the end of a line.
+ *
+ * @bug @c '\\r' is also treated as a newline, which contradicts this description and the
+ *      file description in console_fb.h ("every other byte, including '\\r', is drawn as
+ *      a glyph"). Output written as "\r\n" moves down two rows. A carriage return
+ *      would normally only move the cursor back to column 0.
+ *
+ * @param c Byte to output
+ */
 static void console_fb_putc(char c)
 {
-	if (c == '\n')
+	if (c == '\n' || c == '\r')
 	{
 		newline();
 		return;
@@ -94,9 +141,10 @@ int console_fb_init()
 	static struct console fb_console;
 	fb_console.name = "fb";
 	fb_console.putc = console_fb_putc;
+	fb_console.getc = NULL;
 	console_register(&fb_console);
 
-	int error = hal_fb_init(1920, 1080, 32);
+	int error = hal_fb_init(800, 600, 32);
 
 	framebuffer_t* fb = hal_fb_get_info();
 	s_cursor_x = 0;

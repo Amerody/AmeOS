@@ -280,18 +280,23 @@ if(KERNEL_BUILD_DOCS)
         set(DOXYGEN_OUTPUT_DIRECTORY      "${CMAKE_SOURCE_DIR}/docs")
         set(DOXYGEN_RECURSIVE             YES)
         set(DOXYGEN_OPTIMIZE_OUTPUT_FOR_C YES)   # remove once C++ is used
-        set(DOXYGEN_EXTRACT_ALL           NO)    #only documented items appear
+        set(DOXYGEN_EXTRACT_ALL           NO)    # only documented items appear
         set(DOXYGEN_EXTRACT_STATIC        YES)
-        set(DOXYGEN_WARN_IF_UNDOCUMENTED  NO)
+        set(DOXYGEN_WARN_IF_UNDOCUMENTED  YES)
         set(DOXYGEN_WARN_IF_DOC_ERROR     YES)
         set(DOXYGEN_WARN_NO_PARAMDOC      YES)
         set(DOXYGEN_WARN_AS_ERROR         NO)    # switch to YES once the docs are clean
         set(DOXYGEN_GENERATE_LATEX        NO)
         set(DOXYGEN_INCLUDE_GRAPH         NO)   # only drawn if Graphviz is installed
+        set(DOXYGEN_INCLUDED_BY_GRAPH     NO)
+        set(DOXYGEN_SHOW_INCLUDE_FILES    NO)
         set(DOXYGEN_CALL_GRAPH            NO)
         set(DOXYGEN_GROUP_GRAPHS          NO)
         set(DOXYGEN_STRIP_FROM_PATH       "${CMAKE_SOURCE_DIR}")
         set(DOXYGEN_REPEAT_BRIEF          NO)
+
+        set(DOXYGEN_MACRO_EXPANSION YES)
+        set(DOXYGEN_PREDEFINED "__attribute__(x)=")
 
         # Sources
         set(DOXYGEN_FILE_PATTERNS *.h *.c *.hpp *.cpp *.md *.dox)

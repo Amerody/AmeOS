@@ -2,7 +2,7 @@
  * @file platform.h
  * @brief Board-level contract: bring-up, identity and the RAM map.
  *
- * Implemented by src/platform/<PLATFORM>/ . This header is also
+ * Implemented by src/platform/\<PLATFORM\>/ . This header is also
  * the home of the conventions shared by every hal_*.h header.
  *
  * ---- HAL conventions ----------------------------------------------------
@@ -10,7 +10,8 @@
  * Boot order (kmain):
  *   1. arch_init()          exception vectors installed, IRQs masked
  *   2. platform_init()      interrupt controller up, memory map valid
- *   3. hal_uart_init(0, ..) console UART usable (called by console_init())
+ *   3. hal_uart_init(1, ..) console UART usable (called by console_uart_init(),
+ *                           after console_init())
  *   4. hal_timer_init()     monotonic time and tick available
  *   5. arch_irq_enable()    CPU starts taking interrupts
  * A hal_* function used before the step that enables it is a bug.
@@ -52,6 +53,9 @@ extern "C"
 	 *
 	 * Nothing can be printed yet while this runs. If bring-up fails in a way that
 	 * cannot be recovered, the implementation calls arch_halt().
+	 *
+	 * @todo The device tree isn't parsed yet, so platform_mem_regions() has no data
+	 *       after this returns.
 	 */
 	void platform_init();
 
@@ -84,6 +88,9 @@ extern "C"
 	 * @param out  Array to fill; may be NULL when @p max is 0 (to just count).
 	 * @param max  Capacity of @p out in entries.
 	 * @return     Total number of usable regions.
+	 *
+	 * @todo Not implemented yet: always returns 0 and writes nothing, until the
+	 *       device tree is parsed.
 	 */
 	size_t platform_mem_regions(struct mem_region* out, size_t max);
 

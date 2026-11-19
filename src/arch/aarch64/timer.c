@@ -13,6 +13,8 @@
  * what makes it drift-free.
  *
  * The contract and its documentation live in include/hal/hal_timer.h.
+ *
+ * @ingroup timer
  */
 
 #include "arch/irq.h"
@@ -23,29 +25,36 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/// @brief Nanoseconds in one second
 #define NS_PER_SEC 1000000000ULL
-#define TIMER_IRQ_VIRT 27u /* GIC PPI of the EL1 virtual timer */
+#define TIMER_IRQ_VIRT 27u ///< GIC PPI of the EL1 virtual timer
 
 /* CNTV_CTL_EL0 bits */
+/// @brief CNTV_CTL_EL0.ENABLE: timer enabled
 #define CTL_ENABLE (1u << 0)
-#define CTL_IMASK (1u << 1)   /* unused: we always run unmasked */
-#define CTL_ISTATUS (1u << 2) /* condition met (read-only) */
+#define CTL_IMASK (1u << 1)   ///< CNTV_CTL_EL0.IMASK. Unused: we always run unmasked
+#define CTL_ISTATUS (1u << 2) ///< CNTV_CTL_EL0.ISTATUS: condition met (read-only)
 
 /* ---- state ------------------------------------------------------------- */
 
+/// @brief true once hal_timer_init() has succeeded
 static bool s_ready;
-static uint64_t s_freq;  /* counter frequency in Hz */
-static uint64_t s_start; /* counter value at hal_timer_init() */
+static uint64_t s_freq;  ///< Counter frequency in Hz
+static uint64_t s_start; ///< Counter value at hal_timer_init()
 
-static void (*s_tick_cb)(void); /* NULL while the tick is stopped */
-static uint64_t s_hz;           /* requested ticks per second */
-static uint64_t s_interval;     /* whole counter ticks per period */
-static uint64_t s_rem;          /* s_freq % s_hz, spread over periods */
-static uint64_t s_acc;          /* fractional accumulator for s_rem */
-static uint64_t s_deadline;     /* next absolute CNTVCT value to fire at */
+static void (*s_tick_cb)(void); ///< Tick callback; NULL while the tick is stopped
+static uint64_t s_hz;           ///< Requested ticks per second
+static uint64_t s_interval;     ///< Whole counter ticks per period
+static uint64_t s_rem;          ///< s_freq % s_hz, spread over periods
+static uint64_t s_acc;          ///< Fractional accumulator for s_rem
+static uint64_t s_deadline;     ///< Next absolute CNTVCT value to fire at
 
 /* ---- system register access ------------------------------------------- */
 
+/**
+ * @brief Reads CNTFRQ_EL0, the counter frequency.
+ * @return Counter frequency in Hz, as set by the firmware or boot code
+ */
 static inline uint64_t read_cntfrq()
 {
 	uint64_t v;
@@ -53,6 +62,13 @@ static inline uint64_t read_cntfrq()
 	return v;
 }
 
+/**
+ * @brief Reads CNTVCT_EL0, the virtual counter.
+ *
+ * An @c isb comes first so the read can't happen earlier than where it is written.
+ *
+ * @return Current counter value, in counter ticks
+ */
 static inline uint64_t read_cntvct()
 {
 	uint64_t v;
@@ -61,6 +77,10 @@ static inline uint64_t read_cntvct()
 	return v;
 }
 
+/**
+ * @brief Reads CNTV_CTL_EL0, the virtual timer control register.
+ * @return Register value; see CTL_ENABLE, CTL_IMASK and CTL_ISTATUS
+ */
 static inline uint32_t read_cntv_ctl()
 {
 	uint64_t v;
@@ -68,11 +88,19 @@ static inline uint32_t read_cntv_ctl()
 	return (uint32_t) v;
 }
 
+/**
+ * @brief Writes CNTV_CTL_EL0, followed by an @c isb.
+ * @param v New value; see CTL_ENABLE and CTL_IMASK
+ */
 static inline void write_cntv_ctl(uint32_t v)
 {
 	__asm__ volatile("msr cntv_ctl_el0, %0\n\tisb" ::"r"((uint64_t) v) : "memory");
 }
 
+/**
+ * @brief Writes CNTV_CVAL_EL0, the compare value, followed by an @c isb.
+ * @param v Absolute counter value at which the timer condition is met
+ */
 static inline void write_cntv_cval(uint64_t v)
 {
 	__asm__ volatile("msr cntv_cval_el0, %0\n\tisb" ::"r"(v) : "memory");
@@ -80,10 +108,15 @@ static inline void write_cntv_cval(uint64_t v)
 
 /* ---- helpers ----------------------------------------------------------- */
 
-/*
- * ticks * 1e9 / freq without overflow and without 128-bit division (which
+/**
+ * @brief Converts counter ticks to nanoseconds.
+ *
+ * Computes ticks * 1e9 / freq without overflow and without 128-bit division (which
  * would pull in libgcc). Split into whole seconds plus a remainder smaller
  * than one second: rem * 1e9 stays below 2^64 for any freq up to ~18 GHz.
+ *
+ * @param ticks Number of counter ticks
+ * @return The same duration in nanoseconds
  */
 static uint64_t ticks_to_ns(uint64_t ticks)
 {
@@ -92,11 +125,15 @@ static uint64_t ticks_to_ns(uint64_t ticks)
 	return sec * NS_PER_SEC + rem * NS_PER_SEC / s_freq;
 }
 
-/*
- * Move the deadline forward by exactly one period. When freq is not a
- * multiple of hz, the leftover (s_rem counter ticks per period) is carried in
- * s_acc and paid out one counter tick at a time, so the long-term rate is
+/**
+ * @brief Moves #s_deadline forward by exactly one period.
+ *
+ * When freq is not a multiple of hz, the leftover (s_rem counter ticks per period) is
+ * carried in s_acc and paid out one counter tick at a time, so the long-term rate is
  * exact instead of being off by the truncation error.
+ *
+ * Callers must keep the tick IRQ from running meanwhile: the IRQ handler itself, or
+ * code that has masked IRQs.
  */
 static void advance_deadline()
 {
@@ -109,7 +146,18 @@ static void advance_deadline()
 	}
 }
 
-/* Runs in interrupt context, CPU IRQs masked (called by hal_irq_dispatch). */
+/**
+ * @brief Interrupt handler of the virtual timer (registered for TIMER_IRQ_VIRT).
+ *
+ * Runs in interrupt context, CPU IRQs masked (called by hal_irq_dispatch).
+ *
+ * Ignores the interrupt if the timer condition isn't met. If the tick was stopped
+ * while the IRQ was in flight, turns the timer off. Otherwise moves the deadline on by
+ * whole periods until it is in the future (skipping missed ticks instead of firing a
+ * burst), programs it, then calls the tick callback once.
+ *
+ * @param arg Unused (registered as NULL)
+ */
 static void tick_irq_handler(void* arg)
 {
 	(void) arg;
@@ -204,94 +252,3 @@ int hal_timer_set_tick(uint32_t hz, void (*callback)(void))
 	arch_irq_restore(f);
 	return 0;
 }
-
-// #include "arch/aarch64/timer.h"
-
-// #include "arch/aarch64/irq.h"
-
-// /**
-//  * @addtogroup timer
-//  * @{
-//  */
-
-// /**
-//  * @file timer.h
-//  *
-//  * @brief ARMv8-A Timer driver implementation
-//  */
-
-// #include <stdint.h>
-
-// static uint64_t timer_freq = 0;
-// static uint64_t tick_interval = 0;
-
-// static inline uint64_t timer_read_cntpct()
-// {
-// 	uint64_t count;
-// 	__asm__ volatile("mrs %0, cntpct_el0" : "=r"(count));
-// 	return count;
-// }
-
-// static inline uint64_t timer_read_cntvct()
-// {
-// 	uint64_t v;
-// 	__asm__ volatile("mrs %0, cntvct_el0" : "=r"(v));
-// 	return v;
-// }
-
-// static inline uint64_t timer_read_freq()
-// {
-// 	uint64_t freq;
-// 	__asm__ volatile("mrs %0, cntfrq_el0" : "=r"(freq));
-// 	return freq;
-// }
-
-// void timer_init()
-// {
-// 	timer_freq = timer_read_freq(); // Typically 54MHz on the rpi4
-// }
-
-// uint64_t timer_get_ticks()
-// {
-// 	return timer_read_cntpct();
-// }
-
-// void timer_sleep(uint32_t ms)
-// {
-// 	if (timer_freq == 0)
-// 		timer_init();
-
-// 	uint64_t end = timer_get_ticks() + (timer_freq / 1000) * ms;
-
-// 	while (timer_get_ticks() < end)
-// 	{
-// 		// Busy-wait
-// 	}
-// }
-
-// void timer_interrupt_init(uint32_t hz)
-// {
-// 	if (hz == 0)
-// 		return;
-
-// 	// Read timer frequency (typically 54 MHz)
-// 	if (timer_freq == 0)
-// 		timer_init();
-
-// 	tick_interval = timer_freq / hz;
-
-// 	// Set trigger for 1 second from now
-// 	uint64_t compare = timer_read_cntvct() + tick_interval;
-// 	__asm__ volatile("msr cntv_cval_el0, %0" ::"r"(compare));
-// }
-
-// void timer_interrupt_enable()
-// {
-// 	// Enable timer (bit 0 = enable, bit 1 = mask)
-// 	uint64_t ctrl = (1 << 0); // Enable, don't mask
-// 	__asm__ volatile("msr cntv_ctl_el0, %0" ::"r"(ctrl));
-
-// 	enable_irq();
-// }
-
-/** @} */

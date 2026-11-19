@@ -1,60 +1,38 @@
 #include "arch/arch.h"
 #include "arch/irq.h"
 
+/**
+ * @file arch.c
+ * @brief aarch64 implementation of the arch.h contract (see arch.h)
+ * @ingroup arch
+ */
+
+/// @brief Architecture name returned by arch_name(); KERNEL_ARCH_NAME is set by CMake
 static const char* s_arch_name = KERNEL_ARCH_NAME;
 
+/**
+ * @brief Installs the exception vector table: writes the address of @c vector_table
+ *        to VBAR_EL1.
+ *
+ * Implemented in vectors.S. Must run at EL1. Clobbers x0 only.
+ */
 extern void install_vector_table();
 
-/**
- * @brief One-time CPU setup on the boot CPU.
- *
- * Called once from kmain(), before platform_init().
- *
- * @pre boot code has already left the firmware's exception level for
- * the kernel's (EL1 on aarch64), set up the boot stack and cleared .bss.
- *
- * @post the exception vector table is installed, so any fault taken
- * from now on reaches the arch exception handlers instead of a wild jump.
- *
- * Interrupts stay masked. kmain() unmasks them with arch_irq_enable() only
- * after the interrupt controller and timer have been initialised.
- */
 void arch_init()
 {
 	install_vector_table();
 }
 
-/**
- * @brief Short architecture name for the boot banner, e.g. "aarch64".
- * @return A static string; never NULL.
- */
 const char* arch_name()
 {
 	return s_arch_name;
 }
 
-/**
- * @brief Wait until something wakes the CPU (wfi on aarch64).
- *
- * May return spuriously, so callers must loop and re-check their condition.
- * Used by the idle loop.
- *
- * On aarch64, a pending interrupt wakes the CPU even while IRQs are masked, so
- * the sequence "mask IRQs; check for work; arch_cpu_idle(); unmask IRQs" has
- * no lost-wakeup race.
- */
 void arch_cpu_idle()
 {
 	__asm__ volatile("wfi");
 }
 
-/**
- * @brief Stop this CPU permanently. Never returns.
- *
- * Masks interrupts and parks the CPU in a low-power loop. Used by panic() and
- * other unrecoverable paths. Safe to call from any context, including
- * exception handlers.
- */
 void arch_halt()
 {
 	arch_irq_disable();

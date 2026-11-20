@@ -1,10 +1,21 @@
 // built-in commands
-#include "kernel/commands.h"
+#include "commands.h"
 #include <stddef.h>
 
 #include "kernel/console.h"
 #include "kernel/kprintf.h"
 #include <lib/string.h>
+
+/**
+ * @file commands.c
+ * @brief Built-in shell commands: the command table, shell_dispatch_command() and the command
+ *        implementations (see commands.h)
+ * @ingroup shell
+ *
+ * Every command has the same signature: it gets the tokenized line (@p argv[0] is the
+ * command name) and returns 0 on success or -1 on a usage error, after printing the
+ * usage. shell_dispatch_command() discards the result.
+ */
 
 // help <command>
 static int cmd_help(size_t argc, char* argv[]);
@@ -27,13 +38,15 @@ static int cmd_peek(size_t argc, char* argv[]);
 // reboot
 static int cmd_reboot(size_t argc, char* argv[]);
 
+/// @brief One built-in command: its name, its help text and the function that runs it
 typedef struct
 {
-	const char* name;
-	const char* help; // help message without '\n'
-	int (*fn)(size_t argc, char* argv[]);
+	const char* name;                     ///< Name typed to run the command (argv[0])
+	const char* help;                     ///< Help message without '\n', printed by cmd_help()
+	int (*fn)(size_t argc, char* argv[]); ///< Runs the command; 0 on success, -1 on usage error
 } command_t;
 
+/// @brief Built-in commands, searched in order by shell_dispatch_command() and cmd_help()
 static const command_t s_commands[] = {
 	{ "help",
 	  "Prints the help for a command. Use: help <command>",
@@ -58,9 +71,10 @@ static const command_t s_commands[] = {
 	  cmd_reboot },
 };
 
+/// @brief Number of entries in #s_commands
 #define COMMANDS_SIZE (sizeof(s_commands) / sizeof(s_commands[0]))
 
-void dispatch_command(size_t argc, char* argv[])
+void shell_dispatch_command(size_t argc, char* argv[])
 {
 	for (size_t i = 0; i < COMMANDS_SIZE; i++)
 	{
@@ -75,6 +89,19 @@ void dispatch_command(size_t argc, char* argv[])
 
 // command function implementations
 
+/**
+ * @brief @c help: lists the command names, or prints the help text of one command.
+ *
+ * With no argument, prints every command name, one per line. With one argument, prints
+ * the help text of the command with that name, or @c "help: <name>: command not found"
+ * if there is none.
+ *
+ * @param argc Number of tokens; 1 or 2
+ * @param argv Tokens; @p argv[1], if present, is the command to describe
+ *
+ * @retval 0 The names or the help text were printed
+ * @retval -1 More than one argument (the usage was printed), or no command matched
+ */
 static int cmd_help(size_t argc, char* argv[])
 {
 	if (argc > 2)
@@ -98,13 +125,25 @@ static int cmd_help(size_t argc, char* argv[])
 			if (strcmp(argv[1], s_commands[i].name) == 0)
 			{
 				kprintf("%s\n", s_commands[i].help);
+				return 0;
 			}
 		}
 	}
 
-	return 0;
+	kprintf("help: %s: command not found\n", argv[1]);
+	return -1;
 }
 
+/**
+ * @brief @c echo: prints its arguments separated by single spaces, then a newline.
+ *
+ * Quoted arguments are printed without their quotes, since the tokenizer removed them.
+ *
+ * @param argc Number of tokens
+ * @param argv Tokens; @p argv[1] to @p argv[argc - 1] are printed
+ *
+ * @retval 0 Always
+ */
 static int cmd_echo(size_t argc, char* argv[])
 {
 	for (size_t i = 1; i < argc; i++)
@@ -117,6 +156,18 @@ static int cmd_echo(size_t argc, char* argv[])
 	return 0;
 }
 
+/**
+ * @brief @c version: prints the kernel version.
+ *
+ * The version comes from the KERNEL_VERSION_MAJOR, KERNEL_VERSION_MINOR and
+ * KERNEL_VERSION_PATCH compile definitions set in the top-level CMakeLists.txt.
+ *
+ * @param argc Number of tokens; must be 1
+ * @param argv Tokens; unused
+ *
+ * @retval 0 The version was printed
+ * @retval -1 Arguments were given; the usage was printed
+ */
 static int cmd_version(size_t argc, char* argv[])
 {
 	(void) argv;
@@ -130,6 +181,15 @@ static int cmd_version(size_t argc, char* argv[])
 	return 0;
 }
 
+/**
+ * @brief @c clear: clears every console sink with console_clear().
+ *
+ * @param argc Number of tokens; must be 1
+ * @param argv Tokens; unused
+ *
+ * @retval 0 The console was cleared
+ * @retval -1 Arguments were given; the usage was printed
+ */
 static int cmd_clear(size_t argc, char* argv[])
 {
 	(void) argv;
@@ -143,6 +203,16 @@ static int cmd_clear(size_t argc, char* argv[])
 	return 0;
 }
 
+/**
+ * @brief @c uptime: not implemented yet; prints @c "TODO".
+ *
+ * @param argc Number of tokens; unused
+ * @param argv Tokens; unused
+ *
+ * @retval 0 Always
+ *
+ * @todo Print the time since boot.
+ */
 static int cmd_uptime(size_t argc, char* argv[])
 {
 	(void) argc;
@@ -151,6 +221,16 @@ static int cmd_uptime(size_t argc, char* argv[])
 	return 0;
 }
 
+/**
+ * @brief @c peek: not implemented yet; prints @c "TODO".
+ *
+ * @param argc Number of tokens; unused
+ * @param argv Tokens; unused
+ *
+ * @retval 0 Always
+ *
+ * @todo Print the value at the address given in @p argv[1].
+ */
 static int cmd_peek(size_t argc, char* argv[])
 {
 	(void) argc;
@@ -159,6 +239,16 @@ static int cmd_peek(size_t argc, char* argv[])
 	return 0;
 }
 
+/**
+ * @brief @c reboot: not implemented yet; prints @c "TODO".
+ *
+ * @param argc Number of tokens; unused
+ * @param argv Tokens; unused
+ *
+ * @retval 0 Always
+ *
+ * @todo Reboot the system.
+ */
 static int cmd_reboot(size_t argc, char* argv[])
 {
 	(void) argc;

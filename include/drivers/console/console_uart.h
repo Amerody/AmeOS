@@ -31,7 +31,9 @@ extern "C"
 	 * hal_uart_init(@p port, 115200) (8N1). The sink sends bytes through
 	 * hal_uart_putc() and reads received bytes through hal_uart_getc().
 	 *
-	 * Bytes are sent unchanged: there is no newline translation.
+	 * @c '\\n' is sent as @c "\r\n"; every other byte is sent unchanged. The sink's
+	 * @c clear (see console_clear()) sends the ANSI sequence @c "ESC[2J ESC[H"
+	 * (erase the screen, move the cursor home).
 	 *
 	 * Only one UART console is supported: the port is kept in a private static, so
 	 * a second call returns -EBUSY.
@@ -46,9 +48,6 @@ extern "C"
 	 * @return Otherwise the negative error from hal_uart_init() (-ENODEV, -EINVAL, or
 	 *         another error if the receive interrupt can't be set up)
 	 *
-	 * @bug @c '\\n' is not sent as @c "\r\n", although hal_uart_putc() leaves newline
-	 *      translation to the console layer. A serial terminal that doesn't add the
-	 *      carriage return itself moves down a line without going back to column 0.
 	 * @bug The result of console_register() is ignored, so -ENOSPC is never returned:
 	 *      when the registry is full, the UART is set up but gets no console output.
 	 * @bug The sink is registered before hal_uart_init(). If hal_uart_init() fails, the

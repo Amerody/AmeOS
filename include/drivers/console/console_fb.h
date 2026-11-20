@@ -11,9 +11,11 @@
  * Text is drawn with the gfx font in a grid of cells, each FONT_WIDTH x FONT_HEIGHT
  * pixels times the scale (see console_set_scale()). Each character is drawn on a black
  * cell background in the current colour (see console_set_color()). When the cursor
- * moves past the last row, the screen scrolls up by one row. Only @c '\\n' is
- * interpreted; every other byte, including @c '\\r', is drawn as a glyph. The sink is
- * output-only: it has no @c getc.
+ * moves past the last row, the screen scrolls up by one row. @c '\\n' (next row),
+ * @c '\\r' (start of the row) and @c '\\b' (one cell back) are interpreted; every other
+ * byte is drawn as a glyph. The cursor cell is shown by inverting its pixels. The sink
+ * is output-only: it has no @c getc. Its @c clear (see console_clear()) fills the
+ * screen with black and moves the cursor to the top-left cell.
  *
  * The cursor, colour and scale are kept in file statics, with no locking.
  *
@@ -38,25 +40,20 @@ extern "C"
 	 *
 	 * Registers an output-only sink named "fb" with console_register(), then calls
 	 * hal_fb_init(800, 600, 32) and moves the cursor to the top-left cell. The
-	 * resolution was chosen arbitrarily, while the color format is RGBA8 (32 btis).
+	 * resolution was chosen arbitrarily, while the color format is RGBA8 (32 bits).
 	 *
 	 * Call after console_init().
 	 *
 	 * @retval 0 The framebuffer is set up and registered
+	 * @retval -EBUSY console_fb_init() was already called, even if that earlier call
+	 *                failed
 	 * @return Otherwise the negative error from hal_fb_init()
 	 *
-	 * @bug -EBUSY is never returned: the "already initialised" flag is never set, so
-	 *      a second call registers a second "fb" sink.
 	 * @bug The result of console_register() is ignored, so -ENOSPC is never returned:
 	 *      when the registry is full, the framebuffer is set up but gets no console
 	 *      output.
 	 * @bug The sink is registered before hal_fb_init(). If hal_fb_init() fails, the
 	 *      sink stays registered on a framebuffer that isn't set up.
-	 * @bug The column count is computed as width / FONT_HEIGHT instead of width / cell
-	 *      width (FONT_WIDTH * scale), and the row count ignores the scale too. With the
-	 *      8x14 font that gives 57 columns instead of 100, so lines wrap early. kmain()
-	 *      hides it today by calling console_set_scale(1) right after, which recomputes
-	 *      both.
 	 */
 	int console_fb_init();
 

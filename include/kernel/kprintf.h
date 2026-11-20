@@ -24,8 +24,9 @@
  * Other modifiers (@c h, @c hh, @c j, @c t) are not supported.
  *
  * Not supported: flags, field width and precision (e.g. @c %08x), @c %%X, @c %%o
- * and floating point. An unknown conversion is printed as is, @c % included; a
- * lone @c % at the end of the format string is dropped.
+ * and floating point. An unknown conversion is printed as is, @c % included, but
+ * without its length modifiers (@c %%lq prints @c %%q); a lone @c % at the end of
+ * the format string is dropped, also when length modifiers follow it.
  *
  * Context: same as console_putc(), so safe from interrupt and exception handlers
  * and the panic path. There is no locking, so output from different contexts can

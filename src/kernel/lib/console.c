@@ -1,8 +1,6 @@
 #include "kernel/console.h"
 #include "kernel/errno.h"
 
-#include <drivers/console/console_uart.h>
-
 #include <stddef.h>
 
 /**

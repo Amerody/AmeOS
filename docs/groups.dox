@@ -76,6 +76,12 @@ KERNEL
  * @brief Kernel Print Utilities
  */
 
+/**
+ * @defgroup shell Kernel Shell
+ * @ingroup kernel
+ * @brief Line-editing shell on the console and its built-in commands.
+ */
+
 
 LIB
 

@@ -14,7 +14,7 @@
  * @ingroup console
  */
 
-/// @brief Meant to be non-zero once console_fb_init() has run
+/// @brief Non-zero once console_fb_init() has run, even if hal_fb_init() failed
 static int s_init = 0;
 
 /// @brief Cursor column, in cells
@@ -31,6 +31,7 @@ static uint32_t s_color = COLOR_WHITE;
 /// @brief Size on screen of one font pixel, in pixels; set by console_set_scale()
 static uint32_t s_scale = 1;
 
+/// @brief True while the cell at the cursor is drawn inverted (see cursor_show())
 static bool s_cursor_visible = false;
 
 /// @brief Width of one character cell at the current scale
@@ -108,6 +109,12 @@ static void newline(void)
 		console_fb_scroll();
 }
 
+/**
+ * @brief Removes the cursor by inverting the cursor cell back to its normal pixels.
+ *
+ * Does nothing if the cursor isn't shown. Must be called before the cursor cell is
+ * drawn over or the cursor moves, so the cell isn't left inverted.
+ */
 static void cursor_hide()
 {
 	if (!s_cursor_visible)
@@ -119,6 +126,11 @@ static void cursor_hide()
 	s_cursor_visible = false;
 }
 
+/**
+ * @brief Shows the cursor by inverting the pixels of the cell at the cursor position.
+ *
+ * Does nothing if the cursor is already shown, so the cell is never inverted twice.
+ */
 static void cursor_show()
 {
 	if (s_cursor_visible)
@@ -140,7 +152,14 @@ static void cursor_show()
  *
  * @c '\\b' moves the cursor back one cell.
  *
+ * The cursor is hidden before the byte is handled and shown again afterwards.
+ *
  * @param c Byte to output
+ *
+ * @bug @c '\\b' stops at column 0 and doesn't move back to the end of the previous row.
+ *      When a shell line has wrapped, backspacing past the start of a row leaves the
+ *      characters on the previous row on screen, although the shell removed them from
+ *      its line buffer.
  */
 static void console_fb_putc(char c)
 {
@@ -172,6 +191,12 @@ static void console_fb_putc(char c)
 	cursor_show();
 }
 
+/**
+ * @brief Console @c clear of the framebuffer sink: fills the screen with black and moves
+ *        the cursor to the top-left cell.
+ *
+ * Does nothing if the framebuffer has no buffer.
+ */
 static void console_fb_clear()
 {
 	framebuffer_t* fb = hal_fb_get_info();

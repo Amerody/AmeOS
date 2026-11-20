@@ -14,7 +14,9 @@
 /// @brief Baud rate the console UART is set up with
 #define UART_BAUD_RATE 115200
 
+/// @brief ANSI sequence @c "ESC[2J ESC[H": erase the whole screen, then move the cursor home
 constexpr uint8_t CLEAR_SEQ[] = { 0x1Bu, 0x5Bu, 0x32u, 0x4Au, 0x1Bu, 0x5Bu, 0x48u };
+/// @brief Length of #CLEAR_SEQ, in bytes
 constexpr size_t CLEAR_SEQ_SIZE = sizeof(CLEAR_SEQ);
 
 /// @brief Port of the UART console; 0xFF until console_uart_init() is called
@@ -22,6 +24,9 @@ static unsigned s_port = 0xFF;
 
 /**
  * @brief Console @c putc of the UART sink: sends one byte with hal_uart_putc()
+ *
+ * @c '\\n' is sent as @c "\r\n", because hal_uart_putc() leaves newline translation to
+ * the console layer.
  *
  * No check that @ref s_port is valid: the console only calls this after
  * console_uart_init() set it.
@@ -52,6 +57,13 @@ static bool console_uart_getc(char* c)
 	return hal_uart_getc(s_port, c);
 }
 
+/**
+ * @brief Console @c clear of the UART sink: sends #CLEAR_SEQ, so an ANSI terminal
+ *        erases its screen and moves its cursor home.
+ *
+ * No check that @ref s_port is valid: the console only calls this after
+ * console_uart_init() set it.
+ */
 static void console_uart_clear()
 {
 	for (size_t i = 0; i < CLEAR_SEQ_SIZE; i++)

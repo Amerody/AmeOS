@@ -6,7 +6,8 @@
  *
  * The registry (src/kernel/lib/console.c) knows nothing about devices. It keeps
  * a small list of sinks and sends every byte to all of them. A sink may also
- * provide input (a @c getc), which console_getc() reads. Concrete sinks
+ * provide input (a @c getc), which console_getc() reads, and a way to clear
+ * its screen (a @c clear), which console_clear() calls. Concrete sinks
  * (UART, framebuffer, ...) live in src/drivers/; kmain() initialises
  * the registry and then asks each driver it wants to register its sink:
  *
@@ -60,6 +61,10 @@ extern "C"
 		 */
 		bool (*getc)(char* c);
 
+		/**
+		 * Clear the device's screen and move its cursor to the top-left corner.
+		 * NULL if the device has nothing to clear. Same rules as @c putc.
+		 */
 		void (*clear)(void);
 	};
 
@@ -79,7 +84,8 @@ extern "C"
 	 * may live on the caller's stack. Output written before registration is not
 	 * replayed.
 	 *
-	 * @param con  Sink description; @c putc must not be NULL, @c getc may be.
+	 * @param con  Sink description; @c putc must not be NULL, @c getc and @c clear
+	 *             may be.
 	 *
 	 * @retval 0 The sink was registered
 	 * @retval -EINVAL @p con or its @c putc is NULL
@@ -132,7 +138,16 @@ extern "C"
 	 */
 	bool console_getc(char* c);
 
-	// clears the console
+	/**
+	 * @brief Clear every registered sink that has a @c clear.
+	 *
+	 * Sinks are cleared in registration order; those without a @c clear are
+	 * skipped. With no sinks registered this does nothing. Used by the shell's
+	 * @c clear command.
+	 *
+	 * Takes no locks, like console_putc(), but a sink's @c clear can take long
+	 * (the framebuffer sink fills the whole screen).
+	 */
 	void console_clear();
 
 #ifdef __cplusplus

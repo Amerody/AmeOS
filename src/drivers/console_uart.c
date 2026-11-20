@@ -3,6 +3,7 @@
 #include <hal/hal_uart.h>
 #include <kernel/console.h>
 #include <kernel/errno.h>
+#include <stddef.h>
 
 /**
  * @file console_uart.c
@@ -12,6 +13,9 @@
 
 /// @brief Baud rate the console UART is set up with
 #define UART_BAUD_RATE 115200
+
+constexpr uint8_t CLEAR_SEQ[] = { 0x1Bu, 0x5Bu, 0x32u, 0x4Au, 0x1Bu, 0x5Bu, 0x48u };
+constexpr size_t CLEAR_SEQ_SIZE = sizeof(CLEAR_SEQ);
 
 /// @brief Port of the UART console; 0xFF until console_uart_init() is called
 static unsigned s_port = 0xFF;
@@ -48,6 +52,14 @@ static bool console_uart_getc(char* c)
 	return hal_uart_getc(s_port, c);
 }
 
+static void console_uart_clear()
+{
+	for (size_t i = 0; i < CLEAR_SEQ_SIZE; i++)
+	{
+		hal_uart_putc(s_port, CLEAR_SEQ[i]);
+	}
+}
+
 int console_uart_init(unsigned port)
 {
 	if (s_port != 0xFF)
@@ -59,6 +71,7 @@ int console_uart_init(unsigned port)
 	uart_console.name = "uart";
 	uart_console.putc = console_uart_putc;
 	uart_console.getc = console_uart_getc;
+	uart_console.clear = console_uart_clear;
 	console_register(&uart_console);
 
 	return hal_uart_init(s_port, UART_BAUD_RATE);

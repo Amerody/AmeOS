@@ -7,5 +7,6 @@ add_library(kernel_core OBJECT
     "lib/delay.c"
 
     "shell/shell.c"
+    "shell/commands.c"
 )
 target_link_libraries(kernel_core PUBLIC kernel_flags)

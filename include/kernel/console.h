@@ -59,6 +59,8 @@ extern "C"
 		 * Returns true if a byte was stored in @p c.
 		 */
 		bool (*getc)(char* c);
+
+		void (*clear)(void);
 	};
 
 	/**
@@ -129,6 +131,9 @@ extern "C"
 	 * @retval false No sink had a byte
 	 */
 	bool console_getc(char* c);
+
+	// clears the console
+	void console_clear();
 
 #ifdef __cplusplus
 }

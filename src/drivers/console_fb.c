@@ -172,6 +172,19 @@ static void console_fb_putc(char c)
 	cursor_show();
 }
 
+static void console_fb_clear()
+{
+	framebuffer_t* fb = hal_fb_get_info();
+	if (!fb || !fb->buffer)
+		return;
+
+	cursor_hide();
+	hal_fb_fill_rect(0, 0, fb->width, fb->height, COLOR_BLACK);
+	s_cursor_x = 0;
+	s_cursor_y = 0;
+	cursor_show();
+}
+
 int console_fb_init()
 {
 	if (s_init != 0)
@@ -181,6 +194,7 @@ int console_fb_init()
 	fb_console.name = "fb";
 	fb_console.putc = console_fb_putc;
 	fb_console.getc = NULL;
+	fb_console.clear = console_fb_clear;
 	console_register(&fb_console);
 
 	int error = hal_fb_init(800, 600, 32);
@@ -208,6 +222,6 @@ void console_set_scale(uint32_t scale)
 	s_max_cols = fb->width / cell_w();
 	s_max_rows = fb->height / cell_h();
 
-	hal_fb_fill_rect(0, 0, fb->width, fb->height, COLOR_BLACK); // old text is at the old scale
+	console_fb_clear(); // old text is at the old scale
 	s_cursor_x = s_cursor_y = 0;
 }

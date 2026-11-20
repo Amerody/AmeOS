@@ -31,9 +31,7 @@ int console_register(const struct console* con)
 	if (!con || !con->putc)
 		return -EINVAL;
 
-	s_consoles[s_sinks_registered].name = con->name;
-	s_consoles[s_sinks_registered].putc = con->putc;
-	s_consoles[s_sinks_registered].getc = con->getc;
+	s_consoles[s_sinks_registered] = *con;
 
 	s_sinks_registered++;
 
@@ -65,4 +63,13 @@ bool console_getc(char* c)
 	}
 
 	return false;
+}
+
+void console_clear()
+{
+	for (size_t i = 0; i < s_sinks_registered; i++)
+	{
+		if (s_consoles[i].clear != NULL)
+			s_consoles[i].clear();
+	}
 }

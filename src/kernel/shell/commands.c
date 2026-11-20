@@ -290,7 +290,7 @@ static int cmd_peek(size_t argc, char* argv[])
  *
  * @retval 0 Always
  *
- * @todo Reboot the system.
+ * @todo Reboot the system. https://github.com/torvalds/linux/blob/master/drivers/watchdog/bcm2835_wdt.c
  */
 static int cmd_reboot(size_t argc, char* argv[])
 {

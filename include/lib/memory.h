@@ -14,6 +14,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/// @brief Type for a physical address
+typedef volatile uint32_t* paddr_t;
+/// @brief Type for a virtual address
+typedef volatile uint32_t* vaddr_t;
+
 /**
  * @brief Copies @p n bytes from @p src to @p dest.
  *

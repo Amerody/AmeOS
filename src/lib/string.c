@@ -67,3 +67,101 @@ char* strncpy(char* dest, const char* src, size_t n)
 
 	return oDest;
 }
+
+static inline bool is_space(char c)
+{
+	return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\v' || c == '\f';
+}
+
+static inline bool is_digit(char c)
+{
+	return c >= '0' && c <= '9';
+}
+
+/* Returns 0..15 for a valid hex digit, -1 otherwise. */
+static inline int is_hex_val(char c)
+{
+	if (c >= '0' && c <= '9')
+		return c - '0';
+	if (c >= 'a' && c <= 'f')
+		return c - 'a' + 10;
+	if (c >= 'A' && c <= 'F')
+		return c - 'A' + 10;
+	return -1;
+}
+
+int strtoi(const char* s, int32_t* out)
+{
+	if (!s || !out)
+		return -1;
+
+	while (is_space(*s))
+		s++;
+
+	bool neg = false;
+	if (*s == '+' || *s == '-')
+	{
+		neg = (*s == '-');
+		s++;
+	}
+
+	if (!is_digit(*s))
+		return -1; // no digits at all
+
+	// |INT32_MIN| is one larger than INT32_MAX
+	const uint32_t limit = neg ? (uint32_t) INT32_MAX + 1u : (uint32_t) INT32_MAX;
+	uint32_t val = 0;
+
+	while (is_digit(*s))
+	{
+		uint32_t d = (uint32_t) (*s - '0');
+		if (val > (limit - d) / 10) /* val * 10 + d would exceed limit */
+			return -1;
+		val = val * 10 + d;
+		s++;
+	}
+
+	while (is_space(*s))
+		s++;
+	if (*s != '\0')
+		return -1; /* trailing garbage */
+
+	if (neg)
+		*out = (val == (uint32_t) INT32_MAX + 1u) ? INT32_MIN : -(int32_t) val;
+	else
+		*out = (int32_t) val;
+	return 0;
+}
+
+int strtox(const char* s, uint32_t* out)
+{
+	if (!s || !out)
+		return -1;
+
+	while (is_space(*s))
+		s++;
+
+	if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X'))
+		s += 2;
+
+	if (is_hex_val(*s) < 0)
+		return -1; // no digits at all
+
+	uint32_t val = 0;
+	int d;
+	while ((d = is_hex_val(*s)) >= 0)
+	{
+		if (val >> 28) // top nibble set: shifting would overflow
+			return -1;
+		val = (val << 4) | (uint32_t) d;
+		s++;
+	}
+
+	while (is_space(*s))
+		s++;
+	if (*s != '\0')
+		return -1; // trailing garbage
+
+	*out = val;
+	return 0;
+}

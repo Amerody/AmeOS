@@ -77,3 +77,7 @@ char* strcpy(char* dest, const char* src);
  * @return @p dest
  */
 char* strncpy(char* dest, const char* src, size_t n);
+
+int strtoi(const char* s, int32_t* out);
+
+int strtox(const char* s, uint32_t* out);

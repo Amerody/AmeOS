@@ -5,6 +5,7 @@
 #include "hal/hal_timer.h"
 #include "kernel/console.h"
 #include "kernel/kprintf.h"
+#include <lib/memory.h>
 #include <lib/string.h>
 
 /**
@@ -247,9 +248,28 @@ static int cmd_uptime(size_t argc, char* argv[])
  */
 static int cmd_peek(size_t argc, char* argv[])
 {
-	(void) argc;
-	(void) argv;
-	kprintf("TODO\n");
+	if (argc != 2)
+	{
+		kprintf("Use: peek <address>\n");
+		return -1;
+	}
+
+	uint32_t value;
+	if (strtox(argv[1], &value) != 0)
+	{
+		kprintf("Invalid address\n");
+
+		return -1;
+	}
+
+	if (value % 4u != 0)
+	{
+		kprintf("Address must be 4-byte aligned\n");
+		return -1;
+	}
+
+	paddr_t ptr = (paddr_t) (uintptr_t) value;
+	kprintf("%x: %x\n", value, *ptr);
 	return 0;
 }
 

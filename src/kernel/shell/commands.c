@@ -14,8 +14,8 @@
  * @ingroup shell
  *
  * Every command has the same signature: it gets the tokenized line (@p argv[0] is the
- * command name) and returns 0 on success or -1 on a usage error, after printing the
- * usage. shell_dispatch_command() discards the result.
+ * command name) and returns 0 on success or -1 on an error, after printing a message
+ * (the usage, for a usage error). shell_dispatch_command() discards the result.
  */
 
 // help <command>
@@ -97,7 +97,7 @@ void shell_dispatch_command(size_t argc, char* argv[])
  * the help text of the command with that name, or @c "help: <name>: command not found"
  * if there is none.
  *
- * @param argc Number of tokens; 1 or 2
+ * @param argc Number of tokens; 1 or 2 (more is a usage error)
  * @param argv Tokens; @p argv[1], if present, is the command to describe
  *
  * @retval 0 The names or the help text were printed
@@ -205,14 +205,16 @@ static int cmd_clear(size_t argc, char* argv[])
 }
 
 /**
- * @brief @c uptime: not implemented yet; prints @c "TODO".
+ * @brief @c uptime: prints the time since boot as hours, minutes and seconds.
  *
- * @param argc Number of tokens; unused
+ * The time comes from hal_timer_now_sec(), so it counts from hal_timer_init() and is
+ * rounded down to whole seconds. Hours keep counting past 24; there is no day field.
+ *
+ * @param argc Number of tokens; must be 1
  * @param argv Tokens; unused
  *
- * @retval 0 Always
- *
- * @todo Print the time since boot.
+ * @retval 0 The uptime was printed
+ * @retval -1 Arguments were given; the usage was printed
  */
 static int cmd_uptime(size_t argc, char* argv[])
 {

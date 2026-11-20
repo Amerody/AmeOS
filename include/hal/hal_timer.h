@@ -1,6 +1,7 @@
 /**
  * @file hal_timer.h
  * @brief Time source contract: monotonic clock and a periodic tick.
+ * @ingroup timer
  *
  * Implemented by whichever layer owns the hardware. On aarch64 that is
  * src/arch/aarch64/ (the ARM generic timer is part of the CPU and is the same
@@ -19,8 +20,11 @@ extern "C"
 {
 #endif
 
+/// @brief Nanoseconds per microsecond: divide a nanosecond count by it to get microseconds
 #define NS_TO_US 1000u
+/// @brief Nanoseconds per millisecond: divide a nanosecond count by it to get milliseconds
 #define NS_TO_MS 1000000u
+/// @brief Nanoseconds per second: divide a nanosecond count by it to get seconds
 #define NS_TO_SEC 1000000000u
 
 	/**
@@ -29,7 +33,13 @@ extern "C"
 	 * Needs the interrupt controller, so call it after platform_init(). Does not
 	 * start the tick (see hal_timer_set_tick()) and does not unmask CPU IRQs.
 	 *
-	 * @return 0 on success, a negative error code if the timer is unusable.
+	 * Calling it again after a successful call does nothing and returns 0.
+	 *
+	 * @retval 0 The timer is running (or already was)
+	 * @retval -ENODEV The timer hardware is unusable (on aarch64: the counter
+	 *                 frequency, CNTFRQ_EL0, reads as 0)
+	 * @return Otherwise the negative error from hal_irq_register() for the timer
+	 *         interrupt
 	 */
 	int hal_timer_init();
 
@@ -48,10 +58,34 @@ extern "C"
 	 */
 	uint64_t hal_timer_now_ns();
 
+	/**
+	 * @brief Monotonic time in whole microseconds since hal_timer_init().
+	 *
+	 * hal_timer_now_ns() divided by #NS_TO_US, rounded down. Same context rules as
+	 * hal_timer_now_ns(); returns 0 before hal_timer_init().
+	 *
+	 * @return Microseconds elapsed.
+	 */
 	static inline uint64_t hal_timer_now_us() { return hal_timer_now_ns() / NS_TO_US; }
 
+	/**
+	 * @brief Monotonic time in whole milliseconds since hal_timer_init().
+	 *
+	 * hal_timer_now_ns() divided by #NS_TO_MS, rounded down. Same context rules as
+	 * hal_timer_now_ns(); returns 0 before hal_timer_init().
+	 *
+	 * @return Milliseconds elapsed.
+	 */
 	static inline uint64_t hal_timer_now_ms() { return hal_timer_now_ns() / NS_TO_MS; }
 
+	/**
+	 * @brief Monotonic time in whole seconds since hal_timer_init().
+	 *
+	 * hal_timer_now_ns() divided by #NS_TO_SEC, rounded down. Same context rules as
+	 * hal_timer_now_ns(); returns 0 before hal_timer_init().
+	 *
+	 * @return Seconds elapsed.
+	 */
 	static inline uint64_t hal_timer_now_sec() { return hal_timer_now_ns() / NS_TO_SEC; }
 
 	/**
@@ -68,8 +102,13 @@ extern "C"
 	 *
 	 * @param hz        Ticks per second; 0 stops the tick.
 	 * @param callback  Function to call on every tick; required when @p hz != 0.
-	 * @return 0 on success, -EINVAL if the rate is unsupported or the callback is
-	 *         missing.
+	 *
+	 * Stopping the tick (@p hz == 0) always succeeds, even before hal_timer_init().
+	 *
+	 * @retval 0 The tick was started, changed or stopped
+	 * @retval -ENODEV @p hz != 0 and hal_timer_init() hasn't succeeded yet
+	 * @retval -EINVAL The rate is unsupported (on aarch64: higher than the counter
+	 *                 frequency) or @p callback is NULL
 	 */
 	int hal_timer_set_tick(uint32_t hz, void (*callback)(void));
 

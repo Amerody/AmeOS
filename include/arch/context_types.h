@@ -18,6 +18,8 @@
 /**
  * @brief State saved by arch_context_switch(): the AAPCS64 callee-saved registers plus
  *        the stack pointer. 13 words.
+ *
+ * @bug This is architecture dependant. This should NOT be here
  */
 struct cpu_context
 {
@@ -56,6 +58,8 @@ struct cpu_context
  * vectors.S restores every field from the frame before @c eret, so a handler that
  * changes a field (for example @c elr or a register in @c x) changes the state it
  * returns to.
+ *
+ * @bug This is architecture dependant. This should NOT be here
  */
 struct trap_frame
 {

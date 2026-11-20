@@ -14,7 +14,7 @@
  * @ingroup console
  */
 
-/// @brief Meant to be non-zero once console_fb_init() has run; never set yet
+/// @brief Meant to be non-zero once console_fb_init() has run
 static int s_init = 0;
 
 /// @brief Cursor column, in cells
@@ -26,10 +26,12 @@ static uint32_t s_max_cols = 0;
 /// @brief Number of rows on the screen
 static uint32_t s_max_rows = 0;
 
-/// @brief Text colour, set by console_set_color()
+/// @brief Text color, set by console_set_color()
 static uint32_t s_color = COLOR_WHITE;
 /// @brief Size on screen of one font pixel, in pixels; set by console_set_scale()
 static uint32_t s_scale = 1;
+
+static bool s_cursor_visible = false;
 
 /// @brief Width of one character cell at the current scale
 /// @return Width in pixels
@@ -106,31 +108,68 @@ static void newline(void)
 		console_fb_scroll();
 }
 
+static void cursor_hide()
+{
+	if (!s_cursor_visible)
+		return;
+
+	uint32_t start_x = s_cursor_x * FONT_WIDTH * s_scale;
+	uint32_t start_y = s_cursor_y * FONT_HEIGHT * s_scale;
+	hal_fb_invert_rect(start_x, start_y, FONT_WIDTH * s_scale, FONT_HEIGHT * s_scale);
+	s_cursor_visible = false;
+}
+
+static void cursor_show()
+{
+	if (s_cursor_visible)
+		return;
+
+	uint32_t start_x = s_cursor_x * FONT_WIDTH * s_scale;
+	uint32_t start_y = s_cursor_y * FONT_HEIGHT * s_scale;
+	hal_fb_invert_rect(start_x, start_y, FONT_WIDTH * s_scale, FONT_HEIGHT * s_scale);
+	s_cursor_visible = true;
+}
+
 /**
  * @brief Console @c putc of the framebuffer sink.
  *
  * @c '\\n' moves to the next row; any other byte is drawn at the cursor, which then
  * advances, wrapping to the next row at the end of a line.
  *
- * @bug @c '\\r' is also treated as a newline, which contradicts this description and the
- *      file description in console_fb.h ("every other byte, including '\\r', is drawn as
- *      a glyph"). Output written as "\r\n" moves down two rows. A carriage return
- *      would normally only move the cursor back to column 0.
+ * @c '\\r' moves the cursor to the beginning of the row.
+ *
+ * @c '\\b' moves the cursor back one cell.
  *
  * @param c Byte to output
  */
 static void console_fb_putc(char c)
 {
-	if (c == '\n' || c == '\r')
+	// hide the cursor
+	cursor_hide();
+
+	if (c == '\n')
 	{
 		newline();
-		return;
+	}
+	else if (c == '\r')
+	{
+		s_cursor_x = 0;
+	}
+	else if (c == '\b')
+	{
+		if (s_cursor_x > 0)
+			s_cursor_x--;
+	}
+	else
+	{
+		draw_glyph(s_cursor_x * cell_w(), s_cursor_y * cell_h(), c);
+
+		if (++s_cursor_x >= s_max_cols)
+			newline();
 	}
 
-	draw_glyph(s_cursor_x * cell_w(), s_cursor_y * cell_h(), c);
-
-	if (++s_cursor_x >= s_max_cols)
-		newline();
+	// show the cursor again
+	cursor_show();
 }
 
 int console_fb_init()
@@ -149,9 +188,10 @@ int console_fb_init()
 	framebuffer_t* fb = hal_fb_get_info();
 	s_cursor_x = 0;
 	s_cursor_y = 0;
-	s_max_cols = (fb) ? fb->width / FONT_HEIGHT : 0;
+	s_max_cols = (fb) ? fb->width / FONT_WIDTH : 0;
 	s_max_rows = (fb) ? fb->height / FONT_HEIGHT : 0;
 
+	s_init = 1;
 	return error;
 }
 

@@ -26,6 +26,8 @@ static unsigned s_port = 0xFF;
  */
 static void console_uart_putc(char c)
 {
+	if (c == '\n')
+		hal_uart_putc(s_port, '\r');
 	hal_uart_putc(s_port, c);
 }
 

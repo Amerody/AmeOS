@@ -13,6 +13,9 @@
 /// @brief Absolute value of @p x
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
+/// @brief Mask used to invert a cell's color via XOR. Dependant on endianness (RGBA vs ABGR)
+#define COLOR_INVERT_MASK 0x00FFFFFFu
+
 /// @brief The framebuffer description returned by hal_fb_get_info()
 static framebuffer_t fb_info;
 
@@ -132,6 +135,20 @@ void hal_fb_draw_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32
 		{
 			err += dx;
 			y0 += sy;
+		}
+	}
+}
+
+void hal_fb_invert_rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
+{
+	if (x >= fb_info.width || y >= fb_info.height)
+		return;
+
+	for (uint32_t row = y; row < y + h && row < fb_info.height; row++)
+	{
+		for (uint32_t col = x; col < x + w && col < fb_info.width; col++)
+		{
+			fb_info.buffer[row * (fb_info.pitch / 4) + col] ^= COLOR_INVERT_MASK;
 		}
 	}
 }

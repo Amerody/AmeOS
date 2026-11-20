@@ -96,6 +96,16 @@ void hal_fb_fill_rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t c
 void hal_fb_draw_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t color);
 
 /**
+ * @brief Inverts the specified rect
+ *
+ * @param x
+ * @param y
+ * @param w
+ * @param h
+ */
+void hal_fb_invert_rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
+
+/**
  * @brief Returns the description of the framebuffer.
  *
  * @return Pointer to the description; never NULL. Before a successful hal_fb_init(),

@@ -1,6 +1,7 @@
 #include "kernel/console.h"
 #include "kernel/delay.h"
 #include "kernel/kprintf.h"
+#include "kernel/shell.h"
 
 #include <arch/arch.h>
 #include <arch/irq.h>
@@ -85,16 +86,26 @@ void kmain(uint64_t dtb_ptr)
 	//    }
 
 	init();
-
-	step(1, "Test error");
-
 	kprintf("Welcome to AmeOS version %d.%d.%d!\n", KERNEL_VERSION_MAJOR, KERNEL_VERSION_MINOR, KERNEL_VERSION_PATCH);
 
-	while (1)
+	// initialize the shell after boot has completed successfully
+	shell_init();
+
+	while (1) // This is so kernel_main() doesn't return
 	{
+		arch_irq_disable();
 		char c = 0;
 		if (console_getc(&c))
-			kprintf("%c", c);
-		// This is so kernel_main() doesn't return
+		{
+			arch_irq_enable();
+			shell_feed(c);
+			// kprintf("%x\n", c);
+		}
+		else
+		{
+			// just wait
+			arch_cpu_idle();
+			arch_irq_enable();
+		}
 	}
 }

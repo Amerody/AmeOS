@@ -1,8 +1,6 @@
 #include "kernel/shell.h"
 #include "commands.h"
 #include "kernel/console.h"
-#include "kernel/kprintf.h"
-#include "lib/string.h"
 
 #include <stddef.h>
 #include <stdint.h>

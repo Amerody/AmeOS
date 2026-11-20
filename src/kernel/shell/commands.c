@@ -2,6 +2,7 @@
 #include "commands.h"
 #include <stddef.h>
 
+#include "hal/hal_timer.h"
 #include "kernel/console.h"
 #include "kernel/kprintf.h"
 #include <lib/string.h>
@@ -215,9 +216,20 @@ static int cmd_clear(size_t argc, char* argv[])
  */
 static int cmd_uptime(size_t argc, char* argv[])
 {
-	(void) argc;
 	(void) argv;
-	kprintf("TODO\n");
+	if (argc != 1)
+	{
+		kprintf("Use: uptime\n");
+		return -1;
+	}
+
+	uint64_t now_s = hal_timer_now_sec();
+
+	uint64_t hours = now_s / 3600;
+	uint64_t minutes = (now_s % 3600) / 60;
+	uint64_t seconds = now_s % 60;
+	kprintf("Uptime: %lu hours %lu minutes %lu seconds\n", hours, minutes, seconds);
+
 	return 0;
 }
 

@@ -19,6 +19,10 @@ extern "C"
 {
 #endif
 
+#define NS_TO_US 1000u
+#define NS_TO_MS 1000000u
+#define NS_TO_SEC 1000000000u
+
 	/**
 	 * @brief Initialise the timer hardware and start the monotonic clock.
 	 *
@@ -43,6 +47,12 @@ extern "C"
 	 * @return Nanoseconds elapsed.
 	 */
 	uint64_t hal_timer_now_ns();
+
+	static inline uint64_t hal_timer_now_us() { return hal_timer_now_ns() / NS_TO_US; }
+
+	static inline uint64_t hal_timer_now_ms() { return hal_timer_now_ns() / NS_TO_MS; }
+
+	static inline uint64_t hal_timer_now_sec() { return hal_timer_now_ns() / NS_TO_SEC; }
 
 	/**
 	 * @brief Start, change or stop the periodic tick.

@@ -1,5 +1,4 @@
 #include "kernel/console.h"
-#include "kernel/delay.h"
 #include "kernel/kprintf.h"
 #include "kernel/shell.h"
 
@@ -126,6 +125,7 @@ static void init()
  */
 void kmain(uint64_t dtb_ptr)
 {
+	(void) dtb_ptr;
 	// 	  (Optional but recommended) Parse the DTB structure here
 	//    Find the "soc" node or "ranges" property to extract the base.
 	//

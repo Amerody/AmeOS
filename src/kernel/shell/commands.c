@@ -45,7 +45,7 @@ typedef struct
 {
 	const char* name;                     ///< Name typed to run the command (argv[0])
 	const char* help;                     ///< Help message without '\n', printed by cmd_help()
-	int (*fn)(size_t argc, char* argv[]); ///< Runs the command; 0 on success, -1 on usage error
+	int (*fn)(size_t argc, char* argv[]); ///< Runs the command; 0 on success, -1 on an error
 } command_t;
 
 /// @brief Built-in commands, searched in order by shell_dispatch_command() and cmd_help()
@@ -66,7 +66,7 @@ static const command_t s_commands[] = {
 	  "Prints the uptime of the OS. Use: uptime",
 	  cmd_uptime },
 	{ "peek",
-	  "Prints the value at a memory address. Use: peek <address>",
+	  "Prints the value at a memory address. Use: peek <hex_address>",
 	  cmd_peek },
 	{ "reboot",
 	  "Reboots the system",
@@ -237,20 +237,29 @@ static int cmd_uptime(size_t argc, char* argv[])
 }
 
 /**
- * @brief @c peek: not implemented yet; prints @c "TODO".
+ * @brief @c peek: prints the 32-bit word at a memory address.
  *
- * @param argc Number of tokens; unused
- * @param argv Tokens; unused
+ * @p argv[1] is parsed with strtox(), so it is hexadecimal with an optional @c 0x prefix,
+ * and must be 4-byte aligned. The word is read once through a #paddr_t, then the address
+ * and the value are printed as lowercase hex with no prefix: @c "<address>: <value>".
  *
- * @retval 0 Always
+ * The address is used directly as a pointer, which is the physical address only while the
+ * MMU is off. Nothing checks that there is memory or a device at the address, and reading
+ * a register whose read has side effects triggers them. Addresses above 0xFFFFFFFF can't
+ * be given, since strtox() parses 32 bits.
  *
- * @todo Print the value at the address given in @p argv[1].
+ * @param argc Number of tokens; must be 2
+ * @param argv Tokens; @p argv[1] is the address
+ *
+ * @retval 0 The word was printed
+ * @retval -1 Wrong number of arguments (the usage was printed), or the address is not
+ *            valid hex or not 4-byte aligned (a message was printed)
  */
 static int cmd_peek(size_t argc, char* argv[])
 {
 	if (argc != 2)
 	{
-		kprintf("Use: peek <address>\n");
+		kprintf("Use: peek <hex_address>\n");
 		return -1;
 	}
 

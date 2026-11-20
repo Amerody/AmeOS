@@ -1,10 +1,12 @@
 /**
  * @file memory.h
- * @brief Freestanding memory functions: memcpy(), memset(), memmove().
+ * @brief Freestanding memory functions (memcpy(), memset(), memmove()) and the address
+ *        pointer types #paddr_t and #vaddr_t.
  * @ingroup lib
  *
  * The kernel is built without libc, so it provides its own versions of these. They keep
- * the libc names and behaviour. They work one byte at a time, with no alignment or word-size optimisation.
+ * the libc names and behaviour. They work one byte at a time, with no alignment or
+ * word-size optimisation.
  *
  * Context: they touch no global state and never block, so they can be called from any
  * context, including interrupt handlers.
@@ -14,9 +16,20 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/// @brief Type for a physical address
+/**
+ * @brief Pointer to a @c volatile 32-bit word, used for a physical address.
+ *
+ * Dereferencing it reads or writes one 32-bit word, and @c volatile makes the compiler
+ * emit every access. Dereferencing a physical address is only correct while it is also
+ * the virtual address, which is the case today because the MMU is off (see boot.S).
+ */
 typedef volatile uint32_t* paddr_t;
-/// @brief Type for a virtual address
+
+/**
+ * @brief Pointer to a @c volatile 32-bit word, used for a virtual address.
+ *
+ * Same type as #paddr_t, so the compiler does not catch one being passed for the other.
+ */
 typedef volatile uint32_t* vaddr_t;
 
 /**

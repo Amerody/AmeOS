@@ -1,10 +1,13 @@
 /**
  * @file string.h
- * @brief Freestanding string functions: strlen(), strcmp(), strncmp(), strcpy(), strncpy().
+ * @brief Freestanding string functions: strlen(), strcmp(), strncmp(), strcpy(), strncpy(),
+ *        and the number parsers strtoi() and strtox().
  * @ingroup lib
  *
  * The kernel is built without libc, so it provides its own versions of these. They keep
  * the libc names and behaviour. A string is a sequence of bytes ended by a NUL (@c '\0').
+ * strtoi() and strtox() are not from libc: they parse a whole string into a 32-bit value
+ * and report an error, instead of stopping, at the first character that doesn't fit.
  *
  * Context: they touch no global state and never block, so they can be called from any
  * context, including interrupt handlers.
@@ -78,6 +81,35 @@ char* strcpy(char* dest, const char* src);
  */
 char* strncpy(char* dest, const char* src, size_t n);
 
+/**
+ * @brief Parses a whole string as a signed decimal 32-bit integer.
+ *
+ * Accepts optional whitespace, an optional @c '+' or @c '-', one or more decimal digits,
+ * then optional whitespace, and nothing else. Whitespace is space, @c '\\t', @c '\\n',
+ * @c '\\r', @c '\\v' and @c '\\f'. There is no base prefix.
+ *
+ * @param s   NUL-terminated string to parse
+ * @param out Where the value is stored; written only on success
+ *
+ * @retval 0  @p *out holds the value, from INT32_MIN to INT32_MAX
+ * @retval -1 @p s or @p out is NULL, there are no digits, the value is out of range, or
+ *            other characters follow the number
+ */
 int strtoi(const char* s, int32_t* out);
 
+/**
+ * @brief Parses a whole string as an unsigned hexadecimal 32-bit integer.
+ *
+ * Accepts optional whitespace, an optional @c "0x" or @c "0X" prefix, one or more hex
+ * digits in either case, then optional whitespace, and nothing else. Whitespace is the same
+ * as for strtoi(). There is no sign. Leading zeros don't count toward the 32 bits, so any
+ * number of them is accepted.
+ *
+ * @param s   NUL-terminated string to parse
+ * @param out Where the value is stored; written only on success
+ *
+ * @retval 0  @p *out holds the value
+ * @retval -1 @p s or @p out is NULL, there are no digits after the prefix, the value is
+ *            above 0xFFFFFFFF, or other characters follow the number
+ */
 int strtox(const char* s, uint32_t* out);

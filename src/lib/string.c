@@ -68,18 +68,41 @@ char* strncpy(char* dest, const char* src, size_t n)
 	return oDest;
 }
 
+/**
+ * @brief Tells whether a byte is whitespace for strtoi() and strtox().
+ *
+ * @param c Byte to test
+ *
+ * @retval true @p c is a space, @c '\\t', @c '\\n', @c '\\r', @c '\\v' or @c '\\f'
+ * @retval false Any other byte
+ */
 static inline bool is_space(char c)
 {
 	return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\v' || c == '\f';
 }
 
+/**
+ * @brief Tells whether a byte is a decimal digit.
+ *
+ * @param c Byte to test
+ *
+ * @retval true @p c is @c '0' to @c '9'
+ * @retval false Any other byte
+ */
 static inline bool is_digit(char c)
 {
 	return c >= '0' && c <= '9';
 }
 
-/* Returns 0..15 for a valid hex digit, -1 otherwise. */
-static inline int is_hex_val(char c)
+/**
+ * @brief Converts a hexadecimal digit to its value.
+ *
+ * @param c Byte to convert: @c '0'-'9', @c 'a'-'f' or @c 'A'-'F'
+ *
+ * @return 0 to 15 for a hex digit
+ * @retval -1 @p c is not a hex digit
+ */
+static inline int hex_val(char c)
 {
 	if (c >= '0' && c <= '9')
 		return c - '0';
@@ -144,12 +167,12 @@ int strtox(const char* s, uint32_t* out)
 	if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X'))
 		s += 2;
 
-	if (is_hex_val(*s) < 0)
+	if (hex_val(*s) < 0)
 		return -1; // no digits at all
 
 	uint32_t val = 0;
 	int d;
-	while ((d = is_hex_val(*s)) >= 0)
+	while ((d = hex_val(*s)) >= 0)
 	{
 		if (val >> 28) // top nibble set: shifting would overflow
 			return -1;

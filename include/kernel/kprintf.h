@@ -38,24 +38,33 @@
 
 #include <stdarg.h>
 
-/**
- * @brief Prints a formatted string to the console.
- *
- * See the file description for the supported conversions.
- *
- * @param fmt Format string
- * @param ... Arguments for the conversions in @p fmt
- */
-__attribute__((format(printf, 1, 2))) void kprintf(const char* fmt, ...);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-/**
- * @brief kprintf() with the arguments given as a @c va_list.
- *
- * For functions that take their own variadic arguments and forward them, such as
- * panic().
- *
- * @param fmt Format string, as for kprintf()
- * @param ap Arguments for the conversions in @p fmt. Started with @c va_start() by the
- *           caller, which also calls @c va_end() afterwards
- */
-void kvprintf(const char* fmt, va_list ap);
+	/**
+	 * @brief Prints a formatted string to the console.
+	 *
+	 * See the file description for the supported conversions.
+	 *
+	 * @param fmt Format string
+	 * @param ... Arguments for the conversions in @p fmt
+	 */
+	__attribute__((format(printf, 1, 2))) void kprintf(const char* fmt, ...);
+
+	/**
+	 * @brief kprintf() with the arguments given as a @c va_list.
+	 *
+	 * For functions that take their own variadic arguments and forward them, such as
+	 * panic().
+	 *
+	 * @param fmt Format string, as for kprintf()
+	 * @param ap Arguments for the conversions in @p fmt. Started with @c va_start() by the
+	 *           caller, which also calls @c va_end() afterwards
+	 */
+	void kvprintf(const char* fmt, va_list ap);
+
+#ifdef __cplusplus
+}
+#endif

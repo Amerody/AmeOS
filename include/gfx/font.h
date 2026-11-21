@@ -23,14 +23,23 @@
 /// @brief Glyph height in pixels, which is also the number of bytes per glyph
 #define FONT_HEIGHT 14
 
-/**
- * @brief Returns the bitmap of a character.
- *
- * Every byte value is valid (see the file description for which ones are blank).
- *
- * @param c Character, as a Latin-1 byte
- *
- * @return Pointer to #FONT_HEIGHT bytes in read-only static storage; never NULL. The caller
- *         must not free or modify it.
- */
-const uint8_t* font_get_glyph(unsigned char c);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+	/**
+	 * @brief Returns the bitmap of a character.
+	 *
+	 * Every byte value is valid (see the file description for which ones are blank).
+	 *
+	 * @param c Character, as a Latin-1 byte
+	 *
+	 * @return Pointer to #FONT_HEIGHT bytes in read-only static storage; never NULL. The caller
+	 *         must not free or modify it.
+	 */
+	const uint8_t* font_get_glyph(unsigned char c);
+
+#ifdef __cplusplus
+}
+#endif

@@ -7,7 +7,7 @@
 #include <gfx/font.h>
 #include <hal/hal_fb.h>
 #include <kernel/console.h>
-#include <kernel/errno.h>
+#include <kernel/error.h>
 
 #include <lib/memory.h>
 
@@ -52,7 +52,7 @@ static inline uint32_t cell_h(void) { return FONT_HEIGHT * s_scale; }
  */
 static void console_fb_scroll()
 {
-	framebuffer_t* fb = hal_fb_get_info();
+	struct framebuffer* fb = hal_fb_get_info();
 	if (!fb || !fb->buffer)
 		return;
 
@@ -202,7 +202,7 @@ static void console_fb_putc(char c)
  */
 static void console_fb_clear()
 {
-	framebuffer_t* fb = hal_fb_get_info();
+	struct framebuffer* fb = hal_fb_get_info();
 	if (!fb || !fb->buffer)
 		return;
 
@@ -215,8 +215,8 @@ static void console_fb_clear()
 
 int console_fb_init()
 {
-	if (!s_init)
-		return -EBUSY;
+	if (s_init)
+		return -ERROR_BUSY;
 
 	static struct console fb_console;
 	fb_console.name = "fb";
@@ -227,7 +227,7 @@ int console_fb_init()
 
 	int error = hal_fb_init(800, 600, 32);
 
-	framebuffer_t* fb = hal_fb_get_info();
+	struct framebuffer* fb = hal_fb_get_info();
 	s_cursor_x = 0;
 	s_cursor_y = 0;
 	s_max_cols = (fb) ? fb->width / FONT_WIDTH : 0;
@@ -241,7 +241,7 @@ void console_set_color(uint32_t color) { s_color = color; }
 
 void console_set_scale(uint32_t scale)
 {
-	framebuffer_t* fb = hal_fb_get_info();
+	struct framebuffer* fb = hal_fb_get_info();
 	if (scale == 0 || !fb || FONT_WIDTH * scale > fb->width || FONT_HEIGHT * scale > fb->height)
 		return; // would leave zero columns or rows
 

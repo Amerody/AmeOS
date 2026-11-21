@@ -19,7 +19,7 @@
 
 #include <arch/irq.h>
 #include <hal/hal_irq.h>
-#include <kernel/errno.h>
+#include <kernel/error.h>
 
 #include "gic.h"
 
@@ -52,13 +52,13 @@ int hal_irq_register(unsigned irq, hal_irq_handler_t handler, void* arg)
 	/* gic_num_intids() is 0 until gic_init() has run, so this also rejects
 	 * use before platform_init(). */
 	if (handler == NULL || irq >= gic_num_intids())
-		return -EINVAL;
+		return -ERROR_INVALID_ARG;
 
 	int rc = 0;
 	arch_irq_flags_t f = arch_irq_save(); /* the table is also read from the IRQ path */
 	if (s_handlers[irq].fn != NULL)
 	{
-		rc = -EBUSY;
+		rc = -ERROR_BUSY;
 	}
 	else
 	{

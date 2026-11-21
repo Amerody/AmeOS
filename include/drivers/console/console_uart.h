@@ -39,23 +39,23 @@ extern "C"
 	 * (erase the screen, move the cursor home).
 	 *
 	 * Only one UART console is supported: the port is kept in a private static, so
-	 * a second call returns -EBUSY.
+	 * a second call returns -ERROR_BUSY.
 	 *
 	 * Call after console_init().
 	 *
 	 * @param port Platform UART number; 1 is the console UART.
 	 *
 	 * @retval 0 The UART is set up and registered
-	 * @retval -EBUSY A UART console was already initialised, even if that earlier
+	 * @retval -ERROR_BUSY A UART console was already initialised, even if that earlier
 	 *                call failed
-	 * @return Otherwise the negative error from hal_uart_init() (-ENODEV, -EINVAL, or
+	 * @return Otherwise the negative error from hal_uart_init() (-ERROR_NO_DEVICE, -ERROR_INVALID_ARG, or
 	 *         another error if the receive interrupt can't be set up)
 	 *
-	 * @bug The result of console_register() is ignored, so -ENOSPC is never returned:
+	 * @bug The result of console_register() is ignored, so -ERROR_NO_SPACE is never returned:
 	 *      when the registry is full, the UART is set up but gets no console output.
 	 * @bug The sink is registered before hal_uart_init(). If hal_uart_init() fails, the
 	 *      sink stays registered on a port that isn't set up, and the port stays
-	 *      claimed, so a retry returns -EBUSY.
+	 *      claimed, so a retry returns -ERROR_BUSY.
 	 */
 	int console_uart_init(unsigned port);
 

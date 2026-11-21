@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Amerody
 
 /**
- * @file errno.h
+ * @file error.h
  * @brief Error codes definition
  * @ingroup kernel
  *
@@ -15,14 +15,14 @@
  * @brief Kernel error codes.
  *
  * The values are positive; functions that fail return them negated (for example
- * @c -EINVAL), and #SUCCESS (0) on success.
+ * @c -ERROR_INVALID_ARG), and #SUCCESS (0) on success.
  */
 enum
 {
 	SUCCESS = 0, ///< No error
 
-	EINVAL, ///< Invalid argument
-	EBUSY,  ///< Busy: already initialised or in use
-	ENODEV, ///< No such device
-	ENOSPC, ///< No space left
+	ERROR_INVALID_ARG, ///< Invalid argument
+	ERROR_BUSY,        ///< Busy: already initialised or in use
+	ERROR_NO_DEVICE,   ///< No such device
+	ERROR_NO_SPACE,    ///< No space left
 };

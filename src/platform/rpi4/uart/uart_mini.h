@@ -24,8 +24,8 @@
  * @param baud Requested baud rate, e.g. 115200.
  *
  * @retval 0 Success
- * @retval -EINVAL The interrupt controller isn't initialised (from aux_init())
- * @retval -EBUSY The AUX interrupt line is taken by something else
+ * @retval -ERROR_INVALID_ARG The interrupt controller isn't initialised (from aux_init())
+ * @retval -ERROR_BUSY The AUX interrupt line is taken by something else
  *                (from aux_init())
  */
 int uart_mini_enable(uint32_t baud);

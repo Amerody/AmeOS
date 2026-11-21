@@ -63,9 +63,9 @@ typedef void (*aux_callback_t)(void* arg);
  * Call with the interrupt controller up (after platform_init()).
  *
  * @retval 0 Success, or already initialised
- * @retval -EINVAL The interrupt controller is not initialised yet
+ * @retval -ERROR_INVALID_ARG The interrupt controller is not initialised yet
  *                 (from hal_irq_register())
- * @retval -EBUSY Something else already registered a handler on the AUX line
+ * @retval -ERROR_BUSY Something else already registered a handler on the AUX line
  *                (from hal_irq_register())
  */
 int aux_init();

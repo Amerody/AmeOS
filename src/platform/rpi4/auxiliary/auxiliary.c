@@ -6,7 +6,7 @@
 #include <arch/irq.h>
 #include <common/mmio.h>
 #include <hal/hal_irq.h>
-#include <kernel/errno.h>
+#include <kernel/error.h>
 
 /**
  * @file auxiliary.c

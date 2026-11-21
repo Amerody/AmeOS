@@ -16,7 +16,7 @@
 /// @brief All the relevant VideoCore Mailbox Registers
 /// @note There is not a lot of publicly available documentation so this is only the required registers sourced from tutorials
 /// @warning @p RESERVED_* are not to be used
-typedef struct
+struct VC_MBOX_Registers
 {
 	volatile uint32_t READ; ///< VideoCore Mailbox Read Register
 
@@ -27,10 +27,10 @@ typedef struct
 	volatile uint32_t STATUS; ///< VideoCore Mailbox Status Register
 	volatile uint32_t CONFIG; ///< VideoCore Mailbox Config Register
 	volatile uint32_t WRITE;  ///< VideoCore Mailbox Write Register
-} VC_MBOX_Registers;
+};
 
 #define VC_MBOX_BASE (PERIPHERAL_BASE + 0x0000B880) ///< VideoCore Mailbox base address
-#define VC_MBOX ((VC_MBOX_Registers*) VC_MBOX_BASE) ///< VideoCore Mailbox access
+#define VC_MBOX ((struct VC_MBOX_Registers*) VC_MBOX_BASE) ///< VideoCore Mailbox access
 
 /// @brief Response code in mailbox_buffer[1] when the firmware processed the request
 #define MBOX_RESPONSE 0x80000000

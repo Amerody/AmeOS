@@ -20,7 +20,7 @@
 #define COLOR_INVERT_MASK 0x00FFFFFFu
 
 /// @brief The framebuffer description returned by hal_fb_get_info()
-static framebuffer_t s_fb_info;
+static struct framebuffer s_fb_info;
 
 // One property request with the tags SET_PHYS_WH, SET_VIRT_WH, SET_DEPTH, SET_VIRT_OFF,
 // GET_PITCH and ALLOCATE. Every failure (mailbox error, or no buffer allocated) returns -1.
@@ -156,4 +156,4 @@ void hal_fb_invert_rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 	}
 }
 
-framebuffer_t* hal_fb_get_info() { return &s_fb_info; }
+struct framebuffer* hal_fb_get_info() { return &s_fb_info; }

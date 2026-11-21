@@ -48,11 +48,11 @@ extern "C"
 	 * Call after console_init().
 	 *
 	 * @retval 0 The framebuffer is set up and registered
-	 * @retval -EBUSY console_fb_init() was already called, even if that earlier call
+	 * @retval -ERROR_BUSY console_fb_init() was already called, even if that earlier call
 	 *                failed
 	 * @return Otherwise the negative error from hal_fb_init()
 	 *
-	 * @bug The result of console_register() is ignored, so -ENOSPC is never returned:
+	 * @bug The result of console_register() is ignored, so -ERROR_NO_SPACE is never returned:
 	 *      when the registry is full, the framebuffer is set up but gets no console
 	 *      output.
 	 * @bug The sink is registered before hal_fb_init(). If hal_fb_init() fails, the

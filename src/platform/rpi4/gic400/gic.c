@@ -16,7 +16,7 @@
 
 /// @brief All the GICD Registers
 /// @warning @p RESERVED_* are not to be used
-typedef struct
+struct GICD_Registers
 {
 	volatile uint32_t CTLR;  ///< Distributor Control Register
 	volatile uint32_t TYPER; ///< Interrupt Controller Type Register
@@ -92,14 +92,14 @@ typedef struct
 	volatile uint32_t CIDR1; ///< Component ID 1 Register
 	volatile uint32_t CIDR2; ///< Component ID 2 Register
 	volatile uint32_t CIDR3; ///< Component ID 3 Register
-} GICD_Registers;
+};
 
 #define GICD_BASE (PERIPHERAL_BASE + 0x1841000) ///< GICD base address
-#define GICD ((GICD_Registers*) GICD_BASE)      ///< GICD access
+#define GICD ((struct GICD_Registers*) GICD_BASE)      ///< GICD access
 
 /// @brief All the GICC Registers
 /// @warning @p RESERVED_* are not to be used
-typedef struct
+struct GICC_Registers
 {
 	volatile uint32_t CTLR;   ///< CPU Interface Control Register
 	volatile uint32_t PMR;    ///< Interrupt Priority Mask Register
@@ -128,10 +128,10 @@ typedef struct
 	uint32_t RESERVED_100_FFC[CALC_OFFSET(0x100, 0xFFC)]; ///< 3840 Bytes gap between IIDR and DIR
 
 	volatile uint32_t DIR; ///< Deactivate Interrupt Register
-} GICC_Registers;
+};
 
 #define GICC_BASE (PERIPHERAL_BASE + 0x1842000) ///< GICC base address
-#define GICC ((GICC_Registers*) GICC_BASE)      ///< GICC access
+#define GICC ((struct GICC_Registers*) GICC_BASE)      ///< GICC access
 
 #define GIC_INTID_SGI_BASE 0u  ///< First SGI (0-15)
 #define GIC_INTID_PPI_BASE 16u ///< First PPI (16-31)

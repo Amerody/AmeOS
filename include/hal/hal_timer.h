@@ -39,7 +39,7 @@ extern "C"
 	 * Calling it again after a successful call does nothing and returns 0.
 	 *
 	 * @retval 0 The timer is running (or already was)
-	 * @retval -ENODEV The timer hardware is unusable (on aarch64: the counter
+	 * @retval -ERROR_NO_DEVICE The timer hardware is unusable (on aarch64: the counter
 	 *                 frequency, CNTFRQ_EL0, reads as 0)
 	 * @return Otherwise the negative error from hal_irq_register() for the timer
 	 *         interrupt
@@ -109,8 +109,8 @@ extern "C"
 	 * Stopping the tick (@p hz == 0) always succeeds, even before hal_timer_init().
 	 *
 	 * @retval 0 The tick was started, changed or stopped
-	 * @retval -ENODEV @p hz != 0 and hal_timer_init() hasn't succeeded yet
-	 * @retval -EINVAL The rate is unsupported (on aarch64: higher than the counter
+	 * @retval -ERROR_NO_DEVICE @p hz != 0 and hal_timer_init() hasn't succeeded yet
+	 * @retval -ERROR_INVALID_ARG The rate is unsupported (on aarch64: higher than the counter
 	 *                 frequency) or @p callback is NULL
 	 */
 	int hal_timer_set_tick(uint32_t hz, void (*callback)(void));

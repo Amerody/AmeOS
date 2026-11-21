@@ -2,7 +2,7 @@
 // Copyright (C) 2026 Amerody
 
 #include "kernel/console.h"
-#include "kernel/errno.h"
+#include "kernel/error.h"
 
 #include <stddef.h>
 
@@ -27,10 +27,10 @@ void console_init()
 int console_register(const struct console* con)
 {
 	if (s_sinks_registered >= CONSOLE_MAX_SINKS)
-		return -ENOSPC;
+		return -ERROR_NO_SPACE;
 
 	if (!con || !con->putc)
-		return -EINVAL;
+		return -ERROR_INVALID_ARG;
 
 	s_consoles[s_sinks_registered] = *con;
 

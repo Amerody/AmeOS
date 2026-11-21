@@ -5,7 +5,7 @@
 
 #include <hal/hal_uart.h>
 #include <kernel/console.h>
-#include <kernel/errno.h>
+#include <kernel/error.h>
 #include <stddef.h>
 
 /**
@@ -78,7 +78,7 @@ static void console_uart_clear()
 int console_uart_init(unsigned port)
 {
 	if (s_port != 0xFF)
-		return -EBUSY;
+		return -ERROR_BUSY;
 
 	s_port = port;
 

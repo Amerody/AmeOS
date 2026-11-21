@@ -24,14 +24,14 @@
 #include <stdint.h>
 
 /// @brief Framebuffer description, filled by hal_fb_init() and returned by hal_fb_get_info()
-typedef struct
+struct framebuffer
 {
 	uint32_t* buffer; ///< First pixel (top-left); NULL until hal_fb_init() succeeds
 	uint32_t pitch;   ///< Bytes per row; can be more than width * 4
 	uint32_t width;   ///< Width in pixels
 	uint32_t height;  ///< Height in pixels
 	uint32_t depth;   ///< Bits per pixel, as given to hal_fb_init()
-} framebuffer_t;
+};
 
 /**
  * @brief Sets up a framebuffer of the given size and depth.
@@ -123,4 +123,4 @@ void hal_fb_invert_rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
  * @return Pointer to the description; never NULL. Before a successful hal_fb_init(),
  *         its @c buffer is NULL.
  */
-framebuffer_t* hal_fb_get_info();
+struct framebuffer* hal_fb_get_info();

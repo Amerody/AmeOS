@@ -12,7 +12,7 @@
 #include "auxiliary/aux_regs.h"
 #include "auxiliary/auxiliary.h"
 #include "gpio/gpio.h"
-#include <kernel/errno.h>
+#include <kernel/error.h>
 #include <lib/ringbuf.h>
 
 #include <stddef.h>

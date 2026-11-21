@@ -91,8 +91,8 @@ extern "C"
 	 *             may be.
 	 *
 	 * @retval 0 The sink was registered
-	 * @retval -EINVAL @p con or its @c putc is NULL
-	 * @retval -ENOSPC CONSOLE_MAX_SINKS sinks are already registered (checked first, so
+	 * @retval -ERROR_INVALID_ARG @p con or its @c putc is NULL
+	 * @retval -ERROR_NO_SPACE CONSOLE_MAX_SINKS sinks are already registered (checked first, so
 	 *                 this is returned even when @p con is invalid)
 	 */
 	int console_register(const struct console* con);

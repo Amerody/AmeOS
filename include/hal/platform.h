@@ -20,7 +20,7 @@
  * A hal_* function used before the step that enables it is a bug.
  *
  * Errors: functions that can fail return 0 on success and a negative error
- * code on failure (-EINVAL, -EBUSY, -ENODEV, ...). Functions that cannot
+ * code on failure (-ERROR_INVALID_ARG, -ERROR_BUSY, -ERROR_NO_DEVICE, ...). Functions that cannot
  * meaningfully fail return void or the requested value.
  *
  * Contexts: unless a function says otherwise, it may be called from thread

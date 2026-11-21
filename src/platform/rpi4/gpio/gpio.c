@@ -17,7 +17,7 @@
 
 /// @brief All the GPIO Registers
 /// @warning @p RESERVED_* are not to be used
-typedef struct
+struct GPIO_Registers
 {
 	volatile uint32_t GPFSEL0; ///< GPIO Function Select 0
 	volatile uint32_t GPFSEL1; ///< GPIO Function Select 1
@@ -82,10 +82,10 @@ typedef struct
 	volatile uint32_t GPIO_PUP_PDN_CNTRL_REG1; ///< GPIO Pull-up / Pull-down Register 1
 	volatile uint32_t GPIO_PUP_PDN_CNTRL_REG2; ///< GPIO Pull-up / Pull-down Register 2
 	volatile uint32_t GPIO_PUP_PDN_CNTRL_REG3; ///< GPIO Pull-up / Pull-down Register 3
-} GPIO_Registers;
+};
 
 #define GPIO_BASE (PERIPHERAL_BASE + 0x200000) ///< GPIO base address
-#define GPIO ((GPIO_Registers*) GPIO_BASE)     ///< GPIO access
+#define GPIO ((struct GPIO_Registers*) GPIO_BASE)     ///< GPIO access
 
 /// @brief Highest pin number the functions accept
 #define GPIO_MAX_PIN 57

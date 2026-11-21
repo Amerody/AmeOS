@@ -42,15 +42,15 @@ static int cmd_peek(size_t argc, char* argv[]);
 static int cmd_reboot(size_t argc, char* argv[]);
 
 /// @brief One built-in command: its name, its help text and the function that runs it
-typedef struct
+struct command
 {
 	const char* name;                     ///< Name typed to run the command (argv[0])
 	const char* help;                     ///< Help message without '\n', printed by cmd_help()
 	int (*fn)(size_t argc, char* argv[]); ///< Runs the command; 0 on success, -1 on an error
-} command_t;
+};
 
 /// @brief Built-in commands, searched in order by shell_dispatch_command() and cmd_help()
-static const command_t s_commands[] = {
+static const struct command s_commands[] = {
 	{ "help",
 	  "Prints the help for a command. Use: help <command>",
 	  cmd_help },

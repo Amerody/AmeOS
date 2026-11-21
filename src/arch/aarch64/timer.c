@@ -23,7 +23,7 @@
 #include "arch/irq.h"
 #include <hal/hal_irq.h>
 #include <hal/hal_timer.h>
-#include <kernel/errno.h>
+#include <kernel/error.h>
 
 #include <stddef.h>
 #include <stdint.h>
@@ -201,7 +201,7 @@ int hal_timer_init()
 
 	uint64_t freq = read_cntfrq_el0();
 	if (freq == 0)
-		return -ENODEV; /* firmware/boot code never set it */
+		return -ERROR_NO_DEVICE; /* firmware/boot code never set it */
 
 	write_cntv_ctl_el0(0); /* timer off, any stale condition cleared */
 
@@ -235,9 +235,9 @@ int hal_timer_set_tick(uint32_t hz, void (*callback)(void))
 	}
 
 	if (!s_ready)
-		return -ENODEV;
+		return -ERROR_NO_DEVICE;
 	if (callback == NULL || hz > s_freq)
-		return -EINVAL;
+		return -ERROR_INVALID_ARG;
 
 	arch_irq_flags_t f = arch_irq_save(); /* the IRQ handler reads this state */
 

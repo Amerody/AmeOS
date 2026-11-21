@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file hal_irq.c
  * @brief hal_irq implementation for the Raspberry Pi 4, on top of the GIC-400

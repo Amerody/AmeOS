@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 #include "gic.h"
 #include "soc.h"
 #include <common/mmio.h>

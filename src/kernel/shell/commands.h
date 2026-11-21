@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file commands.h
  * @brief Built-in shell commands: looks up a tokenized command line and runs it.
@@ -11,6 +14,7 @@
 #include <stddef.h>
 
 /**
+ *
  * @brief Runs the built-in command named by @p argv[0].
  *
  * Compares @p argv[0] with each command name in the table (case-sensitive) and calls the

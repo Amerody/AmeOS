@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file console.h
  * @brief Kernel console: a registry of output sinks that kprintf() writes to,

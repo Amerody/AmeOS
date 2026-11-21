@@ -42,7 +42,8 @@ A header and its source share a base name (`pmm.h` / `pmm.c`). One subsystem per
 | Structs, enums, unions | `snake_case`, tag only | `struct page_frame` |
 | Typedefs | `snake_case_t`, only for fixed-width/opaque types | `paddr_t`, `vaddr_t` |
 | Enum constants | `UPPER_SNAKE`, prefixed by the enum | `IRQ_TYPE_TIMER` |
-| Macros and constants | `UPPER_SNAKE`, prefixed by the subsystem | `PAGE_SIZE`, `UART_BASE` |
+| Public macros and constants | `UPPER_SNAKE`, prefixed by the subsystem | `PAGE_SIZE`, `UART_BASE` |
+| Private macros and constants | `UPPER_SNAKE`, don't need to be prefixed by the subsystem | `COMMANDS_COUNT`, `MAX_ARGS` |
 | Non-`static` global variables | `g_` prefix | `g_boot_dtb` |
 | File-`static` variables | `s_` prefix | `s_next_pid` |
 | Booleans | `is_`, `has_`, `can_`, `should_` | `is_mapped`, `has_fpu` |
@@ -74,7 +75,7 @@ typedef struct
 	// ...
 	volatile uint32_t AHPPIR; ///< Aliased Highest Priority Pending Interrupt Register
 
-	uint32_t RESERVED_02C_0CC[CALC_OFFSET(0x02C, 0x0CC)]; ///< 168 Bytes gap between AHPPIR and APR0
+	uint32_t RESERVED_02C_0CC[CALC_OFFSET(0x02C, 0x0CC)]; ///< 164 Bytes gap between AHPPIR and APR0
 
 	volatile uint32_t APR0; ///< Active Priority Register
 
@@ -133,7 +134,7 @@ typedef enum
 
 ## 5. Linker script symbols
 
-- Symbols exported by `linker/*.ld` use a double-underscore prefix and `snake_case`:
+- Symbols exported by `src/platform/<platform>/*.ld` use a double-underscore prefix and `snake_case`:
   `__kernel_start`, `__kernel_end`, `__bss_start`, `__bss_end`, `__stack_top`.
 - Declare them in C as arrays so you take their address correctly:
   `extern char __bss_start[];`

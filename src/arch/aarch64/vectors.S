@@ -1,4 +1,7 @@
 /*
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ * Copyright (C) 2026 Amerody
+ * 
  * vectors.S: EL1 exception vector table and the trap-frame entry/exit code.
  *
  * vector_table has the 16 slots of 0x80 bytes each, in 4 groups of 4
@@ -149,4 +152,5 @@ exception_hang:
 install_vector_table:
     adr x0, vector_table
     msr vbar_el1, x0  // Set Vector Base Address Register
+    isb
     ret

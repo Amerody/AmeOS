@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 #include "uart_pl011.h"
 
 /**
@@ -8,16 +11,21 @@
 
 void uart_pl011_enable(unsigned int id)
 {
+	(void) id;
 	// Placeholder
 }
 
 void uart_pl011_putc(unsigned int port, char c)
 {
+	(void) port;
+	(void) c;
 	// Placeholder
 }
 
 bool uart_pl011_getc(unsigned int port, char* c)
 {
+	(void) port;
+	(void) c;
 	// Placeholder
 	return false;
 }

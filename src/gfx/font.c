@@ -1,13 +1,16 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 #include "gfx/font.h"
 
 #include <stdint.h>
 
-static const uint8_t font_data[256][FONT_HEIGHT] = {
+static const uint8_t s_font_data[256][FONT_HEIGHT] = {
 #include "gfx/terminus_14.inc"
 };
 
 // Returns a pointer to the 8-byte array defining a character.
 const uint8_t* font_get_glyph(unsigned char c)
 {
-	return font_data[c];
+	return s_font_data[c];
 }

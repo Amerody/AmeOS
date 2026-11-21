@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file memory.h
  * @brief Freestanding memory functions (memcpy(), memset(), memmove()) and the address
@@ -10,6 +13,8 @@
  *
  * Context: they touch no global state and never block, so they can be called from any
  * context, including interrupt handlers.
+ *
+ * @todo Make every memory function match the libc signatures
  */
 #pragma once
 

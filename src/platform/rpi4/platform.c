@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 #include "hal/platform.h"
 
-#include <arch/irq.h>
 #include <hal/hal_irq.h>
 
 #include <stddef.h>
@@ -16,10 +18,6 @@ static const char* s_platform_name = KERNEL_PLATFORM_NAME;
 
 void platform_init()
 {
-	// Enable the GIC
-	// gic_init();
-	// gic_cpu_init();
-
 	hal_irq_init();
 
 	// Platform mem regions data not parsed yet
@@ -32,5 +30,7 @@ const char* platform_name()
 
 size_t platform_mem_regions(struct mem_region* out, size_t max)
 {
+	(void) out;
+	(void) max;
 	return 0;
 }

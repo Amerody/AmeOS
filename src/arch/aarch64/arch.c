@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 #include "arch/arch.h"
 #include "arch/irq.h"
 
@@ -37,6 +40,6 @@ void arch_halt()
 {
 	arch_irq_disable();
 
-	while(1)
+	while (1)
 		arch_cpu_idle();
 }

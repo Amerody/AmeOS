@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 #include "gpio.h"
 
 /**
@@ -8,7 +11,6 @@
 
 #include "soc.h"
 #include <common/mmio.h>
-
 
 #include <stddef.h>
 #include <stdint.h>
@@ -86,9 +88,7 @@ typedef struct
 #define GPIO ((GPIO_Registers*) GPIO_BASE)     ///< GPIO access
 
 /// @brief Highest pin number the functions accept
-/// @bug Off by one: the BCM2711 has GPIO0 to GPIO57 (58 pins), so pin 58 is accepted
-///      although it doesn't exist.
-#define GPIO_MAX_PIN 58
+#define GPIO_MAX_PIN 57
 
 /// @brief GPIO field sizes in bits
 typedef enum
@@ -100,7 +100,7 @@ typedef enum
 	/// @brief GPIO_PUP_PDN_CNTRL_REGn: 2 bits per pin
 	GPIO_PULL_FIELD_SIZE = 2,
 	/// @brief GPFSELn: 3 bits per pin
-	GPIO_FSEL_FIELF_SIZE = 3
+	GPIO_FSEL_FIELD_SIZE = 3
 } gpio_field_size_t;
 
 /**
@@ -143,4 +143,4 @@ gpio_status_t gpio_call(gpio_t pin, uint32_t value, mmio_register32_t base_reg, 
 gpio_status_t gpio_set(gpio_t pin) { return gpio_call(pin, 1, &GPIO->GPSET0, GPIO_SET_FIELD_SIZE); }
 gpio_status_t gpio_clr(gpio_t pin) { return gpio_call(pin, 1, &GPIO->GPCLR0, GPIO_CLR_FIELD_SIZE); }
 gpio_status_t gpio_set_resistor(gpio_t pin, gpio_resistor_t value) { return gpio_call(pin, value, &GPIO->GPIO_PUP_PDN_CNTRL_REG0, GPIO_PULL_FIELD_SIZE); }
-gpio_status_t gpio_select_function(gpio_t pin, gpio_function_t func) { return gpio_call(pin, func, &GPIO->GPFSEL0, GPIO_FSEL_FIELF_SIZE); }
+gpio_status_t gpio_select_function(gpio_t pin, gpio_function_t func) { return gpio_call(pin, func, &GPIO->GPFSEL0, GPIO_FSEL_FIELD_SIZE); }

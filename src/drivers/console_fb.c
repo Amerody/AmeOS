@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 #include "drivers/console/console_fb.h"
 
 #include <gfx/color.h>
@@ -14,8 +17,8 @@
  * @ingroup console
  */
 
-/// @brief Non-zero once console_fb_init() has run, even if hal_fb_init() failed
-static int s_init = 0;
+/// @brief True once console_fb_init() has run, even if hal_fb_init() failed
+static bool s_init = false;
 
 /// @brief Cursor column, in cells
 static uint32_t s_cursor_x = 0;
@@ -212,7 +215,7 @@ static void console_fb_clear()
 
 int console_fb_init()
 {
-	if (s_init != 0)
+	if (!s_init)
 		return -EBUSY;
 
 	static struct console fb_console;
@@ -230,7 +233,7 @@ int console_fb_init()
 	s_max_cols = (fb) ? fb->width / FONT_WIDTH : 0;
 	s_max_rows = (fb) ? fb->height / FONT_HEIGHT : 0;
 
-	s_init = 1;
+	s_init = true;
 	return error;
 }
 

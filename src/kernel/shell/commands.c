@@ -1,4 +1,5 @@
-// built-in commands
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
 #include "commands.h"
 #include <stddef.h>
 
@@ -74,11 +75,11 @@ static const command_t s_commands[] = {
 };
 
 /// @brief Number of entries in #s_commands
-#define COMMANDS_SIZE (sizeof(s_commands) / sizeof(s_commands[0]))
+#define COMMANDS_COUNT (sizeof(s_commands) / sizeof(s_commands[0]))
 
 void shell_dispatch_command(size_t argc, char* argv[])
 {
-	for (size_t i = 0; i < COMMANDS_SIZE; i++)
+	for (size_t i = 0; i < COMMANDS_COUNT; i++)
 	{
 		if (strcmp(argv[0], s_commands[i].name) == 0)
 		{
@@ -114,7 +115,7 @@ static int cmd_help(size_t argc, char* argv[])
 
 	if (argc == 1)
 	{
-		for (size_t i = 0; i < COMMANDS_SIZE; i++)
+		for (size_t i = 0; i < COMMANDS_COUNT; i++)
 		{
 			kprintf("%s\n", s_commands[i].name);
 		}
@@ -122,7 +123,7 @@ static int cmd_help(size_t argc, char* argv[])
 	}
 	else
 	{
-		for (size_t i = 0; i < COMMANDS_SIZE; i++)
+		for (size_t i = 0; i < COMMANDS_COUNT; i++)
 		{
 			if (strcmp(argv[1], s_commands[i].name) == 0)
 			{

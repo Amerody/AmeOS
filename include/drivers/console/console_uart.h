@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file console_uart.h
  * @brief Console sink that writes to a serial port and reads what it receives.

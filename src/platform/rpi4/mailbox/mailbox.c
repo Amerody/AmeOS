@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 #include "mailbox.h"
 
 #include <common/mmio.h>
@@ -46,6 +49,9 @@ int mailbox_call(uint8_t channel)
 	// Wait until we can write
 	while (mmio_read(&VC_MBOX->STATUS) & MBOX_FULL)
 		;
+
+	/// @todo Create an arch module for memory synchronization
+	__asm__ __volatile__("dsb sy" ::: "memory");
 
 	// Write the address of our buffer to the mailbox with the channel appended
 	mmio_write(&VC_MBOX->WRITE, r);

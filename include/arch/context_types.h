@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file context_types.h
  * @brief aarch64 layouts of the saved execution states. Layout only, no logic.
@@ -19,7 +22,7 @@
  * @brief State saved by arch_context_switch(): the AAPCS64 callee-saved registers plus
  *        the stack pointer. 13 words.
  *
- * @bug This is architecture dependant. This should NOT be here
+ * @bug This is architecture dependent. This should NOT be here
  */
 struct cpu_context
 {
@@ -59,7 +62,7 @@ struct cpu_context
  * changes a field (for example @c elr or a register in @c x) changes the state it
  * returns to.
  *
- * @bug This is architecture dependant. This should NOT be here
+ * @bug This is architecture dependent. This should NOT be here
  */
 struct trap_frame
 {

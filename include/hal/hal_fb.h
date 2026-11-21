@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file hal_fb.h
  * @brief Framebuffer contract: a linear pixel buffer in memory and simple drawing.

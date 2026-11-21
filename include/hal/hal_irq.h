@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file hal_irq.h
  * @brief Interrupt-controller contract: per-source enable, handlers, dispatch.

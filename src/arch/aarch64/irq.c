@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file irq.c
  * @brief CPU-level IRQ masking on aarch64 (PSTATE.I via the DAIF register).

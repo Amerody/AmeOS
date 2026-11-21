@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file arch.h
  * @brief CPU-architecture contract: bring-up, idle and halt.

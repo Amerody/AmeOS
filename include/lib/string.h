@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file string.h
  * @brief Freestanding string functions: strlen(), strcmp(), strncmp(), strcpy(), strncpy(),
@@ -11,6 +14,8 @@
  *
  * Context: they touch no global state and never block, so they can be called from any
  * context, including interrupt handlers.
+ *
+ * @todo Make every string function match the libc signatures
  */
 #pragma once
 

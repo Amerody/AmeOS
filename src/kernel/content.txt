@@ -1,4 +1,0 @@
-kernel logic with no hardware knowledge. 
-lib/ is where kprintf and the freestanding memcpy/memset/strlen go, 
-plus small utilities like lists, bitmaps, and ring buffers. mm/ will 
-hold the physical page allocator and kmalloc. sched/ and syscall/ come later.

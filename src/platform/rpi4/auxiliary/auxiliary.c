@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 #include "auxiliary.h"
 #include "aux_regs.h"
 #include <arch/irq.h>

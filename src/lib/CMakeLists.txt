@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Amerody
+
 add_library(lib OBJECT
     "string.c"
     "memory.c"

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 #include <hal/hal_fb.h>
 
 #include <common/mmio.h>
@@ -17,15 +20,15 @@
 #define COLOR_INVERT_MASK 0x00FFFFFFu
 
 /// @brief The framebuffer description returned by hal_fb_get_info()
-static framebuffer_t fb_info;
+static framebuffer_t s_fb_info;
 
 // One property request with the tags SET_PHYS_WH, SET_VIRT_WH, SET_DEPTH, SET_VIRT_OFF,
 // GET_PITCH and ALLOCATE. Every failure (mailbox error, or no buffer allocated) returns -1.
 int hal_fb_init(uint32_t width, uint32_t height, uint32_t depth)
 {
-	fb_info.width = width;
-	fb_info.height = height;
-	fb_info.depth = depth;
+	s_fb_info.width = width;
+	s_fb_info.height = height;
+	s_fb_info.depth = depth;
 
 	mailbox_buffer[0] = 35 * 4; // Total size
 	mailbox_buffer[1] = 0;      // Request
@@ -85,25 +88,25 @@ int hal_fb_init(uint32_t width, uint32_t height, uint32_t depth)
 	}
 
 	// Extract framebuffer address and pitch from response
-	fb_info.buffer = (uint32_t*) (uint64_t) (mailbox_buffer[28] & 0x3FFFFFFF);
-	fb_info.pitch = mailbox_buffer[24];
+	s_fb_info.buffer = (uint32_t*) (uint64_t) (mailbox_buffer[28] & 0x3FFFFFFF);
+	s_fb_info.pitch = mailbox_buffer[24];
 
 	return 0;
 }
 
 void hal_fb_set_pixel(uint32_t x, uint32_t y, uint32_t color)
 {
-	if (x >= fb_info.width || y >= fb_info.height)
+	if (x >= s_fb_info.width || y >= s_fb_info.height)
 		return;
 
-	fb_info.buffer[y * (fb_info.pitch / 4) + x] = color;
+	s_fb_info.buffer[y * (s_fb_info.pitch / 4) + x] = color;
 }
 
 void hal_fb_fill_rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t color)
 {
-	for (uint32_t row = y; row < y + h && row < fb_info.height; row++)
+	for (uint32_t row = y; row < y + h && row < s_fb_info.height; row++)
 	{
-		for (uint32_t col = x; col < x + w && col < fb_info.width; col++)
+		for (uint32_t col = x; col < x + w && col < s_fb_info.width; col++)
 		{
 			hal_fb_set_pixel(col, row, color);
 		}
@@ -141,16 +144,16 @@ void hal_fb_draw_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32
 
 void hal_fb_invert_rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 {
-	if (x >= fb_info.width || y >= fb_info.height)
+	if (x >= s_fb_info.width || y >= s_fb_info.height)
 		return;
 
-	for (uint32_t row = y; row < y + h && row < fb_info.height; row++)
+	for (uint32_t row = y; row < y + h && row < s_fb_info.height; row++)
 	{
-		for (uint32_t col = x; col < x + w && col < fb_info.width; col++)
+		for (uint32_t col = x; col < x + w && col < s_fb_info.width; col++)
 		{
-			fb_info.buffer[row * (fb_info.pitch / 4) + col] ^= COLOR_INVERT_MASK;
+			s_fb_info.buffer[row * (s_fb_info.pitch / 4) + col] ^= COLOR_INVERT_MASK;
 		}
 	}
 }
 
-framebuffer_t* hal_fb_get_info() { return &fb_info; }
+framebuffer_t* hal_fb_get_info() { return &s_fb_info; }

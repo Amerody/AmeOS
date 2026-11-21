@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file timer.c
  * @brief hal_timer implementation on the ARM generic timer (aarch64).
@@ -55,7 +58,7 @@ static uint64_t s_deadline;     ///< Next absolute CNTVCT value to fire at
  * @brief Reads CNTFRQ_EL0, the counter frequency.
  * @return Counter frequency in Hz, as set by the firmware or boot code
  */
-static inline uint64_t read_cntfrq()
+static inline uint64_t read_cntfrq_el0()
 {
 	uint64_t v;
 	__asm__ volatile("mrs %0, cntfrq_el0" : "=r"(v));
@@ -69,7 +72,7 @@ static inline uint64_t read_cntfrq()
  *
  * @return Current counter value, in counter ticks
  */
-static inline uint64_t read_cntvct()
+static inline uint64_t read_cntvct_el0()
 {
 	uint64_t v;
 	/* The isb stops the counter read from being speculated earlier. */
@@ -81,7 +84,7 @@ static inline uint64_t read_cntvct()
  * @brief Reads CNTV_CTL_EL0, the virtual timer control register.
  * @return Register value; see CTL_ENABLE, CTL_IMASK and CTL_ISTATUS
  */
-static inline uint32_t read_cntv_ctl()
+static inline uint32_t read_cntv_ctl_el0()
 {
 	uint64_t v;
 	__asm__ volatile("mrs %0, cntv_ctl_el0" : "=r"(v));
@@ -92,7 +95,7 @@ static inline uint32_t read_cntv_ctl()
  * @brief Writes CNTV_CTL_EL0, followed by an @c isb.
  * @param v New value; see CTL_ENABLE and CTL_IMASK
  */
-static inline void write_cntv_ctl(uint32_t v)
+static inline void write_cntv_ctl_el0(uint32_t v)
 {
 	__asm__ volatile("msr cntv_ctl_el0, %0\n\tisb" ::"r"((uint64_t) v) : "memory");
 }
@@ -101,7 +104,7 @@ static inline void write_cntv_ctl(uint32_t v)
  * @brief Writes CNTV_CVAL_EL0, the compare value, followed by an @c isb.
  * @param v Absolute counter value at which the timer condition is met
  */
-static inline void write_cntv_cval(uint64_t v)
+static inline void write_cntv_cval_el0(uint64_t v)
 {
 	__asm__ volatile("msr cntv_cval_el0, %0\n\tisb" ::"r"(v) : "memory");
 }
@@ -162,12 +165,12 @@ static void tick_irq_handler(void* arg)
 {
 	(void) arg;
 
-	if (!(read_cntv_ctl() & CTL_ISTATUS))
+	if (!(read_cntv_ctl_el0() & CTL_ISTATUS))
 		return; /* nothing pending: ignore */
 
 	if (!s_tick_cb)
 	{ /* stopped while the IRQ was in flight */
-		write_cntv_ctl(0);
+		write_cntv_ctl_el0(0);
 		return;
 	}
 
@@ -176,7 +179,7 @@ static void tick_irq_handler(void* arg)
 	 * so late that the next deadline has also passed, skip those ticks instead
 	 * of firing a burst to catch up.
 	 */
-	uint64_t now = read_cntvct();
+	uint64_t now = read_cntvct_el0();
 	do
 	{
 		advance_deadline();
@@ -184,7 +187,7 @@ static void tick_irq_handler(void* arg)
 	while (s_deadline <= now);
 
 	/* Writing a future compare value also clears the interrupt condition. */
-	write_cntv_cval(s_deadline);
+	write_cntv_cval_el0(s_deadline);
 
 	s_tick_cb();
 }
@@ -196,11 +199,11 @@ int hal_timer_init()
 	if (s_ready)
 		return 0; /* idempotent */
 
-	uint64_t freq = read_cntfrq();
+	uint64_t freq = read_cntfrq_el0();
 	if (freq == 0)
 		return -ENODEV; /* firmware/boot code never set it */
 
-	write_cntv_ctl(0); /* timer off, any stale condition cleared */
+	write_cntv_ctl_el0(0); /* timer off, any stale condition cleared */
 
 	int rc = hal_irq_register(TIMER_IRQ_VIRT, tick_irq_handler, NULL);
 	if (rc < 0)
@@ -208,7 +211,7 @@ int hal_timer_init()
 	hal_irq_enable(TIMER_IRQ_VIRT); /* harmless: the timer itself is off */
 
 	s_freq = freq;
-	s_start = read_cntvct();
+	s_start = read_cntvct_el0();
 	s_ready = true;
 	return 0;
 }
@@ -217,7 +220,7 @@ uint64_t hal_timer_now_ns()
 {
 	if (!s_ready)
 		return 0;
-	return ticks_to_ns(read_cntvct() - s_start);
+	return ticks_to_ns(read_cntvct_el0() - s_start);
 }
 
 int hal_timer_set_tick(uint32_t hz, void (*callback)(void))
@@ -225,7 +228,7 @@ int hal_timer_set_tick(uint32_t hz, void (*callback)(void))
 	if (hz == 0)
 	{ /* stop the tick */
 		arch_irq_flags_t f = arch_irq_save();
-		write_cntv_ctl(0);
+		write_cntv_ctl_el0(0);
 		s_tick_cb = NULL;
 		arch_irq_restore(f);
 		return 0;
@@ -244,10 +247,10 @@ int hal_timer_set_tick(uint32_t hz, void (*callback)(void))
 	s_acc = 0;
 	s_tick_cb = callback;
 
-	s_deadline = read_cntvct();
+	s_deadline = read_cntvct_el0();
 	advance_deadline(); /* first tick one period from now */
-	write_cntv_cval(s_deadline);
-	write_cntv_ctl(CTL_ENABLE); /* enabled, interrupt unmasked */
+	write_cntv_cval_el0(s_deadline);
+	write_cntv_ctl_el0(CTL_ENABLE); /* enabled, interrupt unmasked */
 
 	arch_irq_restore(f);
 	return 0;

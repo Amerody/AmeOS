@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 # Build the kernel and run it in QEMU (raspi4b).
 #
 # Meant for Git Bash on Windows (also what Claude Code uses as its shell there).

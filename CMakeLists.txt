@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Amerody
+
 cmake_minimum_required(VERSION 3.25)
 
 # The toolchain file is supplied by the presets (CMakePresets.json), so
@@ -30,18 +33,7 @@ message(STATUS "Kernel platform: ${KERNEL_PLATFORM}")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# ------------------------------------------------------------------------------
-# Sources NOT UP TO DATE
-#
-# Expected layout:
-#   src/kernel/                  platform-independent kernel code
-#   src/arch/aarch64/            CPU-specific code (boot stub, exception vectors, ...)
-#   src/platform/rpi4/           board-specific code (UART, interrupt controller, ...)
-#   include/                     headers (Doxygen comments live here)
-#   linker/rpi4.ld               linker script
-#
-# CONFIGURE_DEPENDS makes the build re-glob automatically when files are added.
-# ------------------------------------------------------------------------------
+# The linker script must have the same name as the platform
 set(KERNEL_LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/src/platform/${KERNEL_PLATFORM}/${KERNEL_PLATFORM}.ld")
 if(NOT EXISTS "${KERNEL_LINKER_SCRIPT}")
     message(FATAL_ERROR "Missing linker script: ${KERNEL_LINKER_SCRIPT}")
@@ -53,7 +45,7 @@ add_library(kernel_flags INTERFACE)
 target_compile_definitions(kernel_flags INTERFACE "KERNEL_ARCH_NAME=\"${KERNEL_ARCH}\""  "KERNEL_PLATFORM_NAME=\"${KERNEL_PLATFORM}\"")
 target_compile_definitions(kernel_flags INTERFACE 
     "KERNEL_VERSION_MAJOR=0"
-    "KERNEL_VERSION_MINOR=2"
+    "KERNEL_VERSION_MINOR=1"
     "KERNEL_VERSION_PATCH=0"
 )
 
@@ -61,6 +53,7 @@ target_include_directories(kernel_flags INTERFACE "${CMAKE_SOURCE_DIR}/include")
 target_compile_options(kernel_flags INTERFACE 
     -mcpu=cortex-a72
     -ffreestanding
+    -mstrict-align # Force strict memory access alignement until the MMU is on
     -fno-stack-protector
     -fno-pic
     -fno-omit-frame-pointer

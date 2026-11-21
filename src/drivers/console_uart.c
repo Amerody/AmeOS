@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 #include "drivers/console/console_uart.h"
 
 #include <hal/hal_uart.h>

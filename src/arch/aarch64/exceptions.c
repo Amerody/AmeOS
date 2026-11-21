@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file exceptions.c
  * @brief aarch64 exception handlers called from the vector table, plus the
@@ -13,20 +16,6 @@
 #include <kernel/kprintf.h>
 
 #include <stdint.h>
-
-/* ---- helpers ----------------------------------------------------------- */
-
-/**
- * @brief Reads a system register with @c mrs and evaluates to its 64-bit value.
- *
- * @param name Register name as the assembler spells it, e.g. @c esr_el1
- */
-#define READ_SYSREG(name)                              \
-	({                                                 \
-		uint64_t _v;                                   \
-		__asm__ volatile("mrs %0, " #name : "=r"(_v)); \
-		_v;                                            \
-	})
 
 /// @brief Exception class (EC) field of an ESR_EL1 value, bits [31:26]
 #define ESR_EC(esr) ((uint32_t) (((esr) >> 26) & 0x3Fu))
@@ -51,6 +40,37 @@
 #define EC_SP_ALIGNMENT 0x26u
 /// @brief Exception class: BRK instruction executed in AArch64 state
 #define EC_BRK64 0x3Cu
+
+/**
+ * @brief Reads ESR_EL1 (Exception Syndrome Register).
+ *
+ * Holds the cause of the last exception taken to EL1
+ * (EC [31:26], IL [25], ISS [24:0]). Must run at EL1 or higher.
+ *
+ * @return Contents of ESR_EL1.
+ */
+static inline uint64_t read_esr_el1()
+{
+	uint64_t v;
+	__asm__ volatile("mrs %0, esr_el1" : "=r"(v));
+	return v;
+}
+
+/**
+ * @brief Reads FAR_EL1 (Fault Address Register).
+ *
+ * Holds the faulting virtual address for aborts, PC alignment faults
+ * and watchpoints taken to EL1. UNKNOWN for other exceptions.
+ * Must run at EL1 or higher.
+ *
+ * @return Contents of FAR_EL1.
+ */
+static inline uint64_t read_far_el1()
+{
+	uint64_t v;
+	__asm__ volatile("mrs %0, far_el1" : "=r"(v));
+	return v;
+}
 
 /**
  * @brief Human-readable name of an exception class, for the panic output.
@@ -124,14 +144,14 @@ void arch_trap_frame_dump(const struct trap_frame* tf)
  */
 __attribute__((noreturn)) static void exception_panic(const char* kind, struct trap_frame* tf)
 {
-	uint64_t esr = READ_SYSREG(esr_el1);
+	uint64_t esr = read_esr_el1();
 	uint32_t ec = ESR_EC(esr);
 
 	kprintf("\n*** %s EXCEPTION ***\n", kind);
 	kprintf("EC=%x (%s) ISS=%x ESR=%lx\n", ec, ec_name(ec), ESR_ISS(esr), esr);
 
 	if (far_is_valid(ec))
-		kprintf("FAR=%lx\n", READ_SYSREG(far_el1));
+		kprintf("FAR=%lx\n", read_far_el1());
 
 	arch_trap_frame_dump(tf);
 	arch_halt();
@@ -141,7 +161,7 @@ __attribute__((noreturn)) static void exception_panic(const char* kind, struct t
 
 void sync_handler(struct trap_frame* tf)
 {
-	uint64_t esr = READ_SYSREG(esr_el1);
+	uint64_t esr = read_esr_el1();
 	uint32_t ec = ESR_EC(esr);
 
 	if (ec == EC_SVC64)

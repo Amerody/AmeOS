@@ -12,12 +12,12 @@ The codebase is organized as follows:
   * `arch/`: Architecture-specific interfaces (context switching, MMU) implemented by the architecture layer.
   * `kernel/`: Internal APIs such as memory allocation, scheduling, and standard library functions.
   * `drivers/`: Kernel drivers such as the console
-  * `gfx`: Graphics-related files such as the font header and the font defining
+  * `gfx/`: Graphics-related files such as the font header and the font defining
 * `src/`: Contains all implementation code.
   * `kernel/`: Platform-independent core components (scheduler, memory management, system calls).
   * `drivers/`: Portable device drivers built on top of the HAL.
   * `gfx/`: Graphics-related implementations
-  * `lib`: Kernel libraries such as String 
+  * `lib/`: Kernel libraries such as String 
   * `arch/aarch64/`: CPU-specific code for ARM64, including boot stubs, exception vectors, and traps.
   * `platform/rpi4/`: Board-specific implementations mapping HAL definitions to the BCM2711 SoC.
 
@@ -109,27 +109,45 @@ AmeOS is primarily a learning project: the goal is to understand OS internals by
 * **Code review**: Reviewing changes for bugs such as missing `volatile` qualifiers or barriers on MMIO accesses, wrong register offsets, alignment problems, incorrect exception-level assumptions, and kernel code that bypasses the HAL.
 * **Design discussion**: Deciding where new code belongs within the layered architecture (kernel core, drivers, HAL, platform, and architecture code).
 * **Debugging**: Helping interpret QEMU output, exception information, and GDB sessions.
-* **Documentation**: Written partly by Claude Code and partly by the maintainer. All of it is reviewed by the maintainer.
-* **Decision records**: Architecture decision records in `docs/internal/decisions/` are written by Claude Code from an interview with the maintainer. The decisions, alternatives, and reasoning are the maintainer's; the AI asks the questions and writes up the answers.
+* **Documentation**: Written partly by Claude Code and partly by me. All of it is reviewed by hand.
+* **Decision records**: Architecture decision records in `docs/internal/decisions/` are written by Claude Code from an interview with me. The decisions, alternatives, and reasoning are mine; the AI asks the questions and writes up the answers.
 
 ### Authorship
-* **Kernel code**: All kernel code, including drivers, the HAL, and libraries, is written by the maintainer. AI may suggest small fixes during review, but the code is typed and understood by hand.
+* **Kernel code**: All kernel code, including drivers, the HAL, and libraries, is written by me. AI may suggest small fixes during review, but the code is typed and understood by hand.
 * **Tooling**: `tools/run.sh` (QEMU test runner) and `tools/bdf2inc.py` (font conversion) were written by Claude Code.
-* **Documentation**: Written by both Claude Code and the maintainer, and of course reviewed by the maintainer. This includes both `.md` files and doxygen comments in the source.
+* **Documentation**: Written by both Claude Code and me, and of course reviewed by me. This includes both `.md` files and doxygen comments in the source.
 
 ### How correctness is checked
-* Changes are built and run in QEMU (`raspi4b`) using `tools/run.sh` before being committed.
+* Changes are built and run in QEMU (`raspi4b`) using `tools/run.sh` or using the VSCode task `qemu-debug` before being committed.
 * Register addresses, offsets, and bit fields are verified against the official documentation, not taken from the AI's answers.
 * Real-hardware testing on a Raspberry Pi 4 is planned. Until then, behavior that QEMU does not emulate accurately is untested.
 
 ### AI configuration in this repository
 * `CLAUDE.md`: Project context and rules for Claude Code, including the instruction to explain and review rather than write kernel code.
-* `.claude/skills/decision/`: A skill that interviews the maintainer and writes a decision record.
-* `.claude/skills/document/`: A skill that writes Doxygen comments across the code base and reports to the mantainer the added comments for review.
-* `.claude/skills/bug-hunt/`: A skill that checks the whole code base, or a given directory, for possible bugs, writes the corresponding `@bug` and reports back to the mantainer.
-* `.claude/skills/kernel-review/`: A skill that checks the given directories or uncommited changes for issues and reports them.
-* `claude/agents/concurrency-reviewer.md`: An agent that checks the given code for concurrency and memory-ordering bugs.
+* `.claude/skills/decision/`: A skill that interviews me and writes a decision record.
+* `.claude/skills/document/`: A skill that writes Doxygen comments across the code base and reports to me the added comments for review.
+* `.claude/skills/bug-hunt/`: A skill that checks the whole code base, or a given directory, for possible bugs, writes the corresponding `@bug` and reports back to me.
+* `.claude/skills/kernel-review/`: A skill that checks the given directories or uncommitted changes for issues and reports them.
+* `.claude/agents/concurrency-reviewer.md`: An agent that checks the given code for concurrency and memory-ordering bugs.
 * `docs/internal/style.md`: The coding style guide.
 
-### Contributing
-Contributions made with the help of AI tools are welcome, as long as AI is used the way it is in the rest of the project: as a tool for learning, reviewing, and debugging, not as a way to generate code. Kernel code should be written by hand. AI-written tooling and documentation are fine if disclosed in the pull request. You are expected to understand every change you submit, be able to explain it, and have built and tested it before opening a pull request.
+## Contributing
+AmeOS is a personal learning project. Writing every part of it myself is the whole point, so **I'm not accepting pull requests**, and any that are opened will be closed.
+
+You're still very welcome to:
+* **Read and learn from it.** The code, the Doxygen documentation, and the decision records in `docs/internal/decisions/` are there to be read.
+* **Fork it** and take your copy in whatever direction you like, within the terms of the license.
+* **Report bugs.** If you spot something wrong, an issue describing the problem is appreciated. Please describe it rather than sending a fix, since working out the fix is part of what I want to learn.
+
+
+## License
+AmeOS is free software, licensed under the [GNU General Public License v3.0 or later](LICENSE).
+ 
+You can use, study, modify, and share it freely. If you distribute AmeOS or a modified version of it, you must release the source under the same license. Whatever is built from this project stays open for everyone to learn from.
+
+The console font is [Terminus Font](https://terminus-font.sourceforge.net/) by
+Dimitar Toshkov Zhekov, licensed under the SIL Open Font License 1.1. The original
+BDF files and the license text are in `terminus/`; the generated
+`include/gfx/*.inc` files are covered by the same license.
+
+Copyright (C) 2026 Amerody

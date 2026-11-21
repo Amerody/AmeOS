@@ -93,6 +93,15 @@ LIB
 
 
 
+GFX
+
+/**
+ * @defgroup gfx Graphics Library
+ * @brief Colours and the bitmap font, drawn through hal_fb. No hardware access of its own.
+ */
+
+
+
 ARCH
 
 /**

@@ -133,17 +133,15 @@ AmeOS is primarily a learning project: the goal is to understand OS internals by
 
 ## Contributing
 AmeOS is a personal learning project. Writing every part of it myself is the whole point, so **I'm not accepting pull requests**, and any that are opened will be closed.
-
-You're still very welcome to:
-* **Read and learn from it.** The code, the Doxygen documentation, and the decision records in `docs/internal/decisions/` are there to be read.
-* **Fork it** and take your copy in whatever direction you like, within the terms of the license.
-* **Report bugs.** If you spot something wrong, an issue describing the problem is appreciated. Please describe it rather than sending a fix, since working out the fix is part of what I want to learn.
+Refer to [CONTRIBUTING.md](CONTRIBUTING.md)
 
 
 ## License
 AmeOS is free software, licensed under the [GNU General Public License v3.0 or later](LICENSE).
  
 You can use, study, modify, and share it freely. If you distribute AmeOS or a modified version of it, you must release the source under the same license. Whatever is built from this project stays open for everyone to learn from.
+
+The device tree blob src/platform/rpi4/bcm2711-rpi-4-b.dtb is taken unmodified from the Raspberry Pi firmware repository (commit f2491b7). It is compiled from the device tree sources in the Raspberry Pi Linux kernel, licensed under <SPDX ID>. It is distributed as a separate file and is not covered by AmeOS's license.
 
 The console font is [Terminus Font](https://terminus-font.sourceforge.net/) by
 Dimitar Toshkov Zhekov, licensed under the SIL Open Font License 1.1. The original

@@ -162,7 +162,7 @@ typedef enum
 
 ## 8. Formatting
 
-Enforced by `.clang-format` (K&R braces, tabs, 100 columns). Don't hand-format against it.
+Enforced by `.clang-format` (Allman braces, tabs). Don't hand-format against it.
 
 ## 9. Commits and docs
 

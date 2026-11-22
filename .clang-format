@@ -13,8 +13,8 @@ AlignConsecutiveAssignments:
   PadOperators:    true
 AlignConsecutiveBitFields:
   Enabled:         true
-  AcrossEmptyLines: false
-  AcrossComments:  false
+  AcrossEmptyLines: true
+  AcrossComments:  true
   AlignCompound:   false
   AlignFunctionDeclarations: false
   AlignFunctionPointers: false
@@ -32,7 +32,7 @@ AlignConsecutiveDeclarations:
 AlignConsecutiveMacros:
   Enabled:         true
   AcrossEmptyLines: true
-  AcrossComments:  false
+  AcrossComments:  true
   AlignCompound:   false
   AlignFunctionDeclarations: false
   AlignFunctionPointers: false
@@ -40,7 +40,7 @@ AlignConsecutiveMacros:
   PadOperators:    false
 AlignConsecutiveShortCaseStatements:
   Enabled:         true
-  AcrossEmptyLines: false
+  AcrossEmptyLines: true
   AcrossComments:  false
   AlignCaseArrows: false
   AlignCaseColons: false
@@ -170,20 +170,21 @@ ForEachMacros:
   - BOOST_FOREACH
 IfMacros:
   - KJ_IF_MAYBE
-IncludeBlocks:   Preserve
+IncludeBlocks:   Regroup
 IncludeCategories:
-  - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
-    Priority:        2
-    SortPriority:    0
-    CaseSensitive:   false
-  - Regex:           '^(<|"(gtest|gmock|isl|json)/)'
-    Priority:        3
-    SortPriority:    0
-    CaseSensitive:   false
-  - Regex:           '.*'
+  # 1. Main header (matched automatically by IncludeIsMainRegex, usually priority 0)
+  
+  # 2. Local project headers in quotes
+  - Regex:           '^".*"'
     Priority:        1
-    SortPriority:    0
-    CaseSensitive:   false
+  
+  # 3. Third-party library headers in angle brackets (with a / in the path)
+  - Regex:           '^<.*\/.*>'
+    Priority:        2
+  
+  # 4. C++ / C standard library headers in angle brackets (no slash)
+  - Regex:           '^<.*>'
+    Priority:        3
 IncludeIsMainRegex: '(Test)?$'
 IncludeIsMainSourceRegex: ''
 IndentAccessModifiers: false
@@ -192,12 +193,12 @@ IndentCaseLabels: false
 IndentExportBlock: true
 IndentExternBlock: AfterExternBlock
 IndentGotoLabels: OuterIndent
-IndentPPDirectives: None
+IndentPPDirectives: AfterHash
 IndentRequiresClause: true
 IndentWidth:     4
 IndentWrappedFunctionNames: false
 InsertBraces:    false
-InsertNewlineAtEOF: false
+InsertNewlineAtEOF: true
 InsertTrailingCommas: None
 IntegerLiteralSeparator:
   Binary:          0
@@ -261,14 +262,14 @@ PointerAlignment: Left
 PPIndentWidth:   -1
 QualifierAlignment: Leave
 ReferenceAlignment: Pointer
-ReflowComments:  Always
+ReflowComments:  Never
 RemoveBracesLLVM: false
 RemoveEmptyLinesInUnwrappedLines: false
 RemoveParentheses: Leave
 RemoveSemicolon: false
 RequiresClausePosition: OwnLine
 RequiresExpressionIndentation: OuterScope
-SeparateDefinitionBlocks: Leave
+SeparateDefinitionBlocks: Always
 ShortNamespaceLines: 1
 SkipMacroDefinitionBody: false
 SortIncludes:

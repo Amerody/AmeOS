@@ -12,17 +12,18 @@
 #include "auxiliary/aux_regs.h"
 #include "auxiliary/auxiliary.h"
 #include "gpio/gpio.h"
+
 #include <kernel/error.h>
 #include <lib/ringbuf.h>
 
 #include <stddef.h>
 #include <stdint.h>
 
-#define PIN_START 14U ///< Start pin to configure
-#define PIN_END 17U   ///< End pin to configure
+#define PIN_START             14U ///< Start pin to configure
+#define PIN_END               17U ///< End pin to configure
 
-#define AUX_UART_CLOCK 500000000                                  ///< 500 MHz clock
-#define AUX_MU_BAUD(baud) ((AUX_UART_CLOCK / ((baud) * 8U)) - 1U) ///< Helper to calculate the baudrate
+#define AUX_UART_CLOCK        500000000                               ///< 500 MHz clock
+#define AUX_MU_BAUD(baud)     ((AUX_UART_CLOCK / ((baud) * 8U)) - 1U) ///< Helper to calculate the baudrate
 
 #define UART_MINI_RX_BUF_SIZE 256u ///< Size of the receive ring buffer in bytes. Must be a power of 2
 

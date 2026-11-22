@@ -17,11 +17,11 @@
  * interface only), so other cores would still have to call gic_cpu_init().
  */
 
+#include "gic.h"
+
 #include <arch/irq.h>
 #include <hal/hal_irq.h>
 #include <kernel/error.h>
-
-#include "gic.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -54,8 +54,8 @@ int hal_irq_register(unsigned irq, hal_irq_handler_t handler, void* arg)
 	if (handler == NULL || irq >= gic_num_intids())
 		return -ERROR_INVALID_ARG;
 
-	int rc = 0;
-	arch_irq_flags_t f = arch_irq_save(); /* the table is also read from the IRQ path */
+	int              rc = 0;
+	arch_irq_flags_t f  = arch_irq_save(); /* the table is also read from the IRQ path */
 	if (s_handlers[irq].fn != NULL)
 	{
 		rc = -ERROR_BUSY;
@@ -63,7 +63,7 @@ int hal_irq_register(unsigned irq, hal_irq_handler_t handler, void* arg)
 	else
 	{
 		s_handlers[irq].arg = arg;
-		s_handlers[irq].fn = handler;
+		s_handlers[irq].fn  = handler;
 	}
 	arch_irq_restore(f);
 	return rc;

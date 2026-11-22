@@ -61,6 +61,7 @@ static void on_tick()
  * @param ... Arguments for the conversions in @p fmt
  */
 static void step(int rc, const char* fmt, ...) __attribute__((format(printf, 2, 3)));
+
 static void step(int rc, const char* fmt, ...)
 {
 	uint32_t color = (rc == 0) ? COLOR_GREEN : COLOR_RED;

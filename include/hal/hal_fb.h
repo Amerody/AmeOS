@@ -27,10 +27,10 @@
 struct framebuffer
 {
 	uint32_t* buffer; ///< First pixel (top-left); NULL until hal_fb_init() succeeds
-	uint32_t pitch;   ///< Bytes per row; can be more than width * 4
-	uint32_t width;   ///< Width in pixels
-	uint32_t height;  ///< Height in pixels
-	uint32_t depth;   ///< Bits per pixel, as given to hal_fb_init()
+	uint32_t  pitch;  ///< Bytes per row; can be more than width * 4
+	uint32_t  width;  ///< Width in pixels
+	uint32_t  height; ///< Height in pixels
+	uint32_t  depth;  ///< Bits per pixel, as given to hal_fb_init()
 };
 
 #ifdef __cplusplus

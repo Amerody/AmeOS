@@ -2,11 +2,12 @@
 // Copyright (C) 2026 Amerody
 
 #include "kernel/shutdown.h"
+
+#include "arch/irq.h"
 #include "kernel/console.h"
 #include "kernel/delay.h"
 #include "kernel/kprintf.h"
 
-#include "arch/irq.h"
 #include <arch/arch.h>
 #include <hal/platform.h>
 

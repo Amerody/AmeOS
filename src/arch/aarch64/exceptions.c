@@ -9,6 +9,7 @@
  */
 
 #include "exceptions.h"
+
 #include "arch/arch.h"
 #include "arch/context.h"
 
@@ -18,28 +19,28 @@
 #include <stdint.h>
 
 /// @brief Exception class (EC) field of an ESR_EL1 value, bits [31:26]
-#define ESR_EC(esr) ((uint32_t) (((esr) >> 26) & 0x3Fu))
+#define ESR_EC(esr)       ((uint32_t) (((esr) >> 26) & 0x3Fu))
 /// @brief Instruction-specific syndrome (ISS) field of an ESR_EL1 value, bits [24:0]
-#define ESR_ISS(esr) ((uint32_t) ((esr) & 0x1FFFFFFu))
+#define ESR_ISS(esr)      ((uint32_t) ((esr) & 0x1FFFFFFu))
 
 /// @brief Exception class: unknown reason
-#define EC_UNKNOWN 0x00u
+#define EC_UNKNOWN        0x00u
 /// @brief Exception class: SVC instruction executed in AArch64 state
-#define EC_SVC64 0x15u
+#define EC_SVC64          0x15u
 /// @brief Exception class: instruction abort from a lower exception level
-#define EC_IABORT_LOWER 0x20u
+#define EC_IABORT_LOWER   0x20u
 /// @brief Exception class: instruction abort taken without a change of exception level
 #define EC_IABORT_CURRENT 0x21u
 /// @brief Exception class: PC alignment fault
-#define EC_PC_ALIGNMENT 0x22u
+#define EC_PC_ALIGNMENT   0x22u
 /// @brief Exception class: data abort from a lower exception level
-#define EC_DABORT_LOWER 0x24u
+#define EC_DABORT_LOWER   0x24u
 /// @brief Exception class: data abort taken without a change of exception level
 #define EC_DABORT_CURRENT 0x25u
 /// @brief Exception class: SP alignment fault
-#define EC_SP_ALIGNMENT 0x26u
+#define EC_SP_ALIGNMENT   0x26u
 /// @brief Exception class: BRK instruction executed in AArch64 state
-#define EC_BRK64 0x3Cu
+#define EC_BRK64          0x3Cu
 
 /**
  * @brief Reads ESR_EL1 (Exception Syndrome Register).
@@ -145,7 +146,7 @@ void arch_trap_frame_dump(const struct trap_frame* tf)
 __attribute__((noreturn)) static void exception_panic(const char* kind, struct trap_frame* tf)
 {
 	uint64_t esr = read_esr_el1();
-	uint32_t ec = ESR_EC(esr);
+	uint32_t ec  = ESR_EC(esr);
 
 	kprintf("\n*** %s EXCEPTION ***\n", kind);
 	kprintf("EC=%x (%s) ISS=%x ESR=%lx\n", ec, ec_name(ec), ESR_ISS(esr), esr);
@@ -162,7 +163,7 @@ __attribute__((noreturn)) static void exception_panic(const char* kind, struct t
 void sync_handler(struct trap_frame* tf)
 {
 	uint64_t esr = read_esr_el1();
-	uint32_t ec = ESR_EC(esr);
+	uint32_t ec  = ESR_EC(esr);
 
 	if (ec == EC_SVC64)
 	{

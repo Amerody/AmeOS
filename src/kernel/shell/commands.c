@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Amerody
 #include "commands.h"
-#include <stddef.h>
 
 #include "hal/hal_timer.h"
 #include "kernel/console.h"
 #include "kernel/kprintf.h"
 #include "kernel/shutdown.h"
+
 #include <lib/memory.h>
 #include <lib/string.h>
+
+#include <stddef.h>
 
 /**
  * @file commands.c

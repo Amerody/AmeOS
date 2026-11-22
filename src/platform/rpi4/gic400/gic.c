@@ -2,7 +2,9 @@
 // Copyright (C) 2026 Amerody
 
 #include "gic.h"
+
 #include "soc.h"
+
 #include <common/mmio.h>
 
 #include <stdint.h>
@@ -94,8 +96,8 @@ struct GICD_Registers
 	volatile uint32_t CIDR3; ///< Component ID 3 Register
 };
 
-#define GICD_BASE (PERIPHERAL_BASE + 0x1841000) ///< GICD base address
-#define GICD ((struct GICD_Registers*) GICD_BASE)      ///< GICD access
+#define GICD_BASE (PERIPHERAL_BASE + 0x1841000)        ///< GICD base address
+#define GICD      ((struct GICD_Registers*) GICD_BASE) ///< GICD access
 
 /// @brief All the GICC Registers
 /// @warning @p RESERVED_* are not to be used
@@ -130,29 +132,29 @@ struct GICC_Registers
 	volatile uint32_t DIR; ///< Deactivate Interrupt Register
 };
 
-#define GICC_BASE (PERIPHERAL_BASE + 0x1842000) ///< GICC base address
-#define GICC ((struct GICC_Registers*) GICC_BASE)      ///< GICC access
+#define GICC_BASE                      (PERIPHERAL_BASE + 0x1842000)        ///< GICC base address
+#define GICC                           ((struct GICC_Registers*) GICC_BASE) ///< GICC access
 
-#define GIC_INTID_SGI_BASE 0u  ///< First SGI (0-15)
-#define GIC_INTID_PPI_BASE 16u ///< First PPI (16-31)
-#define GIC_INTID_SPI_BASE 32u ///< First SPI (shared, 32 and above)
+#define GIC_INTID_SGI_BASE             0u  ///< First SGI (0-15)
+#define GIC_INTID_PPI_BASE             16u ///< First PPI (16-31)
+#define GIC_INTID_SPI_BASE             32u ///< First SPI (shared, 32 and above)
 
 /// @brief Priority given to every interrupt by gic_init() and gic_cpu_init()
-#define GIC_DEFAULT_PRIORITY 0xA0u
+#define GIC_DEFAULT_PRIORITY           0xA0u
 /// @brief Target CPU mask given to every SPI by gic_init(): core 0
-#define GIC_DEFAULT_TARGET 0x01
+#define GIC_DEFAULT_TARGET             0x01
 
-#define GIC_MAX_PRIORITY_LEVEL 16u ///< Priority levels implemented. Since we boot in Non-secure mode, it's 16 for the GIC-400
+#define GIC_MAX_PRIORITY_LEVEL         16u ///< Priority levels implemented. Since we boot in Non-secure mode, it's 16 for the GIC-400
 
 #define GIC_DEFAULT_CORE_PRIORITY_MASK 0xFFu ///< Default core priority mask (all interrupts)
 
-#define GICD_SGIR_SGIINTID_SHIFT 0u    ///< GICD_SGIR bits [3:0]: SGI ID
-#define GICD_SGIR_TARGETLIST_SHIFT 16u ///< GICD_SGIR bits [23:16]: CPUTargetList (one bit per core)
-#define GICD_SGIR_FILTER_SHIFT 24u     ///< GICD_SGIR bits [25:24]: TargetListFilter
+#define GICD_SGIR_SGIINTID_SHIFT       0u  ///< GICD_SGIR bits [3:0]: SGI ID
+#define GICD_SGIR_TARGETLIST_SHIFT     16u ///< GICD_SGIR bits [23:16]: CPUTargetList (one bit per core)
+#define GICD_SGIR_FILTER_SHIFT         24u ///< GICD_SGIR bits [25:24]: TargetListFilter
 
-#define GICD_SGIR_FILTER_LIST 0x0u         ///< TargetListFilter: use CPUTargetList
-#define GICD_SGIR_FILTER_ALL_BUT_SELF 0x1u ///< TargetListFilter: every core except the requester
-#define GICD_SGIR_FILTER_SELF 0x2u         ///< TargetListFilter: only the requester (0x3: reserved)
+#define GICD_SGIR_FILTER_LIST          0x0u ///< TargetListFilter: use CPUTargetList
+#define GICD_SGIR_FILTER_ALL_BUT_SELF  0x1u ///< TargetListFilter: every core except the requester
+#define GICD_SGIR_FILTER_SELF          0x2u ///< TargetListFilter: only the requester (0x3: reserved)
 
 /// @brief Number of interrupt IDs implemented, set by gic_init(); see gic_num_intids()
 static uint32_t s_num_intids;
@@ -185,7 +187,7 @@ void gic_init()
 
 	// Read maximum interrupt ID
 	uint32_t it_lines_number = mmio_read_field(&GICD->TYPER, 0b11111, 0); // Since NUM_SPIS = 192, it should be 192/32 = 6
-	s_num_intids = (32 * (it_lines_number + 1));                          // NUM_SPIS = 192, so it should be (((192/32)+1)*32) = 224
+	s_num_intids             = (32 * (it_lines_number + 1));              // NUM_SPIS = 192, so it should be (((192/32)+1)*32) = 224
 	if (s_num_intids > GIC_MAX_NUM_INTERRUPTS)                            // Array size limit
 		s_num_intids = GIC_MAX_NUM_INTERRUPTS;
 
@@ -249,9 +251,9 @@ gic_status_t gic_enable_irq(uint32_t intid)
 {
 	GIC_CHECK_INTID(intid);
 
-	uint32_t reg_idx = intid / 32;      // Which ISENABLERn to write
+	uint32_t reg_idx      = intid / 32; // Which ISENABLERn to write
 	uint32_t required_bit = intid % 32; // Which bit number (0..31) is the one to set
-	uint32_t value = (1u << required_bit);
+	uint32_t value        = (1u << required_bit);
 
 	mmio_write(&GICD->ISENABLER[reg_idx], value);
 
@@ -262,9 +264,9 @@ gic_status_t gic_disable_irq(uint32_t intid)
 {
 	GIC_CHECK_INTID(intid);
 
-	uint32_t reg_idx = intid / 32;      // Which ICENALERn to write
+	uint32_t reg_idx      = intid / 32; // Which ICENALERn to write
 	uint32_t required_bit = intid % 32; // Which bit number (0..31) is the one to set
-	uint32_t value = (1u << required_bit);
+	uint32_t value        = (1u << required_bit);
 
 	mmio_write(&GICD->ICENABLER[reg_idx], value);
 
@@ -276,9 +278,9 @@ int gic_is_enabled(uint32_t intid)
 	if (intid >= s_num_intids)
 		return 0;
 
-	uint32_t reg_idx = intid / 32;      // Which ISENABLERn to read
+	uint32_t reg_idx      = intid / 32; // Which ISENABLERn to read
 	uint32_t required_bit = intid % 32; // Which bit number (0..31) is the one to set
-	uint32_t mask = (1u << required_bit);
+	uint32_t mask         = (1u << required_bit);
 
 	uint32_t current_value = mmio_read(&GICD->ISENABLER[reg_idx]);
 	return ((current_value & mask) >> required_bit);
@@ -329,7 +331,7 @@ gic_status_t gic_set_trigger(uint32_t intid, int edge)
 		return GIC_ERROR_INTID_NOT_SPI;
 
 	uint32_t reg_idx = intid / 16; // Which ICFGRn to write
-	uint32_t shift = (intid % 16) * 2 + 1;
+	uint32_t shift   = (intid % 16) * 2 + 1;
 
 	mmio_write_field(&GICD->ICFGR[reg_idx], (edge != 0), 0x1, shift);
 
@@ -341,7 +343,7 @@ int gic_is_pending(uint32_t intid)
 	if (intid >= s_num_intids)
 		return 0;
 
-	uint32_t reg_idx = intid / 32;
+	uint32_t reg_idx      = intid / 32;
 	uint32_t bit_required = intid % 32;
 
 	return mmio_read_field(&GICD->ISPENDR[reg_idx], 1, bit_required);
@@ -352,7 +354,7 @@ int gic_is_active(uint32_t intid)
 	if (intid >= s_num_intids)
 		return 0;
 
-	uint32_t reg_idx = intid / 32;
+	uint32_t reg_idx      = intid / 32;
 	uint32_t bit_required = intid % 32;
 
 	return mmio_read_field(&GICD->ISACTIVER[reg_idx], 1, bit_required);
@@ -366,7 +368,7 @@ gic_status_t gic_set_pending(uint32_t intid)
 		return GIC_ERROR_INTID_IS_SGI;
 
 	uint32_t reg_idx = intid / 32;
-	uint32_t bit = intid % 32;
+	uint32_t bit     = intid % 32;
 
 	mmio_write(&GICD->ISPENDR[reg_idx], 1u << bit);
 
@@ -381,7 +383,7 @@ gic_status_t gic_clear_pending(uint32_t intid)
 		return GIC_ERROR_INTID_IS_SGI;
 
 	uint32_t reg_idx = intid / 32;
-	uint32_t bit = intid % 32;
+	uint32_t bit     = intid % 32;
 
 	mmio_write(&GICD->ICPENDR[reg_idx], 1u << bit);
 
@@ -395,8 +397,8 @@ gic_status_t gic_clear_sgi_pending(uint32_t intid, uint8_t src_cpu_mask)
 
 	GIC_CHECK_CPU_MASK(src_cpu_mask);
 
-	uint32_t reg_idx = intid / 4;     // 4 SGIs (bytes) per CPENDSGIRn
-	uint32_t shift = (intid % 4) * 8; // Which byte of the word belongs to this SGI
+	uint32_t reg_idx = intid / 4;       // 4 SGIs (bytes) per CPENDSGIRn
+	uint32_t shift   = (intid % 4) * 8; // Which byte of the word belongs to this SGI
 
 	mmio_write(&GICD->CPENDSGIR[reg_idx], ((uint32_t) src_cpu_mask) << shift);
 
@@ -415,7 +417,7 @@ gic_status_t gic_send_sgi(uint32_t intid, gic_sgi_target_t target, uint8_t cpu_m
 	{
 	case GIC_SGI_TARGET_LIST:
 		GIC_CHECK_CPU_MASK(cpu_mask);
-		filter = GICD_SGIR_FILTER_LIST;
+		filter      = GICD_SGIR_FILTER_LIST;
 		target_list = cpu_mask;
 		break;
 

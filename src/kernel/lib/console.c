@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Amerody
 
 #include "kernel/console.h"
+
 #include "kernel/error.h"
 
 #include <stddef.h>

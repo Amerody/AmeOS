@@ -24,10 +24,10 @@
 /// @brief Ring buffer state. Initialise with ringbuf_init(); don't touch the fields directly
 struct ringbuf
 {
-	uint8_t* buf; ///< Storage given to ringbuf_init()
-	size_t mask;  ///< Capacity - 1 (the capacity is a power of 2)
-	size_t head;  ///< Next slot to write. Written only by the producer
-	size_t tail;  ///< Next slot to read. Written only by the consumer
+	uint8_t* buf;  ///< Storage given to ringbuf_init()
+	size_t   mask; ///< Capacity - 1 (the capacity is a power of 2)
+	size_t   head; ///< Next slot to write. Written only by the producer
+	size_t   tail; ///< Next slot to read. Written only by the consumer
 };
 
 #ifdef __cplusplus

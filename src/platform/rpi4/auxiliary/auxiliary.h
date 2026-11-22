@@ -31,7 +31,7 @@ typedef enum
  */
 typedef enum
 {
-	AUX_PERIPHERAL_MU = 0,  ///< Mini UART. Uses 1 Byte of data
+	AUX_PERIPHERAL_MU  = 0, ///< Mini UART. Uses 1 Byte of data
 	AUX_PERIPHERAL_SP1 = 1, ///< SP1. Uses 2 Bytes of data
 	AUX_PERIPHERAL_SP2 = 2  ///< SP2. Uses 2 Bytes of data
 } aux_peripheral_t;

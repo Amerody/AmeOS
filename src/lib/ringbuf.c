@@ -12,7 +12,7 @@
 void ringbuf_init(struct ringbuf* rb, uint8_t* storage, size_t capacity)
 {
 	// TODO: assert capacity is a power of 2
-	rb->buf = storage;
+	rb->buf  = storage;
 	rb->mask = capacity - 1;
 	rb->head = 0;
 	rb->tail = 0;

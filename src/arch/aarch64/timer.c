@@ -21,6 +21,7 @@
  */
 
 #include "arch/irq.h"
+
 #include <hal/hal_irq.h>
 #include <hal/hal_timer.h>
 #include <kernel/error.h>
@@ -29,19 +30,19 @@
 #include <stdint.h>
 
 /// @brief Nanoseconds in one second
-#define NS_PER_SEC 1000000000ULL
+#define NS_PER_SEC     1000000000ULL
 #define TIMER_IRQ_VIRT 27u ///< GIC PPI of the EL1 virtual timer
 
 /* CNTV_CTL_EL0 bits */
 /// @brief CNTV_CTL_EL0.ENABLE: timer enabled
-#define CTL_ENABLE (1u << 0)
-#define CTL_IMASK (1u << 1)   ///< CNTV_CTL_EL0.IMASK. Unused: we always run unmasked
-#define CTL_ISTATUS (1u << 2) ///< CNTV_CTL_EL0.ISTATUS: condition met (read-only)
+#define CTL_ENABLE     (1u << 0)
+#define CTL_IMASK      (1u << 1) ///< CNTV_CTL_EL0.IMASK. Unused: we always run unmasked
+#define CTL_ISTATUS    (1u << 2) ///< CNTV_CTL_EL0.ISTATUS: condition met (read-only)
 
 /* ---- state ------------------------------------------------------------- */
 
 /// @brief true once hal_timer_init() has succeeded
-static bool s_ready;
+static bool     s_ready;
 static uint64_t s_freq;  ///< Counter frequency in Hz
 static uint64_t s_start; ///< Counter value at hal_timer_init()
 
@@ -210,7 +211,7 @@ int hal_timer_init()
 		return rc;
 	hal_irq_enable(TIMER_IRQ_VIRT); /* harmless: the timer itself is off */
 
-	s_freq = freq;
+	s_freq  = freq;
 	s_start = read_cntvct_el0();
 	s_ready = true;
 	return 0;
@@ -241,11 +242,11 @@ int hal_timer_set_tick(uint32_t hz, void (*callback)(void))
 
 	arch_irq_flags_t f = arch_irq_save(); /* the IRQ handler reads this state */
 
-	s_hz = hz;
+	s_hz       = hz;
 	s_interval = s_freq / hz;
-	s_rem = s_freq % hz;
-	s_acc = 0;
-	s_tick_cb = callback;
+	s_rem      = s_freq % hz;
+	s_acc      = 0;
+	s_tick_cb  = callback;
 
 	s_deadline = read_cntvct_el0();
 	advance_deadline(); /* first tick one period from now */

@@ -2,7 +2,6 @@
 // Copyright (C) 2026 Amerody
 
 #include <hal/hal_uart.h>
-
 #include <kernel/error.h>
 
 /**

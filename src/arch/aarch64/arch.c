@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Amerody
 
 #include "arch/arch.h"
+
 #include "arch/irq.h"
 
 /**

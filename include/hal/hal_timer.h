@@ -24,9 +24,9 @@ extern "C"
 #endif
 
 /// @brief Nanoseconds per microsecond: divide a nanosecond count by it to get microseconds
-#define NS_TO_US 1000u
+#define NS_TO_US  1000u
 /// @brief Nanoseconds per millisecond: divide a nanosecond count by it to get milliseconds
-#define NS_TO_MS 1000000u
+#define NS_TO_MS  1000000u
 /// @brief Nanoseconds per second: divide a nanosecond count by it to get seconds
 #define NS_TO_SEC 1000000000u
 

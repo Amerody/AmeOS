@@ -32,8 +32,8 @@
 /// @brief White
 #define COLOR_WHITE RGB(255, 255, 255)
 /// @brief Pure red
-#define COLOR_RED RGB(255, 0, 0)
+#define COLOR_RED   RGB(255, 0, 0)
 /// @brief Pure green
 #define COLOR_GREEN RGB(0, 255, 0)
 /// @brief Pure blue
-#define COLOR_BLUE RGB(0, 0, 255)
+#define COLOR_BLUE  RGB(0, 0, 255)

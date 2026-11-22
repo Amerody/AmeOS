@@ -25,10 +25,10 @@ typedef enum
 {
 	GIC_SUCCESS = 0, ///< Operation Success
 
-	GIC_ERROR_INVALID_INTID = -1,    ///< An invalid interrupt id has been provided
-	GIC_ERROR_INTID_NOT_SPI = -2,    ///< An interrupt id NOT corresponding to an SPI has been provided where it shouldn't be
-	GIC_ERROR_INTID_NOT_SGI = -3,    ///< An interrupt id NOT corresponding to an SGI has been provided where it shouldn't be
-	GIC_ERROR_INTID_IS_SGI = -4,     ///< An interrupt id corresponding to an SGI has been provided where it shouldn't be
+	GIC_ERROR_INVALID_INTID    = -1, ///< An invalid interrupt id has been provided
+	GIC_ERROR_INTID_NOT_SPI    = -2, ///< An interrupt id NOT corresponding to an SPI has been provided where it shouldn't be
+	GIC_ERROR_INTID_NOT_SGI    = -3, ///< An interrupt id NOT corresponding to an SGI has been provided where it shouldn't be
+	GIC_ERROR_INTID_IS_SGI     = -4, ///< An interrupt id corresponding to an SGI has been provided where it shouldn't be
 	GIC_ERROR_INVALID_CPU_MASK = -5, ///< An invalid CPU mask has been provided
 
 	GIC_ERROR_INVALID_ARG = -999, ///< An invalid argument has been provided (shouldn't happen)
@@ -44,14 +44,14 @@ typedef enum
 } gic_sgi_target_t;
 
 /// @brief Extracts the interrupt ID (bits [9:0]) from a raw GICC_IAR value
-#define GIC_IAR_INTID(iar) ((iar) & 0x3FFu)
+#define GIC_IAR_INTID(iar)     ((iar) & 0x3FFu)
 
 /// @brief Extracts the source CPU ID (bits [12:10]) from a raw GICC_IAR value. Only meaningful for SGIs
-#define GIC_IAR_CPUID(iar) (((iar) >> 10) & 0x7u)
+#define GIC_IAR_CPUID(iar)     (((iar) >> 10) & 0x7u)
 
 /// @brief Most interrupt IDs the driver handles: its register arrays cover IDs 0-511
 #define GIC_MAX_NUM_INTERRUPTS 512u
-#define GIC_INTID_SPURIOUS 1023u ///< Returned by GICC_IAR when nothing is pending
+#define GIC_INTID_SPURIOUS     1023u ///< Returned by GICC_IAR when nothing is pending
 
 /**
  * @brief Initialize the GIC distributor.

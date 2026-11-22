@@ -11,6 +11,7 @@
 
 #include "common/mmio.h"
 #include "soc.h"
+
 #include <stdint.h>
 
 /// @brief All the AUX Peripherals Registers
@@ -78,5 +79,5 @@ struct AUX_Registers
 	volatile uint32_t SPI2_TXHOLD_REGd; ///< SPI 2 Extended Data
 };
 
-#define AUX_BASE (PERIPHERAL_BASE + 0x215000) ///< AUX Peripherals base address
-#define AUX ((struct AUX_Registers*) AUX_BASE)       ///< AUX Peripherals access
+#define AUX_BASE (PERIPHERAL_BASE + 0x215000)       ///< AUX Peripherals base address
+#define AUX      ((struct AUX_Registers*) AUX_BASE) ///< AUX Peripherals access

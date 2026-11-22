@@ -4,6 +4,7 @@
 #include "mailbox.h"
 
 #include <common/mmio.h>
+
 #include <soc.h>
 
 /**
@@ -29,15 +30,15 @@ struct VC_MBOX_Registers
 	volatile uint32_t WRITE;  ///< VideoCore Mailbox Write Register
 };
 
-#define VC_MBOX_BASE (PERIPHERAL_BASE + 0x0000B880) ///< VideoCore Mailbox base address
-#define VC_MBOX ((struct VC_MBOX_Registers*) VC_MBOX_BASE) ///< VideoCore Mailbox access
+#define VC_MBOX_BASE  (PERIPHERAL_BASE + 0x0000B880)             ///< VideoCore Mailbox base address
+#define VC_MBOX       ((struct VC_MBOX_Registers*) VC_MBOX_BASE) ///< VideoCore Mailbox access
 
 /// @brief Response code in mailbox_buffer[1] when the firmware processed the request
 #define MBOX_RESPONSE 0x80000000
 /// @brief STATUS bit: the write mailbox is full, so no message can be sent yet
-#define MBOX_FULL 0x80000000
+#define MBOX_FULL     0x80000000
 /// @brief STATUS bit: the read mailbox is empty, so no reply has arrived yet
-#define MBOX_EMPTY 0x40000000
+#define MBOX_EMPTY    0x40000000
 
 volatile uint32_t mailbox_buffer[36];
 

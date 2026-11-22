@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Amerody
 
 #include "kernel/shell.h"
+
 #include "commands.h"
 #include "kernel/console.h"
 
@@ -18,10 +19,10 @@
 /// @brief Size of #s_line_buffer in bytes, including the terminating NUL
 #define BUFFER_SIZE 256u
 /// @brief Maximum number of tokens per line; tokens past this are dropped
-#define MAX_ARGS 16u
+#define MAX_ARGS    16u
 
 /// @brief The escape byte that starts a terminal escape sequence
-#define ESC 0x1Bu
+#define ESC         0x1Bu
 
 /// @brief The line being typed; NUL-terminated only when the line ends
 static uint8_t s_line_buffer[BUFFER_SIZE];
@@ -97,7 +98,7 @@ static bool is_space(char c)
 static size_t tokenize(char* line, char* argv[], size_t max_args)
 {
 	size_t argc = 0;
-	char* p = line;
+	char*  p    = line;
 	while (*p != '\0')
 	{
 		while (is_space(*p))
@@ -156,8 +157,8 @@ static void print_prompt()
 
 void shell_init()
 {
-	s_cursor_pos = 0;
-	s_last_byte_r = false;
+	s_cursor_pos            = 0;
+	s_last_byte_r           = false;
 	s_escape_sequence_state = STATE_NORMAL;
 
 	print_prompt();
@@ -188,7 +189,7 @@ void shell_feed(char c)
 			s_last_byte_r = true;
 		console_putc('\n');
 		s_line_buffer[s_cursor_pos] = '\0';
-		s_cursor_pos = 0;
+		s_cursor_pos                = 0;
 		parse_command();
 		print_prompt();
 		break;

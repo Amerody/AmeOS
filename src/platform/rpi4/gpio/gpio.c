@@ -10,6 +10,7 @@
  */
 
 #include "soc.h"
+
 #include <common/mmio.h>
 
 #include <stddef.h>
@@ -84,8 +85,8 @@ struct GPIO_Registers
 	volatile uint32_t GPIO_PUP_PDN_CNTRL_REG3; ///< GPIO Pull-up / Pull-down Register 3
 };
 
-#define GPIO_BASE (PERIPHERAL_BASE + 0x200000) ///< GPIO base address
-#define GPIO ((struct GPIO_Registers*) GPIO_BASE)     ///< GPIO access
+#define GPIO_BASE    (PERIPHERAL_BASE + 0x200000)         ///< GPIO base address
+#define GPIO         ((struct GPIO_Registers*) GPIO_BASE) ///< GPIO access
 
 /// @brief Highest pin number the functions accept
 #define GPIO_MAX_PIN 57
@@ -131,9 +132,9 @@ gpio_status_t gpio_call(gpio_t pin, uint32_t value, mmio_register32_t base_reg, 
 
 	unsigned int num_fields = 32U / field_size;
 
-	uint32_t reg_index = pin / num_fields;
+	uint32_t          reg_index  = pin / num_fields;
 	mmio_register32_t target_reg = base_reg + reg_index;
-	unsigned int shift = (pin % num_fields) * field_size;
+	unsigned int      shift      = (pin % num_fields) * field_size;
 
 	mmio_write_field(target_reg, value, field_mask, shift);
 
@@ -141,6 +142,9 @@ gpio_status_t gpio_call(gpio_t pin, uint32_t value, mmio_register32_t base_reg, 
 }
 
 gpio_status_t gpio_set(gpio_t pin) { return gpio_call(pin, 1, &GPIO->GPSET0, GPIO_SET_FIELD_SIZE); }
+
 gpio_status_t gpio_clr(gpio_t pin) { return gpio_call(pin, 1, &GPIO->GPCLR0, GPIO_CLR_FIELD_SIZE); }
+
 gpio_status_t gpio_set_resistor(gpio_t pin, gpio_resistor_t value) { return gpio_call(pin, value, &GPIO->GPIO_PUP_PDN_CNTRL_REG0, GPIO_PULL_FIELD_SIZE); }
+
 gpio_status_t gpio_select_function(gpio_t pin, gpio_function_t func) { return gpio_call(pin, func, &GPIO->GPFSEL0, GPIO_FSEL_FIELD_SIZE); }

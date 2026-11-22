@@ -2,8 +2,11 @@
 // Copyright (C) 2026 Amerody
 
 #include "kernel/panic.h"
+
 #include "kernel/kprintf.h"
+
 #include <arch/arch.h>
+
 #include <stdarg.h>
 
 /**

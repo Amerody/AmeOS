@@ -2,7 +2,9 @@
 // Copyright (C) 2026 Amerody
 
 #include "kernel/kprintf.h"
+
 #include "kernel/console.h"
+
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -38,8 +40,8 @@ static void print_str(const char* s)
 static void print_uint(uint64_t value, unsigned base, bool upper)
 {
 	const char* digits = upper ? "0123456789ABCDEF" : "0123456789abcdef";
-	char buf[64]; // enough for 64 bits in base 2
-	size_t i = 0;
+	char        buf[64]; // enough for 64 bits in base 2
+	size_t      i = 0;
 
 	do
 	{ // do-while so 0 prints "0"

@@ -2,7 +2,9 @@
 // Copyright (C) 2026 Amerody
 
 #include "auxiliary.h"
+
 #include "aux_regs.h"
+
 #include <arch/irq.h>
 #include <common/mmio.h>
 #include <hal/hal_irq.h>
@@ -23,9 +25,9 @@
  * AUX is VideoCore peripheral IRQ 29, and the VideoCore peripheral IRQs start
  * at GIC SPI ID 96 (BCM2711 ARM Peripherals, chapter 6), so 96 + 29.
  */
-#define AUX_IRQ_INTID 125u
+#define AUX_IRQ_INTID            125u
 
-#define AUX_PERIPHERAL_COUNT 3u ///< Number of AUX peripherals (MU, SPI1, SPI2)
+#define AUX_PERIPHERAL_COUNT     3u ///< Number of AUX peripherals (MU, SPI1, SPI2)
 
 #define AUX_MU_IIR_CLEAR_RX_FIFO (1u << 1) ///< AUX_MU_IIR_REG write: clear the receive FIFO
 
@@ -35,7 +37,7 @@ static_assert(AUX_PERIPHERAL_MU == 0 && AUX_PERIPHERAL_SP1 == 1 && AUX_PERIPHERA
 struct aux_handler_entry
 {
 	aux_callback_t callback; ///< Handler to call, NULL if none
-	void* arg;               ///< Passed back to @p callback
+	void*          arg;      ///< Passed back to @p callback
 };
 
 /// @brief Registered handlers, indexed by aux_peripheral_t. Also read from the IRQ path
@@ -117,9 +119,9 @@ void aux_set_callback(aux_peripheral_t peripheral, aux_callback_t callback, void
 	if ((uint32_t) peripheral >= AUX_PERIPHERAL_COUNT)
 		return;
 
-	arch_irq_flags_t flags = arch_irq_save(); // The table is also read from the IRQ path
+	arch_irq_flags_t flags          = arch_irq_save(); // The table is also read from the IRQ path
 	s_handlers[peripheral].callback = callback;
-	s_handlers[peripheral].arg = arg;
+	s_handlers[peripheral].arg      = arg;
 	arch_irq_restore(flags);
 }
 

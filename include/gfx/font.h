@@ -19,7 +19,7 @@
 #include <stdint.h>
 
 /// @brief Glyph width in pixels; the glyph data has this size, so changing it alone breaks it
-#define FONT_WIDTH 8 // native size, tied to the glyph data
+#define FONT_WIDTH  8 // native size, tied to the glyph data
 /// @brief Glyph height in pixels, which is also the number of bytes per glyph
 #define FONT_HEIGHT 14
 

@@ -2,12 +2,13 @@
 // Copyright (C) 2026 Amerody
 
 #include "hal/platform.h"
+
 #include "arch/arch.h"
 #include "soc.h"
 
+#include <common/mmio.h>
 #include <hal/hal_irq.h>
 
-#include <common/mmio.h>
 #include <stddef.h>
 
 /**
@@ -30,8 +31,8 @@ struct PM_Registers
 	volatile uint32_t WDOG; ///< Watchdog countdown (20 bits) in ticks of about 16us
 };
 
-#define PM_BASE (PERIPHERAL_BASE + 0x100000)     ///< PM base address
-#define PM      ((struct PM_Registers*) PM_BASE) ///< PM access
+#define PM_BASE                  (PERIPHERAL_BASE + 0x100000)     ///< PM base address
+#define PM                       ((struct PM_Registers*) PM_BASE) ///< PM access
 
 /// @brief Password in bits 31:24 that every write to a PM register carries (the Linux driver
 ///        ORs it into each write)

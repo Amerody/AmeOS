@@ -39,6 +39,7 @@ static bool s_cursor_visible = false;
 /// @brief Width of one character cell at the current scale
 /// @return Width in pixels
 static inline uint32_t cell_w(void) { return FONT_WIDTH * s_scale; }
+
 /// @brief Height of one character cell at the current scale
 /// @return Height in pixels
 static inline uint32_t cell_h(void) { return FONT_HEIGHT * s_scale; }

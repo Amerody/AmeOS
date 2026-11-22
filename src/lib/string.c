@@ -136,7 +136,7 @@ int strtoi(const char* s, int32_t* out)
 
 	// |INT32_MIN| is one larger than INT32_MAX
 	const uint32_t limit = neg ? (uint32_t) INT32_MAX + 1u : (uint32_t) INT32_MAX;
-	uint32_t val = 0;
+	uint32_t       val   = 0;
 
 	while (is_digit(*s))
 	{
@@ -174,7 +174,7 @@ int strtox(const char* s, uint32_t* out)
 		return -1; // no digits at all
 
 	uint32_t val = 0;
-	int d;
+	int      d;
 	while ((d = hex_val(*s)) >= 0)
 	{
 		if (val >> 28) // top nibble set: shifting would overflow

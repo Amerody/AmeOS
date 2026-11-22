@@ -27,18 +27,18 @@
 extern volatile uint32_t mailbox_buffer[36] __attribute__((aligned(16)));
 
 /// @brief Mailbox channel for property-tag requests
-#define MAILBOX_CH_PROP 8
+#define MAILBOX_CH_PROP          8
 
 /// @brief Property tag: allocate the framebuffer (value: alignment in, address and size out)
-#define MBOX_TAG_FB_ALLOCATE 0x40001
+#define MBOX_TAG_FB_ALLOCATE     0x40001
 /// @brief Property tag: set the physical (display) width and height
-#define MBOX_TAG_FB_SET_PHYS_WH 0x48003
+#define MBOX_TAG_FB_SET_PHYS_WH  0x48003
 /// @brief Property tag: set the virtual (buffer) width and height
-#define MBOX_TAG_FB_SET_VIRT_WH 0x48004
+#define MBOX_TAG_FB_SET_VIRT_WH  0x48004
 /// @brief Property tag: set the depth, in bits per pixel
-#define MBOX_TAG_FB_SET_DEPTH 0x48005
+#define MBOX_TAG_FB_SET_DEPTH    0x48005
 /// @brief Property tag: get the pitch, in bytes per row
-#define MBOX_TAG_FB_GET_PITCH 0x40008
+#define MBOX_TAG_FB_GET_PITCH    0x40008
 /// @brief Property tag: set the virtual offset (x, y) of the displayed area
 #define MBOX_TAG_FB_SET_VIRT_OFF 0x48009
 

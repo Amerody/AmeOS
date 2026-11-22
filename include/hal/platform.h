@@ -96,7 +96,7 @@ extern "C"
 	struct mem_region
 	{
 		uintptr_t base; /**< First byte, page-aligned. */
-		size_t size;    /**< Length in bytes, a multiple of the page size. */
+		size_t    size; /**< Length in bytes, a multiple of the page size. */
 	};
 
 	/**

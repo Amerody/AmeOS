@@ -6,6 +6,7 @@
 #include <hal/hal_uart.h>
 #include <kernel/console.h>
 #include <kernel/error.h>
+
 #include <stddef.h>
 
 /**

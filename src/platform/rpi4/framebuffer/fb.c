@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Amerody
 
-#include <hal/hal_fb.h>
-
 #include <common/mmio.h>
+#include <hal/hal_fb.h>
 #include <mailbox/mailbox.h>
 
 /**
@@ -14,7 +13,7 @@
  */
 
 /// @brief Absolute value of @p x
-#define ABS(x) ((x) < 0 ? -(x) : (x))
+#define ABS(x)            ((x) < 0 ? -(x) : (x))
 
 /// @brief Mask used to invert a cell's color via XOR. Dependant on endianness (RGBA vs ABGR)
 #define COLOR_INVERT_MASK 0x00FFFFFFu
@@ -26,9 +25,9 @@ static struct framebuffer s_fb_info;
 // GET_PITCH and ALLOCATE. Every failure (mailbox error, or no buffer allocated) returns -1.
 int hal_fb_init(uint32_t width, uint32_t height, uint32_t depth)
 {
-	s_fb_info.width = width;
+	s_fb_info.width  = width;
 	s_fb_info.height = height;
-	s_fb_info.depth = depth;
+	s_fb_info.depth  = depth;
 
 	mailbox_buffer[0] = 35 * 4; // Total size
 	mailbox_buffer[1] = 0;      // Request
@@ -41,9 +40,9 @@ int hal_fb_init(uint32_t width, uint32_t height, uint32_t depth)
 	mailbox_buffer[6] = height;
 
 	// Set virtual dimensions
-	mailbox_buffer[7] = MBOX_TAG_FB_SET_VIRT_WH;
-	mailbox_buffer[8] = 8;
-	mailbox_buffer[9] = 0;
+	mailbox_buffer[7]  = MBOX_TAG_FB_SET_VIRT_WH;
+	mailbox_buffer[8]  = 8;
+	mailbox_buffer[9]  = 0;
 	mailbox_buffer[10] = width;
 	mailbox_buffer[11] = height;
 
@@ -89,7 +88,7 @@ int hal_fb_init(uint32_t width, uint32_t height, uint32_t depth)
 
 	// Extract framebuffer address and pitch from response
 	s_fb_info.buffer = (uint32_t*) (uint64_t) (mailbox_buffer[28] & 0x3FFFFFFF);
-	s_fb_info.pitch = mailbox_buffer[24];
+	s_fb_info.pitch  = mailbox_buffer[24];
 
 	return 0;
 }
@@ -116,10 +115,10 @@ void hal_fb_fill_rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t c
 // Uses Bresenham's Algorithm to draw lines efficiently without floating-point math
 void hal_fb_draw_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t color)
 {
-	int dx = ABS(x1 - x0);
-	int dy = ABS(y1 - y0);
-	int sx = x0 < x1 ? 1 : -1;
-	int sy = y0 < y1 ? 1 : -1;
+	int dx  = ABS(x1 - x0);
+	int dy  = ABS(y1 - y0);
+	int sx  = x0 < x1 ? 1 : -1;
+	int sy  = y0 < y1 ? 1 : -1;
 	int err = dx - dy;
 
 	while (1)

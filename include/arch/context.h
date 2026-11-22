@@ -27,9 +27,9 @@
  */
 #pragma once
 
-#include <stdint.h>
-
 #include "context_types.h" /* struct cpu_context, struct trap_frame */
+
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C"

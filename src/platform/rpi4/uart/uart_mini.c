@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 #include "uart_mini.h"
 
 /**
@@ -9,7 +12,7 @@
 #include "auxiliary/aux_regs.h"
 #include "auxiliary/auxiliary.h"
 #include "gpio/gpio.h"
-#include <kernel/errno.h>
+#include <kernel/error.h>
 #include <lib/ringbuf.h>
 
 #include <stddef.h>
@@ -38,6 +41,19 @@ static uint8_t s_rx_storage[UART_MINI_RX_BUF_SIZE];
 static bool uart_mini_is_write_ready()
 {
 	return (bool) mmio_read_field(&AUX->MU_LSR_REG, 0x1, 5); // Transmitter can accept a byte
+}
+
+/**
+ * @brief Checks whether the transmitter has sent everything
+ *
+ * Reads the "transmitter idle" bit (bit 6) of AUX_MU_LSR_REG.
+ *
+ * @retval true The transmit FIFO is empty and the last byte has been shifted out
+ * @retval false Bytes are still waiting in the FIFO or being sent
+ */
+static bool uart_mini_is_transmitter_idle()
+{
+	return (bool) mmio_read_field(&AUX->MU_LSR_REG, 0x1, 6);
 }
 
 /**
@@ -129,4 +145,10 @@ void uart_mini_putc(char c)
 bool uart_mini_getc(char* c)
 {
 	return ringbuf_get(&s_rx_buffer, (uint8_t*) c);
+}
+
+void uart_mini_flush()
+{
+	while (!uart_mini_is_transmitter_idle())
+		;
 }

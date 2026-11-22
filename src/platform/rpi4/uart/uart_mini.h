@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 #pragma once
 
 /**
@@ -21,8 +24,8 @@
  * @param baud Requested baud rate, e.g. 115200.
  *
  * @retval 0 Success
- * @retval -EINVAL The interrupt controller isn't initialised (from aux_init())
- * @retval -EBUSY The AUX interrupt line is taken by something else
+ * @retval -ERROR_INVALID_ARG The interrupt controller isn't initialised (from aux_init())
+ * @retval -ERROR_BUSY The AUX interrupt line is taken by something else
  *                (from aux_init())
  */
 int uart_mini_enable(uint32_t baud);
@@ -57,3 +60,15 @@ void uart_mini_putc(char c);
  * @retval false No byte was available
  */
 bool uart_mini_getc(char* c);
+
+/**
+ * @brief Waits until the UART1 (mini UART) has sent every byte written so far
+ *
+ * Busy-waits, with no timeout, until the "transmitter idle" bit (bit 6) of
+ * AUX_MU_LSR_REG is set: the transmit FIFO is empty and the last byte has been
+ * shifted out. Uses no kernel service, so it can be called with IRQs masked, from
+ * interrupt handlers and from the panic path.
+ *
+ * @pre uart_mini_enable() has been called (it enables the mini UART's registers).
+ */
+void uart_mini_flush();

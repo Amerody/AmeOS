@@ -45,7 +45,7 @@
 
 - Naming: `subsystem_verb_noun` functions, `snake_case` everything, `UPPER_SNAKE` macros/constants with a subsystem prefix, `g_`/`s_` prefixes for globals and file statics, `is_`/`has_`/... booleans, `_t` only for fixed-width or opaque typedefs.
 - Units in names (`timeout_ms`, `freq_hz`), `size` means bytes, `_count` / `_idx` suffixes, `_pa` / `_va` for raw addresses.
-- Error handling: `0` / negative `ERR_*` for `int`, or a `<system>_status_t` enum for hardware code; pointer-returning functions document their failure value.
+- Error handling: `0` / negative `ERROR_*` for `int`, or a `<system>_status_t` enum for hardware code; pointer-returning functions document their failure value.
 - Pointer style `const char* path`, function pointers `void (*callback)(...)`.
 - `#pragma once` include guards; a header and its source share a base name.
 - Don't comment on formatting that `.clang-format` handles.

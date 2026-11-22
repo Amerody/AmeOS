@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file exceptions.h
  * @brief Private to src/arch/aarch64/: the C entry points that vectors.S calls.

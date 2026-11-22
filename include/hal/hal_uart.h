@@ -1,8 +1,11 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file hal_uart.h
  * @brief Serial-port contract.
  *
- * Implemented by src/platform/<PLATFORM>/ (the mini UART on rpi4). The
+ * Implemented by src/platform/\<PLATFORM\>/ (the mini UART on rpi4). The
  * implementation hides everything hardware-specific: enabling the peripheral
  * block, pin muxing, clocks and baud divisors are its private business, and
  * callers only ask for a port at a baud rate.
@@ -30,14 +33,14 @@ extern "C"
 	 *
 	 * @param port  Platform UART number
 	 * @param baud  Requested baud rate, e.g. 115200.
-	 * @return 0 on success, -ENODEV if the platform has no such port, -EINVAL if
+	 * @return 0 on success, -ERROR_NO_DEVICE if the platform has no such port, -ERROR_INVALID_ARG if
 	 *         the baud rate is outside what the hardware can produce, or another
 	 *         negative error if the UART's receive interrupt can't be set up.
 	 *
 	 * @bug rpi4: ports 0 and 2-5 return 0 although the PL011 driver is only a
 	 *      placeholder, so a caller (e.g. console_uart_init()) believes the port works
-	 *      and all its output is silently dropped. -ENODEV would match the contract.
-	 * @bug rpi4: -EINVAL is never returned for a bad @p baud (only from aux_init()). The divisor
+	 *      and all its output is silently dropped. -ERROR_NO_DEVICE would match the contract.
+	 * @bug rpi4: -ERROR_INVALID_ARG is never returned for a bad @p baud (only from aux_init()). The divisor
 	 *      500 MHz / (8 * baud) - 1 is not range-checked: @p baud 0 divides by zero,
 	 *      rates below ~954 baud need more than the 16 bits of AUX_MU_BAUD_REG and
 	 *      are silently truncated by mmio_write_field(), and very high rates
@@ -81,6 +84,28 @@ extern "C"
 	 * @retval false No byte was available
 	 */
 	bool hal_uart_getc(unsigned port, char* c);
+
+	/**
+	 * @brief Wait until every byte already sent on a port has left the UART.
+	 *
+	 * Returns once the transmit FIFO is empty and the transmitter has finished the
+	 * last byte, so output written with hal_uart_putc() before the call is on the
+	 * wire. Received bytes are not touched. Use it before anything that would cut
+	 * the output short, such as resetting the board.
+	 *
+	 * Busy-waits with no timeout. Like hal_uart_putc(), it must work with CPU IRQs
+	 * masked and without any kernel service, so it is safe from interrupt handlers,
+	 * exception handlers and the panic path.
+	 *
+	 * Valid after a successful hal_uart_init() on the same port. A non-existent port
+	 * returns at once.
+	 *
+	 * @param port Platform UART number.
+	 *
+	 * @note rpi4: ports 0 and 2-5 return at once, because the PL011 driver is only a
+	 *       placeholder (see hal_uart_init()).
+	 */
+	void hal_uart_flush(unsigned port);
 
 #ifdef __cplusplus
 }

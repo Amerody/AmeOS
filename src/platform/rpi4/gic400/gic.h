@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file gic.h
  * @brief Public interface of the GICv2 (GIC-400) interrupt controller driver.

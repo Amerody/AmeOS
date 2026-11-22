@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 #pragma once
 
 /**
@@ -31,3 +34,11 @@ void uart_pl011_putc(unsigned int port, char c);
  * @retval false Always: no byte available
  */
 bool uart_pl011_getc(unsigned int port, char* c);
+
+/**
+ * @brief Waits until a PL011 UART has sent every byte written so far. Placeholder:
+ *        returns at once.
+ *
+ * @param port Platform UART number (0, 2, 3, 4 or 5)
+ */
+void uart_pl011_flush(unsigned int port);

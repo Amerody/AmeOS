@@ -1,7 +1,8 @@
-#include "kernel/console.h"
-#include "kernel/errno.h"
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
 
-#include <drivers/console/console_uart.h>
+#include "kernel/console.h"
+#include "kernel/error.h"
 
 #include <stddef.h>
 
@@ -26,14 +27,12 @@ void console_init()
 int console_register(const struct console* con)
 {
 	if (s_sinks_registered >= CONSOLE_MAX_SINKS)
-		return -ENOSPC;
+		return -ERROR_NO_SPACE;
 
 	if (!con || !con->putc)
-		return -EINVAL;
+		return -ERROR_INVALID_ARG;
 
-	s_consoles[s_sinks_registered].name = con->name;
-	s_consoles[s_sinks_registered].putc = con->putc;
-	s_consoles[s_sinks_registered].getc = con->getc;
+	s_consoles[s_sinks_registered] = *con;
 
 	s_sinks_registered++;
 
@@ -65,4 +64,22 @@ bool console_getc(char* c)
 	}
 
 	return false;
+}
+
+void console_clear()
+{
+	for (size_t i = 0; i < s_sinks_registered; i++)
+	{
+		if (s_consoles[i].clear != NULL)
+			s_consoles[i].clear();
+	}
+}
+
+void console_flush()
+{
+	for (size_t i = 0; i < s_sinks_registered; i++)
+	{
+		if (s_consoles[i].flush != NULL)
+			s_consoles[i].flush();
+	}
 }

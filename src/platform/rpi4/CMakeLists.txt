@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Amerody
+
 add_library(rpi4 OBJECT
     "platform.c"
 

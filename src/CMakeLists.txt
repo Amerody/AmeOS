@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Amerody
+
 add_subdirectory("arch")
 add_subdirectory("kernel")
 add_subdirectory("platform")

@@ -1,6 +1,9 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 #include <hal/hal_uart.h>
 
-#include <kernel/errno.h>
+#include <kernel/error.h>
 
 /**
  * @file uart.c
@@ -11,7 +14,7 @@
 #include "uart_mini.h"
 #include "uart_pl011.h"
 
-// On rpi4, the "receive interrupt can't be set up" errors are -EINVAL / -EBUSY from aux_init().
+// On rpi4, the "receive interrupt can't be set up" errors are -ERROR_INVALID_ARG / -ERROR_BUSY from aux_init().
 int hal_uart_init(unsigned port, uint32_t baud)
 {
 	switch (port)
@@ -26,7 +29,7 @@ int hal_uart_init(unsigned port, uint32_t baud)
 	case 1:
 		return uart_mini_enable(baud);
 	default:
-		return -ENODEV;
+		return -ERROR_NO_DEVICE;
 	}
 
 	return SUCCESS;
@@ -65,5 +68,24 @@ bool hal_uart_getc(unsigned port, char* c)
 		return uart_mini_getc(c);
 	default:
 		return false;
+	}
+}
+
+void hal_uart_flush(unsigned port)
+{
+	switch (port)
+	{
+	case 0:
+	case 2:
+	case 3:
+	case 4:
+	case 5:
+		uart_pl011_flush(port); // Todo: implement
+		break;
+	case 1:
+		uart_mini_flush();
+		break;
+	default:
+		break;
 	}
 }

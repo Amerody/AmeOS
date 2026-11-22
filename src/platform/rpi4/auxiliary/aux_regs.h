@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 #pragma once
 
 /**
@@ -12,7 +15,7 @@
 
 /// @brief All the AUX Peripherals Registers
 /// @warning @p RESERVED_* are not to be used
-typedef struct
+struct AUX_Registers
 {
 	volatile uint32_t IRQ;     ///< Auxiliary Interrupt status
 	volatile uint32_t ENABLES; ///< Auxiliary enables
@@ -73,7 +76,7 @@ typedef struct
 	volatile uint32_t SPI2_TXHOLD_REGb; ///< SPI 2 Extended Data
 	volatile uint32_t SPI2_TXHOLD_REGc; ///< SPI 2 Extended Data
 	volatile uint32_t SPI2_TXHOLD_REGd; ///< SPI 2 Extended Data
-} AUX_Registers;
+};
 
 #define AUX_BASE (PERIPHERAL_BASE + 0x215000) ///< AUX Peripherals base address
-#define AUX ((AUX_Registers*) AUX_BASE)       ///< AUX Peripherals access
+#define AUX ((struct AUX_Registers*) AUX_BASE)       ///< AUX Peripherals access

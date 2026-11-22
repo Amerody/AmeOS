@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file console_uart.h
  * @brief Console sink that writes to a serial port and reads what it receives.
@@ -31,29 +34,28 @@ extern "C"
 	 * hal_uart_init(@p port, 115200) (8N1). The sink sends bytes through
 	 * hal_uart_putc() and reads received bytes through hal_uart_getc().
 	 *
-	 * Bytes are sent unchanged: there is no newline translation.
+	 * @c '\\n' is sent as @c "\r\n"; every other byte is sent unchanged. The sink's
+	 * @c clear (see console_clear()) sends the ANSI sequence @c "ESC[2J ESC[H"
+	 * (erase the screen, move the cursor home).
 	 *
 	 * Only one UART console is supported: the port is kept in a private static, so
-	 * a second call returns -EBUSY.
+	 * a second call returns -ERROR_BUSY.
 	 *
 	 * Call after console_init().
 	 *
 	 * @param port Platform UART number; 1 is the console UART.
 	 *
 	 * @retval 0 The UART is set up and registered
-	 * @retval -EBUSY A UART console was already initialised, even if that earlier
+	 * @retval -ERROR_BUSY A UART console was already initialised, even if that earlier
 	 *                call failed
-	 * @return Otherwise the negative error from hal_uart_init() (-ENODEV, -EINVAL, or
+	 * @return Otherwise the negative error from hal_uart_init() (-ERROR_NO_DEVICE, -ERROR_INVALID_ARG, or
 	 *         another error if the receive interrupt can't be set up)
 	 *
-	 * @bug @c '\\n' is not sent as @c "\r\n", although hal_uart_putc() leaves newline
-	 *      translation to the console layer. A serial terminal that doesn't add the
-	 *      carriage return itself moves down a line without going back to column 0.
-	 * @bug The result of console_register() is ignored, so -ENOSPC is never returned:
+	 * @bug The result of console_register() is ignored, so -ERROR_NO_SPACE is never returned:
 	 *      when the registry is full, the UART is set up but gets no console output.
 	 * @bug The sink is registered before hal_uart_init(). If hal_uart_init() fails, the
 	 *      sink stays registered on a port that isn't set up, and the port stays
-	 *      claimed, so a retry returns -EBUSY.
+	 *      claimed, so a retry returns -ERROR_BUSY.
 	 */
 	int console_uart_init(unsigned port);
 

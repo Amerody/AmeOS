@@ -1,4 +1,7 @@
 /*
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ * Copyright (C) 2026 Amerody
+ * 
  * boot.S: kernel entry point (_start) for aarch64.
  *
  * Linked first in the image (section .text.boot), so the firmware jumps here.

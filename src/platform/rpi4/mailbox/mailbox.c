@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 #include "mailbox.h"
 
 #include <common/mmio.h>
@@ -13,7 +16,7 @@
 /// @brief All the relevant VideoCore Mailbox Registers
 /// @note There is not a lot of publicly available documentation so this is only the required registers sourced from tutorials
 /// @warning @p RESERVED_* are not to be used
-typedef struct
+struct VC_MBOX_Registers
 {
 	volatile uint32_t READ; ///< VideoCore Mailbox Read Register
 
@@ -24,10 +27,10 @@ typedef struct
 	volatile uint32_t STATUS; ///< VideoCore Mailbox Status Register
 	volatile uint32_t CONFIG; ///< VideoCore Mailbox Config Register
 	volatile uint32_t WRITE;  ///< VideoCore Mailbox Write Register
-} VC_MBOX_Registers;
+};
 
 #define VC_MBOX_BASE (PERIPHERAL_BASE + 0x0000B880) ///< VideoCore Mailbox base address
-#define VC_MBOX ((VC_MBOX_Registers*) VC_MBOX_BASE) ///< VideoCore Mailbox access
+#define VC_MBOX ((struct VC_MBOX_Registers*) VC_MBOX_BASE) ///< VideoCore Mailbox access
 
 /// @brief Response code in mailbox_buffer[1] when the firmware processed the request
 #define MBOX_RESPONSE 0x80000000
@@ -46,6 +49,9 @@ int mailbox_call(uint8_t channel)
 	// Wait until we can write
 	while (mmio_read(&VC_MBOX->STATUS) & MBOX_FULL)
 		;
+
+	/// @todo Create an arch module for memory synchronization
+	__asm__ __volatile__("dsb sy" ::: "memory");
 
 	// Write the address of our buffer to the mailbox with the channel appended
 	mmio_write(&VC_MBOX->WRITE, r);

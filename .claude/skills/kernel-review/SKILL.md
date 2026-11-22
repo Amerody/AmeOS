@@ -19,7 +19,7 @@ The user writes this kernel to learn. Your job is to **review, not rewrite**:
 
 ## 2. Check the changes
 
-Go through every item in [checklist.md](checklist.md). Skip sections that clearly don't apply to the diff. The rules for naming and docs live in `docs/internal/style.md`; read it when the diff adds or renames identifiers, files or documentation.
+Go through every item in [checklist.md](checklist.md). Skip sections that clearly don't apply to the diff. The rules for naming and docs live in `docs/internal/style.md`; read it when the diff adds or renames identifiers, files or documentation. At your disposal are: the `concurrency reviewer` agent and the `bug-hunt` skill.
 
 ## 3. Build and boot check
 

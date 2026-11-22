@@ -76,6 +76,12 @@ KERNEL
  * @brief Kernel Print Utilities
  */
 
+/**
+ * @defgroup shell Kernel Shell
+ * @ingroup kernel
+ * @brief Line-editing shell on the console and its built-in commands.
+ */
+
 
 LIB
 
@@ -83,6 +89,15 @@ LIB
  * @defgroup lib Kernel Library
  * @brief Freestanding helpers with no hardware access: string and memory functions
  *        (the kernel has no libc) and generic data structures.
+ */
+
+
+
+GFX
+
+/**
+ * @defgroup gfx Graphics Library
+ * @brief Colours and the bitmap font, drawn through hal_fb. No hardware access of its own.
  */
 
 

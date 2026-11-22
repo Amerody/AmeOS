@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file mailbox.h
  * @brief VideoCore mailbox: send a request buffer to the firmware and wait for the reply.

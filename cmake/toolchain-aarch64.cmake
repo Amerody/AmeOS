@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Amerody
+
 # Toolchain file: bare-metal AArch64 (aarch64-none-elf) using LLVM (Clang + lld).
 #
 # Finding LLVM, in priority order:

@@ -39,10 +39,11 @@ A header and its source share a base name (`pmm.h` / `pmm.c`). One subsystem per
 | Functions | `subsystem_verb_noun` | `pmm_alloc_page`, `uart_putc` |
 | File-local (`static`) functions | `snake_case`, no prefix required | `find_free_run` |
 | Variables, parameters, members | `snake_case` | `free_count` |
-| Structs, enums, unions | `snake_case`, tag only | `struct page_frame` |
-| Typedefs | `snake_case_t`, only for fixed-width/opaque types | `paddr_t`, `vaddr_t` |
+| Structs | `snake_case`, tag only | `struct page_frame` |
+| Typedefs | `snake_case_t`, only for fixed-width/opaque types, status code enums, or unions | `paddr_t`, `gic_status_t` |
 | Enum constants | `UPPER_SNAKE`, prefixed by the enum | `IRQ_TYPE_TIMER` |
-| Macros and constants | `UPPER_SNAKE`, prefixed by the subsystem | `PAGE_SIZE`, `UART_BASE` |
+| Public macros and constants | `UPPER_SNAKE`, prefixed by the subsystem | `PAGE_SIZE`, `UART_BASE` |
+| Private macros and constants | `UPPER_SNAKE`, don't need to be prefixed by the subsystem | `COMMANDS_COUNT`, `MAX_ARGS` |
 | Non-`static` global variables | `g_` prefix | `g_boot_dtb` |
 | File-`static` variables | `s_` prefix | `s_next_pid` |
 | Booleans | `is_`, `has_`, `can_`, `should_` | `is_mapped`, `has_fpu` |
@@ -55,13 +56,42 @@ Function verbs, used consistently: `init`, `alloc`/`free`, `map`/`unmap`, `read`
 ### Constants and macros
 
 - Prefer `enum`, `static const`, or `constexpr` over `#define` for typed constants.
-- Hardware registers: Specific registers are defined as the example below and bits and masks are defined as
-  `<DEVICE>_<REGISTER>_<FIELD>` if needed.
+- Hardware registers: Specific registers are defined as the example below and constants are defined as
+  `<DEVICE>_<REGISTER>_<FIELD/PURPOSE>` if needed. All inside a `.c`file or in a private `.h`header next 
+  to it when several files share the block.
 ```c
-#define UART_DR            0x00
-#define UART_FR            0x18
-#define UART_FR_TXFF       (1u << 5)   /* transmit FIFO full */
+/// @brief All the GICC Registers
+/// @warning @p RESERVED_* are not to be used
+struct GICC_Registers
+{
+	volatile uint32_t CTLR;   ///< CPU Interface Control Register
+	volatile uint32_t PMR;    ///< Interrupt Priority Mask Register
+	// ...
+	volatile uint32_t AHPPIR; ///< Aliased Highest Priority Pending Interrupt Register
+
+	uint32_t RESERVED_02C_0CC[CALC_OFFSET(0x02C, 0x0CC)]; ///< 164 Bytes gap between AHPPIR and APR0
+
+	volatile uint32_t APR0; ///< Active Priority Register
+
+	uint32_t RESERVED_0D4_0DC[CALC_OFFSET(0x0D4, 0x0DC)]; ///< 12 Bytes gap between APR0 and NSAPR0
+  
+  // if there is a 4 bytes gap use
+  // uint32_t RESERVED_<addr>[1]
+ 
+  // if there is a gap bigger than 4 bytes use
+  // uint32_t RESERVED_<start_addr>_<end_addr>[CALC_OFFSET(<start_addr>, <end_addr>)] (every address is aligned by word)
+
+  // ...
+};
+
+#define GICC_BASE (PERIPHERAL_BASE + 0x1842000) ///< GICC base address
+#define GICC ((struct GICC_Registers*) GICC_BASE)      ///< GICC access
+
+#define GICD_SGIR_FILTER_LIST 0x0u         ///< TargetListFilter: use CPUTargetList
+#define GICD_SGIR_FILTER_ALL_BUT_SELF 0x1u ///< TargetListFilter: every core except the requester
+#define GICD_SGIR_FILTER_SELF 0x2u         ///< TargetListFilter: only the requester (0x3: reserved)
 ```
+Register blocks are the one exception to struct naming: `struct <DEVICE>_Registers`
 
 - The hardware registers are defined with structs the following way inside its corresponding `.c` file:
 ```c
@@ -133,7 +163,7 @@ typedef enum
 
 ## 5. Linker script symbols
 
-- Symbols exported by `linker/*.ld` use a double-underscore prefix and `snake_case`:
+- Symbols exported by `src/platform/<platform>/*.ld` use a double-underscore prefix and `snake_case`:
   `__kernel_start`, `__kernel_end`, `__bss_start`, `__bss_end`, `__stack_top`.
 - Declare them in C as arrays so you take their address correctly:
   `extern char __bss_start[];`
@@ -159,7 +189,7 @@ typedef enum
 
 ## 8. Formatting
 
-Enforced by `.clang-format` (K&R braces, 4 spaces, no tabs, 100 columns). Don't hand-format against it.
+Enforced by `.clang-format` (Allman braces, tabs). Don't hand-format against it.
 
 ## 9. Commits and docs
 

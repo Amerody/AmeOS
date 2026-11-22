@@ -12,6 +12,9 @@
       // Install the Arm GNU Toolchain and add its bin folder to PATH, or override
       // below if you use gdb-multiarch on Linux.
       "miDebuggerPath": "aarch64-none-elf-gdb",
+      "linux": {
+        "miDebuggerPath": "aarch64-linux-gnu-gdb"
+      },
       "miDebuggerServerAddress": "localhost:1234",
       "stopAtEntry": false,
       "targetArchitecture": "arm64",

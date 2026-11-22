@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 /**
  * @file hal_irq.h
  * @brief Interrupt-controller contract: per-source enable, handlers, dispatch.
@@ -52,8 +55,8 @@ extern "C"
 	 * @param irq      Platform IRQ number.
 	 * @param handler  Function to call; must not be NULL.
 	 * @param arg      Passed back to the handler unchanged; may be NULL.
-	 * @return 0 on success, -EINVAL if @p irq does not exist on this platform,
-	 *         -EBUSY if the source already has a handler.
+	 * @return 0 on success, -ERROR_INVALID_ARG if @p irq does not exist on this platform,
+	 *         -ERROR_BUSY if the source already has a handler.
 	 */
 	int hal_irq_register(unsigned irq, hal_irq_handler_t handler, void* arg);
 

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Amerody
+
 #pragma once
 
 /**
@@ -19,23 +22,32 @@
 
 #include <stdint.h>
 
-/**
- * @brief Busy-waits for at least @p ns nanoseconds.
- *
- * @param ns Delay in nanoseconds
- */
-void delay_ns(uint64_t ns);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-/**
- * @brief Busy-waits for at least @p us microseconds.
- *
- * @param us Delay in microseconds
- */
-static inline void delay_us(uint64_t us) { delay_ns(us * 1000u); }
+	/**
+	 * @brief Busy-waits for at least @p ns nanoseconds.
+	 *
+	 * @param ns Delay in nanoseconds
+	 */
+	void delay_ns(uint64_t ns);
 
-/**
- * @brief Busy-waits for at least @p ms milliseconds.
- *
- * @param ms Delay in milliseconds
- */
-static inline void delay_ms(uint64_t ms) { delay_ns(ms * 1000000u); }
+	/**
+	 * @brief Busy-waits for at least @p us microseconds.
+	 *
+	 * @param us Delay in microseconds
+	 */
+	static inline void delay_us(uint64_t us) { delay_ns(us * 1000u); }
+
+	/**
+	 * @brief Busy-waits for at least @p ms milliseconds.
+	 *
+	 * @param ms Delay in milliseconds
+	 */
+	static inline void delay_ms(uint64_t ms) { delay_ns(ms * 1000000u); }
+
+#ifdef __cplusplus
+}
+#endif

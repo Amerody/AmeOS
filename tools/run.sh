@@ -9,7 +9,7 @@
 #   tools/run.sh [mode] [options]
 #
 # Modes:
-#   run     (default) headless, UART on stdout, stops after a timeout.
+#   run     (default) headless, UART on stdin/stdout, stops after a timeout.
 #           Use this for automated test runs (e.g. from Claude Code).
 #   gui     QEMU window + UART on stdout, no timeout. Quit with Ctrl-A X.
 #   debug   like gui, but QEMU waits for GDB on localhost:1234 (-s -S).
@@ -91,9 +91,14 @@ if [[ "${MODE}" != "run" || "${TIMEOUT}" == "0" ]]; then
     exec "${QEMU}" "${QEMU_ARGS[@]}"
 fi
 
-# Headless run with a time limit. The kernel never exits on its own,
-# so hitting the timeout is the normal way this ends.
-"${QEMU}" "${QEMU_ARGS[@]}" &
+# Headless run with a time limit. Hitting the timeout is the normal way this
+# ends, unless the guest shuts down (the shell's "shutdown" command exits QEMU).
+#
+# "<&0" keeps QEMU on this script's stdin. Without it, bash connects a
+# background job to /dev/null (job control is off in scripts), so typed
+# commands never reach the UART and are left for the parent shell to run once
+# the script exits. It also lets input be piped in: printf 'help\r' | tools/run.sh
+"${QEMU}" "${QEMU_ARGS[@]}" <&0 &
 QEMU_PID=$!
 trap 'kill "${QEMU_PID}" 2>/dev/null || true' EXIT INT TERM
 

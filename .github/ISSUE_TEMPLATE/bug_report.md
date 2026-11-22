@@ -45,4 +45,4 @@ working out the fix is part of what I want to learn. Pull requests are not accep
 
 ## Additional context
 
-<!-- Where in the code you think the problem is (file:line, register, documentation section), if you know. -->
+<!-- Where in the code you think the problem might be (file:line, register, documentation section...), if you know. -->

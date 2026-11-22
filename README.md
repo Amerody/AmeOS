@@ -141,11 +141,8 @@ AmeOS is free software, licensed under the [GNU General Public License v3.0 or l
  
 You can use, study, modify, and share it freely. If you distribute AmeOS or a modified version of it, you must release the source under the same license. Whatever is built from this project stays open for everyone to learn from.
 
-The device tree blob src/platform/rpi4/bcm2711-rpi-4-b.dtb is taken unmodified from the Raspberry Pi firmware repository (commit f2491b7). It is compiled from the device tree sources in the Raspberry Pi Linux kernel, licensed under <SPDX ID>. It is distributed as a separate file and is not covered by AmeOS's license.
+The device tree blob src/platform/rpi4/bcm2711-rpi-4-b.dtb is taken unmodified from the Raspberry Pi firmware repository (commit f2491b7). It is built from the device tree sources in the Raspberry Pi Linux kernel and licensed under the GNU GPL v2 (see src/platform/rpi4/COPYING.linux). It is a separate file loaded at boot, not part of the AmeOS kernel image, and is not covered by AmeOS's license.
 
-The console font is [Terminus Font](https://terminus-font.sourceforge.net/) by
-Dimitar Toshkov Zhekov, licensed under the SIL Open Font License 1.1. The original
-BDF files and the license text are in `terminus/`; the generated
-`include/gfx/*.inc` files are covered by the same license.
+The console font is [Terminus Font](https://terminus-font.sourceforge.net/) by Dimitar Toshkov Zhekov, licensed under the SIL Open Font License 1.1. The original BDF files and the license text are in `terminus/`; the generated `include/gfx/*.inc` files are covered by the same license.
 
 Copyright (C) 2026 Amerody

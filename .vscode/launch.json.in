@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach to QEMU (AArch64)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${command:cmake.buildDirectory}/kernel.elf",
+      "cwd": "${workspaceFolder}",
+      "MIMode": "gdb",
+      // Filled in by CMake at configure time (see "GDB for VS Code" in CMakeLists.txt).
+      // Edit launch.json.in, not launch.json: launch.json is regenerated.
+      "miDebuggerPath": "@KERNEL_GDB@",
+      "miDebuggerServerAddress": "localhost:1234",
+      "stopAtEntry": false,
+      "targetArchitecture": "arm64",
+      "preLaunchTask": "qemu-debug",
+      "postDebugTask": "qemu-stop",
+      "setupCommands": [
+        { "text": "-enable-pretty-printing", "ignoreFailures": true }
+      ],
+      // Pause right after connecting (QEMU's reset code, address 0x0). Without this,
+      // cppdbg resumes straight away and ignores breakpoints it did not create itself,
+      // such as the hbreak below. Press Continue once to reach _start.
+      "stopAtConnect": true,
+      // After connecting: a hardware breakpoint set before the connection never fires
+      "postRemoteConnectCommands": [
+        { "text": "hbreak _start" }
+      ]
+    }
+  ]
+}

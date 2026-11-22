@@ -1,7 +1,7 @@
 {
   // Works on Windows (PowerShell, the VS Code default) and Linux/macOS (bash/zsh).
-  // Requires qemu-system-aarch64 on PATH. On Windows the installer's folder
-  // (C:\Program Files\qemu) must be added to PATH, as in the install steps.
+  // QEMU is started through the CMake "debug" target, so it is found the same way
+  // as for the build (PATH, or C:\Program Files\qemu on Windows).
   "version": "2.0.0",
   "tasks": [
     {
@@ -24,10 +24,12 @@
         "pattern": {
           "regexp": "^$"
         },
+        // Ready once the CMake "debug" target prints its COMMENT, right before QEMU starts.
+        // activeOnStart makes the task "busy" immediately; beginsPattern is never printed.
         "background": {
           "activeOnStart": true,
           "beginsPattern": "QEMU_BEGIN",
-          "endsPattern": "QEMU_READY"
+          "endsPattern": "waiting for GDB"
         }
       },
       "group": "build"

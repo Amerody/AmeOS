@@ -152,10 +152,46 @@ if(_qemu_usable)
         -serial null -serial mon:stdio)
     add_custom_target(run
         COMMAND "${KERNEL_QEMU}" ${_qemu_args}
-        DEPENDS kernel USES_TERMINAL VERBATIM)
+        DEPENDS kernel USES_TERMINAL VERBATIM
+        COMMENT "QEMU: booting kernel8.img (quit with Ctrl-A X)")
+    # The VS Code qemu-debug task waits for this COMMENT ("waiting for GDB") before
+    # starting the debugger, so keep the two in sync.
     add_custom_target(debug
         COMMAND "${KERNEL_QEMU}" ${_qemu_args} -s -S
-        DEPENDS kernel USES_TERMINAL VERBATIM)
+        DEPENDS kernel USES_TERMINAL VERBATIM
+        COMMENT "QEMU: waiting for GDB on localhost:1234 (quit with Ctrl-A X)")
+endif()
+
+# ------------------------------------------------------------------------------
+# GDB for VS Code: the first one found that can debug AArch64.
+#   Windows: aarch64-none-elf-gdb (Arm GNU Toolchain)
+#   Debian/Ubuntu: gdb-multiarch    Arch: gdb (built with all targets)
+# The result is written into .vscode/launch.json, generated from launch.json.in.
+# ------------------------------------------------------------------------------
+set(KERNEL_GDB "")
+foreach(_gdb_name aarch64-none-elf-gdb gdb-multiarch gdb aarch64-linux-gnu-gdb)
+    find_program(_gdb_path NAMES ${_gdb_name} NO_CACHE)
+    if(_gdb_path)
+        # gdb -batch exits with 1 when the last command fails, e.g. an unknown architecture
+        execute_process(COMMAND "${_gdb_path}" -nx -batch -ex "set architecture aarch64"
+                        RESULT_VARIABLE _gdb_rc OUTPUT_QUIET ERROR_QUIET)
+        if(_gdb_rc EQUAL 0)
+            set(KERNEL_GDB "${_gdb_path}")
+            break()
+        endif()
+    endif()
+endforeach()
+
+if(KERNEL_GDB)
+    message(STATUS "GDB for debugging: ${KERNEL_GDB}")
+else()
+    set(KERNEL_GDB "aarch64-none-elf-gdb") # placeholder, so launch.json stays valid
+    message(WARNING "No AArch64-capable GDB found: install aarch64-none-elf-gdb "
+                    "(Arm GNU Toolchain) or gdb-multiarch to debug from VS Code")
+endif()
+
+if(EXISTS "${CMAKE_SOURCE_DIR}/.vscode/launch.json.in")
+    configure_file(.vscode/launch.json.in ${CMAKE_SOURCE_DIR}/.vscode/launch.json @ONLY)
 endif()
 
 # ------------------------------------------------------------------------------

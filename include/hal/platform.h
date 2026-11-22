@@ -62,8 +62,28 @@ extern "C"
 	 */
 	void platform_init();
 
+	/**
+	 * @brief Reset the whole board, as if it had just been powered on.
+	 *
+	 * The firmware runs again and boots the kernel from the start. Nothing is
+	 * saved, printed or flushed first: the caller does that (see kernel_shutdown(),
+	 * which flushes the console before calling this).
+	 *
+	 * Never returns. Uses no kernel service, so it may be called with CPU IRQs
+	 * masked. Valid at any point after boot; it doesn't depend on platform_init().
+	 */
 	[[noreturn]] void platform_reboot();
 
+	/**
+	 * @brief Power the board off, or get as close to that as the board can.
+	 *
+	 * A board that can't cut its own power stops in its lowest-power state and
+	 * doesn't boot the kernel again until it is power-cycled. As with
+	 * platform_reboot(), the caller saves and flushes anything it needs first.
+	 *
+	 * Never returns. Uses no kernel service, so it may be called with CPU IRQs
+	 * masked. Valid at any point after boot; it doesn't depend on platform_init().
+	 */
 	[[noreturn]] void platform_shutdown();
 
 	/**

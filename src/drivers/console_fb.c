@@ -212,6 +212,12 @@ static void console_fb_clear()
 	cursor_show();
 }
 
+/**
+ * @brief Console @c flush of the framebuffer sink: does nothing.
+ *
+ * console_fb_putc() draws each character into the framebuffer before it returns, so
+ * there is no pending output to wait for. A NULL @c flush would behave the same.
+ */
 static void console_fb_flush()
 {
 	// nothing to do

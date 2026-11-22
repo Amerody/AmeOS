@@ -10,6 +10,13 @@
 #include <arch/arch.h>
 #include <hal/platform.h>
 
+/**
+ * @file shutdown.c
+ * @brief Kernel shutdown path: clean-up before halting, powering off or rebooting
+ *        (see shutdown.h)
+ * @ingroup kernel
+ */
+
 void kernel_shutdown(enum shutdown_action action)
 {
 	// do stuff...
@@ -21,7 +28,7 @@ void kernel_shutdown(enum shutdown_action action)
 		kprintf("Halting system...\n");
 		console_flush();
 		arch_halt();
-		// doesn't return from panic()
+		// doesn't return from arch_halt()
 
 	case SHUTDOWN_POWEROFF:
 		kprintf("Shutting down...\n");

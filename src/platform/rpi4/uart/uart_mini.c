@@ -43,6 +43,14 @@ static bool uart_mini_is_write_ready()
 	return (bool) mmio_read_field(&AUX->MU_LSR_REG, 0x1, 5); // Transmitter can accept a byte
 }
 
+/**
+ * @brief Checks whether the transmitter has sent everything
+ *
+ * Reads the "transmitter idle" bit (bit 6) of AUX_MU_LSR_REG.
+ *
+ * @retval true The transmit FIFO is empty and the last byte has been shifted out
+ * @retval false Bytes are still waiting in the FIFO or being sent
+ */
 static bool uart_mini_is_transmitter_idle()
 {
 	return (bool) mmio_read_field(&AUX->MU_LSR_REG, 0x1, 6);

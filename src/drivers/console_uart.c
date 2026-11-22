@@ -75,6 +75,13 @@ static void console_uart_clear()
 	}
 }
 
+/**
+ * @brief Console @c flush of the UART sink: waits with hal_uart_flush() until every byte
+ *        sent so far has left the UART.
+ *
+ * Busy-waits with no timeout. No check that @c s_port is valid: the console only calls
+ * this after console_uart_init() set it.
+ */
 static void console_uart_flush()
 {
 	hal_uart_flush(s_port);

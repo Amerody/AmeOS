@@ -40,7 +40,7 @@ A header and its source share a base name (`pmm.h` / `pmm.c`). One subsystem per
 | File-local (`static`) functions | `snake_case`, no prefix required | `find_free_run` |
 | Variables, parameters, members | `snake_case` | `free_count` |
 | Structs | `snake_case`, tag only | `struct page_frame` |
-| Typedefs | `snake_case_t`, only for fixed-width/opaque types or unions | `paddr_t`, `gic_status_t` |
+| Typedefs | `snake_case_t`, only for fixed-width/opaque types, status code enums, or unions | `paddr_t`, `gic_status_t` |
 | Enum constants | `UPPER_SNAKE`, prefixed by the enum | `IRQ_TYPE_TIMER` |
 | Public macros and constants | `UPPER_SNAKE`, prefixed by the subsystem | `PAGE_SIZE`, `UART_BASE` |
 | Private macros and constants | `UPPER_SNAKE`, don't need to be prefixed by the subsystem | `COMMANDS_COUNT`, `MAX_ARGS` |
@@ -162,7 +162,7 @@ typedef enum
 
 ## 8. Formatting
 
-Enforced by `.clang-format` (K&R braces, 4 spaces, no tabs, 100 columns). Don't hand-format against it.
+Enforced by `.clang-format` (K&R braces, tabs, 100 columns). Don't hand-format against it.
 
 ## 9. Commits and docs
 

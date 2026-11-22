@@ -30,19 +30,23 @@ struct PM_Registers
 	volatile uint32_t WDOG; ///< Watchdog countdown (20 bits) in ticks of about 16us
 };
 
-#define PM_BASE                  (PERIPHERAL_BASE + 0x100000)     ///< GICC base address
-#define PM                       ((struct PM_Registers*) PM_BASE) ///< GICC access
+#define PM_BASE (PERIPHERAL_BASE + 0x100000)     ///< PM base address
+#define PM      ((struct PM_Registers*) PM_BASE) ///< PM access
 
+/// @brief Password in bits 31:24 that every write to a PM register carries (the Linux driver
+///        ORs it into each write)
 #define PM_PASSWORD              0x5a000000
 
-#define PM_WDOG_TIME_SET         0x000fffff
-#define PM_RSTC_WRCFG_CLR        0xffffffcf
-#define PM_RSTS_HADWRH_SET       0x00000040
-#define PM_RSTC_WRCFG_SET        0x00000030
-#define PM_RSTC_WRCFG_FULL_RESET 0x00000020
-#define PM_RSTC_RESET            0x00000102
+#define PM_WDOG_TIME_SET         0x000fffff ///< WDOG: mask of the 20-bit countdown. Unused
+#define PM_RSTC_WRCFG_CLR        0xffffffcf ///< RSTC: clears the WRCFG field (bits 5:4)
+#define PM_RSTS_HADWRH_SET       0x00000040 ///< RSTS: bit 6, named after Linux. Unused
+#define PM_RSTC_WRCFG_SET        0x00000030 ///< RSTC: the WRCFG field (bits 5:4). Unused
+#define PM_RSTC_WRCFG_FULL_RESET 0x00000020 ///< RSTC: WRCFG value for a full reset
+#define PM_RSTC_RESET            0x00000102 ///< RSTC: value named after Linux. Unused
 
-/*
+/**
+ * @brief RSTS value that selects boot partition 63, which the firmware treats as "halt".
+ *
  * The Raspberry Pi firmware uses the RSTS register to know which partition
  * to boot from. The partition value is spread into bits 0, 2, 4, 6, 8, 10.
  * Partition 63 is a special partition used by the firmware to indicate halt.
@@ -59,6 +63,9 @@ void platform_init()
 	// Platform mem regions data not parsed yet
 }
 
+// Arms the PM watchdog with a very short timeout and a full-reset configuration, the same
+// sequence as __bcm2835_restart() in the Linux driver. QEMU raspi4b ignores the WDOG
+// countdown and resets the machine as soon as RSTC is written.
 void platform_reboot()
 {
 	// use a timeout of 10 ticks (~150us)
@@ -71,13 +78,14 @@ void platform_reboot()
 	arch_halt();
 }
 
+// QEMU raspi4b exits instead of resetting when RSTS holds the halt partition.
 void platform_shutdown()
 {
 	// The rpi4 can't really power off but we can indicate the bootcode
 	// to not reboot, so most of the chip is powered off.
 
-	// Set the watchdog hard reset bit to distinguish the reset from
-	// a normal (full) reset.
+	// Select boot partition 63 (PM_RSTS_RASPBERRYPI_HALT): after the reset the
+	// firmware sees the halt partition and doesn't boot the kernel again.
 	uint32_t val = mmio_read(&PM->RSTS);
 	val |= PM_PASSWORD | PM_RSTS_RASPBERRYPI_HALT;
 	mmio_write(&PM->RSTS, val);

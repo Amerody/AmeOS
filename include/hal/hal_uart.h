@@ -5,7 +5,7 @@
  * @file hal_uart.h
  * @brief Serial-port contract.
  *
- * Implemented by src/platform/<PLATFORM>/ (the mini UART on rpi4). The
+ * Implemented by src/platform/\<PLATFORM\>/ (the mini UART on rpi4). The
  * implementation hides everything hardware-specific: enabling the peripheral
  * block, pin muxing, clocks and baud divisors are its private business, and
  * callers only ask for a port at a baud rate.
@@ -86,9 +86,24 @@ extern "C"
 	bool hal_uart_getc(unsigned port, char* c);
 
 	/**
-	 * @brief Flushes the given UART
+	 * @brief Wait until every byte already sent on a port has left the UART.
 	 *
-	 * @param port Platform UART number
+	 * Returns once the transmit FIFO is empty and the transmitter has finished the
+	 * last byte, so output written with hal_uart_putc() before the call is on the
+	 * wire. Received bytes are not touched. Use it before anything that would cut
+	 * the output short, such as resetting the board.
+	 *
+	 * Busy-waits with no timeout. Like hal_uart_putc(), it must work with CPU IRQs
+	 * masked and without any kernel service, so it is safe from interrupt handlers,
+	 * exception handlers and the panic path.
+	 *
+	 * Valid after a successful hal_uart_init() on the same port. A non-existent port
+	 * returns at once.
+	 *
+	 * @param port Platform UART number.
+	 *
+	 * @note rpi4: ports 0 and 2-5 return at once, because the PL011 driver is only a
+	 *       placeholder (see hal_uart_init()).
 	 */
 	void hal_uart_flush(unsigned port);
 

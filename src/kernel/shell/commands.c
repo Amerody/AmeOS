@@ -291,14 +291,14 @@ static int cmd_peek(size_t argc, char* argv[])
 }
 
 /**
- * @brief @c reboot: not implemented yet; prints @c "TODO".
+ * @brief @c reboot: reboots the system with kernel_shutdown(#SHUTDOWN_REBOOT).
  *
- * @param argc Number of tokens; unused
+ * On success it doesn't return: the board resets and the kernel boots again.
+ *
+ * @param argc Number of tokens; must be 1
  * @param argv Tokens; unused
  *
- * @retval 0 Always
- *
- * @todo Reboot the system. https://github.com/torvalds/linux/blob/master/drivers/watchdog/bcm2835_wdt.c
+ * @retval -1 Arguments were given; the usage was printed
  */
 static int cmd_reboot(size_t argc, char* argv[])
 {
@@ -315,14 +315,14 @@ static int cmd_reboot(size_t argc, char* argv[])
 }
 
 /**
- * @brief @c shutdown: not implemented yet; prints @c "TODO".
+ * @brief @c shutdown: powers the system off with kernel_shutdown(#SHUTDOWN_POWEROFF).
  *
- * @param argc Number of tokens; unused
+ * On success it doesn't return. On QEMU, the emulator exits.
+ *
+ * @param argc Number of tokens; must be 1
  * @param argv Tokens; unused
  *
- * @retval 0 Always
- *
- * @todo Shut down the system. https://github.com/torvalds/linux/blob/master/drivers/watchdog/bcm2835_wdt.c
+ * @retval -1 Arguments were given; the usage was printed
  */
 static int cmd_shutdown(size_t argc, char* argv[])
 {

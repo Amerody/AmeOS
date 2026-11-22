@@ -8,7 +8,6 @@
 #include <hal/hal_fb.h>
 #include <kernel/console.h>
 #include <kernel/error.h>
-
 #include <lib/memory.h>
 
 /**
@@ -56,7 +55,7 @@ static void console_fb_scroll()
 	if (!fb || !fb->buffer)
 		return;
 
-	uint32_t line_size = fb->pitch * cell_h();
+	uint32_t line_size  = fb->pitch * cell_h();
 	uint32_t total_size = fb->pitch * fb->height;
 
 	// Move all lines up by one row
@@ -213,25 +212,32 @@ static void console_fb_clear()
 	cursor_show();
 }
 
+static void console_fb_flush()
+{
+	// nothing to do
+	return;
+}
+
 int console_fb_init()
 {
 	if (s_init)
 		return -ERROR_BUSY;
 
 	static struct console fb_console;
-	fb_console.name = "fb";
-	fb_console.putc = console_fb_putc;
-	fb_console.getc = NULL;
+	fb_console.name  = "fb";
+	fb_console.putc  = console_fb_putc;
+	fb_console.getc  = NULL;
 	fb_console.clear = console_fb_clear;
+	fb_console.flush = console_fb_flush;
 	console_register(&fb_console);
 
 	int error = hal_fb_init(800, 600, 32);
 
 	struct framebuffer* fb = hal_fb_get_info();
-	s_cursor_x = 0;
-	s_cursor_y = 0;
-	s_max_cols = (fb) ? fb->width / FONT_WIDTH : 0;
-	s_max_rows = (fb) ? fb->height / FONT_HEIGHT : 0;
+	s_cursor_x             = 0;
+	s_cursor_y             = 0;
+	s_max_cols             = (fb) ? fb->width / FONT_WIDTH : 0;
+	s_max_rows             = (fb) ? fb->height / FONT_HEIGHT : 0;
 
 	s_init = true;
 	return error;

@@ -85,6 +85,13 @@ extern "C"
 	 */
 	bool hal_uart_getc(unsigned port, char* c);
 
+	/**
+	 * @brief Flushes the given UART
+	 *
+	 * @param port Platform UART number
+	 */
+	void hal_uart_flush(unsigned port);
+
 #ifdef __cplusplus
 }
 #endif

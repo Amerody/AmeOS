@@ -75,6 +75,11 @@ static void console_uart_clear()
 	}
 }
 
+static void console_uart_flush()
+{
+	hal_uart_flush(s_port);
+}
+
 int console_uart_init(unsigned port)
 {
 	if (s_port != 0xFF)
@@ -83,10 +88,11 @@ int console_uart_init(unsigned port)
 	s_port = port;
 
 	static struct console uart_console;
-	uart_console.name = "uart";
-	uart_console.putc = console_uart_putc;
-	uart_console.getc = console_uart_getc;
+	uart_console.name  = "uart";
+	uart_console.putc  = console_uart_putc;
+	uart_console.getc  = console_uart_getc;
 	uart_console.clear = console_uart_clear;
+	uart_console.flush = console_uart_flush;
 	console_register(&uart_console);
 
 	return hal_uart_init(s_port, UART_BAUD_RATE);

@@ -70,3 +70,22 @@ bool hal_uart_getc(unsigned port, char* c)
 		return false;
 	}
 }
+
+void hal_uart_flush(unsigned port)
+{
+	switch (port)
+	{
+	case 0:
+	case 2:
+	case 3:
+	case 4:
+	case 5:
+		uart_pl011_flush(port); // Todo: implement
+		break;
+	case 1:
+		uart_mini_flush();
+		break;
+	default:
+		break;
+	}
+}

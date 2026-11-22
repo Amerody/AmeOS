@@ -60,3 +60,5 @@ void uart_mini_putc(char c);
  * @retval false No byte was available
  */
 bool uart_mini_getc(char* c);
+
+void uart_mini_flush();

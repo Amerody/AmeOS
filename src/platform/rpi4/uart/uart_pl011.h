@@ -34,3 +34,5 @@ void uart_pl011_putc(unsigned int port, char c);
  * @retval false Always: no byte available
  */
 bool uart_pl011_getc(unsigned int port, char* c);
+
+void uart_pl011_flush(unsigned int port);

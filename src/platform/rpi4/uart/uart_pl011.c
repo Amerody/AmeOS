@@ -29,3 +29,9 @@ bool uart_pl011_getc(unsigned int port, char* c)
 	// Placeholder
 	return false;
 }
+
+void uart_pl011_flush(unsigned int port)
+{
+	(void) port;
+	return;
+}

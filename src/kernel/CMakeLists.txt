@@ -8,6 +8,7 @@ add_library(kernel_core OBJECT
     "lib/kprintf.c"
     "lib/panic.c"
     "lib/delay.c"
+    "lib/shutdown.c"
 
     "shell/shell.c"
     "shell/commands.c"

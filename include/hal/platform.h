@@ -62,6 +62,10 @@ extern "C"
 	 */
 	void platform_init();
 
+	[[noreturn]] void platform_reboot();
+
+	[[noreturn]] void platform_shutdown();
+
 	/**
 	 * @brief Short platform name for the boot banner, e.g. "rpi4".
 	 * @return A static string; never NULL.

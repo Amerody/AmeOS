@@ -74,3 +74,12 @@ void console_clear()
 			s_consoles[i].clear();
 	}
 }
+
+void console_flush()
+{
+	for (size_t i = 0; i < s_sinks_registered; i++)
+	{
+		if (s_consoles[i].flush != NULL)
+			s_consoles[i].flush();
+	}
+}

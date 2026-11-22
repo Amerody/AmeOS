@@ -3,7 +3,7 @@ AlignAfterOpenBracket: true
 AccessModifierOffset: -2
 AlignArrayOfStructures: None
 AlignConsecutiveAssignments:
-  Enabled:         false
+  Enabled:         true
   AcrossEmptyLines: false
   AcrossComments:  false
   AlignCompound:   false
@@ -12,7 +12,7 @@ AlignConsecutiveAssignments:
   EnumAssignments: false
   PadOperators:    true
 AlignConsecutiveBitFields:
-  Enabled:         false
+  Enabled:         true
   AcrossEmptyLines: false
   AcrossComments:  false
   AlignCompound:   false
@@ -21,7 +21,7 @@ AlignConsecutiveBitFields:
   EnumAssignments: false
   PadOperators:    false
 AlignConsecutiveDeclarations:
-  Enabled:         false
+  Enabled:         true
   AcrossEmptyLines: false
   AcrossComments:  false
   AlignCompound:   false
@@ -30,8 +30,8 @@ AlignConsecutiveDeclarations:
   EnumAssignments: false
   PadOperators:    false
 AlignConsecutiveMacros:
-  Enabled:         false
-  AcrossEmptyLines: false
+  Enabled:         true
+  AcrossEmptyLines: true
   AcrossComments:  false
   AlignCompound:   false
   AlignFunctionDeclarations: false
@@ -39,7 +39,7 @@ AlignConsecutiveMacros:
   EnumAssignments: false
   PadOperators:    false
 AlignConsecutiveShortCaseStatements:
-  Enabled:         false
+  Enabled:         true
   AcrossEmptyLines: false
   AcrossComments:  false
   AlignCaseArrows: false

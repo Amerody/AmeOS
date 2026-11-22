@@ -6,6 +6,7 @@
 #include "hal/hal_timer.h"
 #include "kernel/console.h"
 #include "kernel/kprintf.h"
+#include "kernel/shutdown.h"
 #include <lib/memory.h>
 #include <lib/string.h>
 
@@ -41,6 +42,9 @@ static int cmd_peek(size_t argc, char* argv[]);
 // reboot
 static int cmd_reboot(size_t argc, char* argv[]);
 
+// shutdown
+static int cmd_shutdown(size_t argc, char* argv[]);
+
 /// @brief One built-in command: its name, its help text and the function that runs it
 struct command
 {
@@ -70,8 +74,11 @@ static const struct command s_commands[] = {
 	  "Prints the value at a memory address. Use: peek <hex_address>",
 	  cmd_peek },
 	{ "reboot",
-	  "Reboots the system",
+	  "Reboots the system. Use: reboot",
 	  cmd_reboot },
+	{ "shutdown",
+	  "Shuts down the system. Use: shutdown",
+	  cmd_shutdown },
 };
 
 /// @brief Number of entries in #s_commands
@@ -229,7 +236,7 @@ static int cmd_uptime(size_t argc, char* argv[])
 
 	uint64_t now_s = hal_timer_now_sec();
 
-	uint64_t hours = now_s / 3600;
+	uint64_t hours   = now_s / 3600;
 	uint64_t minutes = (now_s % 3600) / 60;
 	uint64_t seconds = now_s % 60;
 	kprintf("Uptime: %lu hours %lu minutes %lu seconds\n", hours, minutes, seconds);
@@ -295,8 +302,38 @@ static int cmd_peek(size_t argc, char* argv[])
  */
 static int cmd_reboot(size_t argc, char* argv[])
 {
-	(void) argc;
 	(void) argv;
-	kprintf("TODO\n");
+	if (argc != 1)
+	{
+		kprintf("Use: reboot\n");
+		/// @todo add parameters
+		return -1;
+	}
+
+	kernel_shutdown(SHUTDOWN_REBOOT);
+	return 0;
+}
+
+/**
+ * @brief @c shutdown: not implemented yet; prints @c "TODO".
+ *
+ * @param argc Number of tokens; unused
+ * @param argv Tokens; unused
+ *
+ * @retval 0 Always
+ *
+ * @todo Shut down the system. https://github.com/torvalds/linux/blob/master/drivers/watchdog/bcm2835_wdt.c
+ */
+static int cmd_shutdown(size_t argc, char* argv[])
+{
+	(void) argv;
+	if (argc != 1)
+	{
+		kprintf("Use: shutdown\n");
+		/// @todo add parameters
+		return -1;
+	}
+
+	kernel_shutdown(SHUTDOWN_POWEROFF);
 	return 0;
 }

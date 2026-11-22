@@ -69,6 +69,8 @@ extern "C"
 		 * NULL if the device has nothing to clear. Same rules as @c putc.
 		 */
 		void (*clear)(void);
+
+		void (*flush)(void);
 	};
 
 	/**
@@ -152,6 +154,8 @@ extern "C"
 	 * (the framebuffer sink fills the whole screen).
 	 */
 	void console_clear();
+
+	void console_flush();
 
 #ifdef __cplusplus
 }

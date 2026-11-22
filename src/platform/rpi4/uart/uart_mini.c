@@ -43,6 +43,11 @@ static bool uart_mini_is_write_ready()
 	return (bool) mmio_read_field(&AUX->MU_LSR_REG, 0x1, 5); // Transmitter can accept a byte
 }
 
+static bool uart_mini_is_transmitter_idle()
+{
+	return (bool) mmio_read_field(&AUX->MU_LSR_REG, 0x1, 6);
+}
+
 /**
  * @brief Checks whether the receive FIFO holds at least one byte
  *
@@ -132,4 +137,10 @@ void uart_mini_putc(char c)
 bool uart_mini_getc(char* c)
 {
 	return ringbuf_get(&s_rx_buffer, (uint8_t*) c);
+}
+
+void uart_mini_flush()
+{
+	while (!uart_mini_is_transmitter_idle())
+		;
 }

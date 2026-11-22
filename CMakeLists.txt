@@ -144,7 +144,12 @@ else()
 endif()
 
 if(_qemu_usable)
-    set(_qemu_args -M raspi4b -nographic -kernel "$<TARGET_FILE:kernel>")
+    # Same arguments as tools/run.sh and the VS Code qemu-debug task.
+    # The mini UART is QEMU's second serial port, so the first (PL011) goes to null.
+    set(_qemu_args -M raspi4b
+        -dtb "${CMAKE_SOURCE_DIR}/src/platform/rpi4/bcm2711-rpi-4-b.dtb"
+        -kernel "$<TARGET_FILE_DIR:kernel>/kernel8.img"
+        -serial null -serial mon:stdio)
     add_custom_target(run
         COMMAND "${KERNEL_QEMU}" ${_qemu_args}
         DEPENDS kernel USES_TERMINAL VERBATIM)

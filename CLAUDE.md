@@ -71,9 +71,9 @@ Done:
 - Framebuffer via the mailbox with `hal_fb` (`hal_fb_init`, `hal_fb_set_pixel`, `hal_fb_fill_rect`, `hal_fb_draw_line`, pixel coordinates)
 - TTY: font, terminal abstraction (cursor cell vs pixel position), console changes
 - Own string/memory functions
+- Basic shell: UART RX via interrupt on the mini UART
 
 In progress / next (in order):
-- Basic shell: UART RX via interrupt on the mini UART first, PL011 driver later
 - Memory allocator 
 - MMU
 - Kernel heap (kmalloc)

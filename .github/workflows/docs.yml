@@ -37,15 +37,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Install LLVM, Ninja and Doxygen
+      - name: Install LLVM and Ninja
         run: |
           wget -q https://apt.llvm.org/llvm.sh
           chmod +x llvm.sh
           sudo ./llvm.sh "$LLVM_VERSION"
-          sudo apt-get install -y "llvm-$LLVM_VERSION" ninja-build doxygen
-          # The toolchain file looks in $LLVM_ROOT/bin first.
+          sudo apt-get install -y "llvm-$LLVM_VERSION" ninja-build
           echo "LLVM_ROOT=/usr/lib/llvm-$LLVM_VERSION" >> "$GITHUB_ENV"
 
+      - name: Install Doxygen
+        env:
+          DOXYGEN_VERSION: 1.18.0
+        run: |
+          tag="Release_${DOXYGEN_VERSION//./_}"
+          mkdir -p "$RUNNER_TEMP/doxygen"
+          curl -fsSL "https://github.com/doxygen/doxygen/releases/download/$tag/doxygen-$DOXYGEN_VERSION.linux.bin.tar.gz" \
+            | tar -xz --strip-components=1 -C "$RUNNER_TEMP/doxygen"
+          echo "$RUNNER_TEMP/doxygen/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/doxygen/bin/doxygen" --version
+      
       - name: Configure
         run: cmake --preset "$PRESET"
 

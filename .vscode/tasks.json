@@ -7,8 +7,11 @@
     {
       "label": "build-kernel",
       "type": "shell",
-      "command": "cmake --build --preset ${command:cmake.activeConfigurePresetName}",
-      "group": "build",
+      "command": "cmake --build --preset ${command:cmake.activeBuildPresetName} --target kernel",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
       "problemMatcher": []
     },
     {
@@ -16,7 +19,7 @@
       "type": "shell",
       "dependsOn": "build-kernel",
       "isBackground": true,
-      "command": "echo QEMU_READY; qemu-system-aarch64 -M raspi4b -dtb '${workspaceFolder}/src/platform/rpi4/bcm2711-rpi-4-b.dtb' -serial null -serial mon:stdio -kernel '${command:cmake.buildDirectory}/kernel8.img' -s -S",
+      "command": "cmake --build --preset ${command:cmake.activeBuildPresetName} --target debug",
       "problemMatcher": {
         "pattern": {
           "regexp": "^$"
@@ -27,10 +30,17 @@
           "endsPattern": "QEMU_READY"
         }
       },
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
+      "group": "build"
+    },
+    {
+      "label": "qemu-stop",
+      "type": "shell",
+      "command": "echo ${input:terminateQemu}",
+      "problemMatcher": []
     }
+  ],
+  "inputs": [
+    { "id": "terminateQemu", "type": "command",
+      "command": "workbench.action.tasks.terminate", "args": "qemu-debug" }
   ]
 }

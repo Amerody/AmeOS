@@ -18,7 +18,7 @@
 * [sypstraw's tutorial (mailbox code adapted mainly from here)](https://rpi4os.com/)
 
 ## Code consulted
-* [Linux `bcm2835_wdt.c` (watchdog, reboot and shutdown via the PM registers)](https://github.com/torvalds/linux/blob/master/drivers/watchdog/bcm2835_wdt.c)
+* Linux [`bcm2835_wdt.c`](https://github.com/torvalds/linux/blob/master/drivers/watchdog/bcm2835_wdt.c) (watchdog, reboot and shutdown via the PM registers)
 * Linux [`bcm2835-mailbox.c`](https://github.com/torvalds/linux/blob/master/drivers/mailbox/bcm2835-mailbox.c) and [`raspberrypi-firmware.h`](https://github.com/torvalds/linux/blob/master/include/soc/bcm2835/raspberrypi-firmware.h) (mailbox registers and property tags)
 
 ## Tools and third-party files

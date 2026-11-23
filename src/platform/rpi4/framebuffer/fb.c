@@ -12,18 +12,20 @@
  * @ingroup framebuffer
  */
 
-/// @brief Absolute value of @p x
+/// @brief Absolute value of @p x. Evaluates @p x more than once.
 #define ABS(x)            ((x) < 0 ? -(x) : (x))
 
-/// @brief Mask used to invert a cell's color via XOR. Dependant on endianness (RGBA vs ABGR)
+/// @brief Mask used to invert a cell's color via XOR. Dependent on endianness (RGBA vs ABGR)
 #define COLOR_INVERT_MASK 0x00FFFFFFu
 
 /// @brief The framebuffer description returned by hal_fb_get_info()
 static struct framebuffer s_fb_info;
 
 // One property request with the tags SET_PHYS_WH, SET_VIRT_WH, SET_DEPTH, SET_VIRT_OFF,
-// GET_PITCH and ALLOCATE. Every failure (mailbox error, or no buffer allocated) returns -1.
-// for the mailbox protocol refer to
+// GET_PITCH and ALLOCATE. Every failure returns -1 and leaves s_fb_info unchanged: the
+// request doesn't fit, the mailbox or a tag failed, the firmware picked a physical size
+// different from the virtual one or a different depth, or the allocated buffer is
+// smaller than pitch * height. For the mailbox protocol refer to
 // https://github.com/raspberrypi/firmware/wiki/Mailbox-property-interface
 int hal_fb_init(uint32_t width, uint32_t height, uint32_t depth)
 {

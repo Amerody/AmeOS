@@ -49,8 +49,7 @@ extern "C"
 	 * @param depth Bits per pixel; the drawing functions assume 32
 	 *
 	 * @retval 0 The framebuffer is ready
-	 * @return Otherwise a negative error code (rpi4: always -1, for a mailbox error or when
-	 *         no buffer was allocated)
+	 * @return Otherwise a negative error code
 	 */
 	int hal_fb_init(uint32_t width, uint32_t height, uint32_t depth);
 

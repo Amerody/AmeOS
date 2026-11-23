@@ -40,9 +40,9 @@ struct VC_MBOX_Registers
 /// @brief STATUS bit: the read mailbox is empty, so no reply has arrived yet
 #define MBOX_EMPTY               0x40000000u
 
-/// @brief Mask to check if the response code of a tag is ok
+/// @brief Tag request/response code, bit 31: set by the firmware when it answered the tag
 #define MBOX_RESPONSE_OK_MASK    0x80000000u
-/// @brief Mask to check the respone value buffer size
+/// @brief Tag request/response code, bits 30:0: length in bytes of the firmware's answer
 #define MBOX_RESPONSE_VB_OK_MASK 0x7FFFFFFFu
 
 /**
@@ -51,10 +51,16 @@ struct VC_MBOX_Registers
  * Busy-waits, with no timeout, until the mailbox can take the message, then until the
  * reply to this message arrives. Other messages read in the meantime are discarded.
  *
- * Only the overall response code is checked; the caller checks the values each tag returned.
+ * Only the overall response code (word 1 of @p buf) is checked; the caller checks the
+ * values each tag returned.
+ *
+ * The message is the buffer's address with its low 4 bits replaced by @p channel, so
+ * the address must be 16-byte aligned and fit in 32 bits. A @c dsb before writing the
+ * message makes the buffer contents visible before the firmware gets the address, and
+ * one after the matching reply keeps the reads of the buffer after the reply.
  *
  * @param channel Mailbox channel; only the low 4 bits are used
- * @param buf Buffer to send
+ * @param buf     Complete request, 16-byte aligned; holds the firmware's reply on return
  *
  * @retval 0 The firmware answered with the success response code
  * @retval -1 The firmware answered with an error

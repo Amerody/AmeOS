@@ -6,12 +6,20 @@
  * @brief VideoCore mailbox: send a request buffer to the firmware and wait for the reply.
  * @ingroup mailbox
  *
- * Requests go through the single shared mailbox_buffer. The caller fills it with a
- * property request (total size in bytes, request code 0, the tags, then an end tag
- * of 0), calls mailbox_call(MAILBOX_CH_PROP) and reads the replies from the same
- * buffer.
+ * Property requests are built in a buffer owned by the caller:
+ *   1. mailbox_prop_begin() starts a request in the buffer,
+ *   2. mailbox_prop_add() appends one tag and returns a pointer to its value words,
+ *      through which the caller writes the tag's arguments,
+ *   3. mailbox_prop_send() adds the header and end tag, sends the buffer on
+ *      #MAILBOX_CH_PROP and waits for the reply,
+ *   4. mailbox_prop_tag_ok() checks each tag's answer, which the caller then reads
+ *      through the same value pointers.
  *
- * Context: one request at a time, with no locking, and mailbox_call() busy-waits for
+ * Buffer layout (32-bit words): total size in bytes, request/response code, the tags
+ * (tag id, value buffer size in bytes, request/response code, value words), end tag 0.
+ * See https://github.com/raspberrypi/firmware/wiki/Mailbox-property-interface
+ *
+ * Context: no locking; each request uses its own buffer, and sending busy-waits for
  * the reply. Not for interrupt handlers.
  */
 #pragma once
@@ -72,9 +80,9 @@ void mailbox_prop_begin(struct mailbox_prop* p, uint32_t* buf, size_t words);
 /**
  * @brief Appends one tag to the request and returns where its value words are.
  *
- * Writes the three tag header words (tag id, value buffer size in bytes, request code
- * 0), zeroes the value words and moves the cursor past them. @p value_size is rounded
- * up to a multiple of 4 bytes.
+ * Writes the three tag header words (tag id, @p value_size as given, request code 0),
+ * zeroes the value words and moves the cursor past them. The space reserved for the
+ * value is @p value_size rounded up to whole 32-bit words.
  *
  * The caller writes the tag's arguments (if any) through the returned pointer before
  * mailbox_prop_send(), and reads the firmware's answer through the same pointer
@@ -110,8 +118,8 @@ uint32_t* mailbox_prop_add(struct mailbox_prop* p, uint32_t tag, size_t value_si
  *
  * @retval 0 The firmware answered with the success code (0x80000000)
  * @retval -ERROR_NO_SPACE A mailbox_prop_add() didn't fit; nothing was sent
- * @return Otherwise a negative error: the firmware answered with an error code
- *         (0x80000001: error parsing the request)
+ * @retval -1 The firmware answered with an error code (0x80000001: error parsing the
+ *         request)
  */
 int mailbox_prop_send(struct mailbox_prop* p);
 
@@ -125,9 +133,10 @@ int mailbox_prop_send(struct mailbox_prop* p);
  *
  * @pre mailbox_prop_send() returned 0 for the request @p value belongs to
  *
- * @param value Pointer returned by mailbox_prop_add() for that tag
+ * @param value Pointer returned by mailbox_prop_add() for that tag; NULL is allowed
  *
  * @retval true The tag was answered and its value words are complete
- * @retval false The tag wasn't answered (e.g. unknown to this firmware) or was truncated
+ * @retval false @p value is NULL (the tag didn't fit), or the tag wasn't answered (e.g.
+ *         unknown to this firmware) or was truncated
  */
 bool mailbox_prop_tag_ok(const uint32_t* value);

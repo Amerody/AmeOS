@@ -23,21 +23,19 @@ static struct framebuffer s_fb_info;
 
 // One property request with the tags SET_PHYS_WH, SET_VIRT_WH, SET_DEPTH, SET_VIRT_OFF,
 // GET_PITCH and ALLOCATE. Every failure (mailbox error, or no buffer allocated) returns -1.
+// for the mailbox protocol refer to
+// https://github.com/raspberrypi/firmware/wiki/Mailbox-property-interface
 int hal_fb_init(uint32_t width, uint32_t height, uint32_t depth)
 {
-	s_fb_info.width  = width;
-	s_fb_info.height = height;
-	s_fb_info.depth  = depth;
-
 	mailbox_buffer[0] = 35 * 4; // Total size
 	mailbox_buffer[1] = 0;      // Request
 
 	// Set physical dimensions
 	mailbox_buffer[2] = MBOX_TAG_FB_SET_PHYS_WH;
-	mailbox_buffer[3] = 8; // Value size
-	mailbox_buffer[4] = 0;
-	mailbox_buffer[5] = width;
-	mailbox_buffer[6] = height;
+	mailbox_buffer[3] = 8;      // Value size
+	mailbox_buffer[4] = 0;      // request/response code
+	mailbox_buffer[5] = width;  // value buffer word 1
+	mailbox_buffer[6] = height; // value buffer word 2
 
 	// Set virtual dimensions
 	mailbox_buffer[7]  = MBOX_TAG_FB_SET_VIRT_WH;
@@ -85,10 +83,19 @@ int hal_fb_init(uint32_t width, uint32_t height, uint32_t depth)
 	{
 		return -1;
 	}
+	// if allocation succeeded, use the values picked by the firmware
+	// in case they aren't the same
+	s_fb_info.width  = mailbox_buffer[5];
+	s_fb_info.height = mailbox_buffer[6];
+	s_fb_info.depth  = mailbox_buffer[15];
+	if (s_fb_info.depth != 32)
+		return -1; // if the depth isn't 32 bits, fail
 
 	// Extract framebuffer address and pitch from response
 	s_fb_info.buffer = (uint32_t*) (uint64_t) (mailbox_buffer[28] & 0x3FFFFFFF);
 	s_fb_info.pitch  = mailbox_buffer[24];
+	if (mailbox_buffer[29] < s_fb_info.pitch * s_fb_info.height)
+		return -1;
 
 	return 0;
 }
@@ -103,9 +110,9 @@ void hal_fb_set_pixel(uint32_t x, uint32_t y, uint32_t color)
 
 void hal_fb_fill_rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t color)
 {
-	for (uint32_t row = y; row < y + h && row < s_fb_info.height; row++)
+	for (uint64_t row = y; row < (uint64_t) y + h && row < s_fb_info.height; row++)
 	{
-		for (uint32_t col = x; col < x + w && col < s_fb_info.width; col++)
+		for (uint64_t col = x; col < (uint64_t) x + w && col < s_fb_info.width; col++)
 		{
 			hal_fb_set_pixel(col, row, color);
 		}
@@ -113,7 +120,7 @@ void hal_fb_fill_rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint32_t c
 }
 
 // Uses Bresenham's Algorithm to draw lines efficiently without floating-point math
-void hal_fb_draw_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t color)
+void hal_fb_draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color)
 {
 	int dx  = ABS(x1 - x0);
 	int dy  = ABS(y1 - y0);
@@ -146,9 +153,9 @@ void hal_fb_invert_rect(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 	if (x >= s_fb_info.width || y >= s_fb_info.height)
 		return;
 
-	for (uint32_t row = y; row < y + h && row < s_fb_info.height; row++)
+	for (uint64_t row = y; row < (uint64_t) y + h && row < s_fb_info.height; row++)
 	{
-		for (uint32_t col = x; col < x + w && col < s_fb_info.width; col++)
+		for (uint64_t col = x; col < (uint64_t) x + w && col < s_fb_info.width; col++)
 		{
 			s_fb_info.buffer[row * (s_fb_info.pitch / 4) + col] ^= COLOR_INVERT_MASK;
 		}

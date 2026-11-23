@@ -58,7 +58,7 @@ Rules and design stance:
 
 ## Code conventions
 - Style guide: `docs/internal/style.md`
-- Language: C for now; moving to C++ later where it fits naturally. Small parts in C or assembly are fine.
+- Language: C23 for now; moving to C++ later where it fits naturally. Small parts in C or assembly are fine.
 - Pointer style: star attached to the type: `const char* path`. Unless it's a function: `void (*callback)(...)`.
 - Freestanding: no libc. String/memory functions (`strlen`, `memcpy`, `memset`, `memmove`, `memcmp`, ...) are our own.
 

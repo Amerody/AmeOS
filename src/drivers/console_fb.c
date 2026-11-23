@@ -16,7 +16,7 @@
  * @ingroup console
  */
 
-/// @brief True once console_fb_init() has run, even if hal_fb_init() failed
+/// @brief True once console_fb_init() has succeeded
 static bool s_init = false;
 
 /// @brief Cursor column, in cells
@@ -38,11 +38,11 @@ static bool s_cursor_visible = false;
 
 /// @brief Width of one character cell at the current scale
 /// @return Width in pixels
-static inline uint32_t cell_w(void) { return FONT_WIDTH * s_scale; }
+static inline uint32_t cell_w() { return FONT_WIDTH * s_scale; }
 
 /// @brief Height of one character cell at the current scale
 /// @return Height in pixels
-static inline uint32_t cell_h(void) { return FONT_HEIGHT * s_scale; }
+static inline uint32_t cell_h() { return FONT_HEIGHT * s_scale; }
 
 /**
  * @brief Scrolls the screen up by one row of cells and clears the bottom row.
@@ -153,16 +153,11 @@ static void cursor_show()
  *
  * @c '\\r' moves the cursor to the beginning of the row.
  *
- * @c '\\b' moves the cursor back one cell.
+ * @c '\\b' moves the cursor back one cell and wraps to the previous row if necessary.
  *
  * The cursor is hidden before the byte is handled and shown again afterwards.
  *
  * @param c Byte to output
- *
- * @bug @c '\\b' stops at column 0 and doesn't move back to the end of the previous row.
- *      When a shell line has wrapped, backspacing past the start of a row leaves the
- *      characters on the previous row on screen, although the shell removed them from
- *      its line buffer.
  */
 static void console_fb_putc(char c)
 {
@@ -181,6 +176,14 @@ static void console_fb_putc(char c)
 	{
 		if (s_cursor_x > 0)
 			s_cursor_x--;
+		else
+		{
+			if (s_cursor_y > 0)
+			{
+				s_cursor_x = s_max_cols - 1;
+				s_cursor_y--;
+			}
+		}
 	}
 	else
 	{
@@ -230,15 +233,12 @@ int console_fb_init()
 	if (s_init)
 		return -ERROR_BUSY;
 
-	static struct console fb_console;
-	fb_console.name  = "fb";
-	fb_console.putc  = console_fb_putc;
-	fb_console.getc  = NULL;
-	fb_console.clear = console_fb_clear;
-	fb_console.flush = console_fb_flush;
-	console_register(&fb_console);
-
 	int error = hal_fb_init(800, 600, 32);
+	if (error != 0)
+	{
+		return error;
+	}
+	// if the framebuffer has initialized correctly, register the console sink
 
 	struct framebuffer* fb = hal_fb_get_info();
 	s_cursor_x             = 0;
@@ -246,8 +246,21 @@ int console_fb_init()
 	s_max_cols             = (fb) ? fb->width / FONT_WIDTH : 0;
 	s_max_rows             = (fb) ? fb->height / FONT_HEIGHT : 0;
 
+	static struct console fb_console;
+	fb_console.name  = "fb";
+	fb_console.putc  = console_fb_putc;
+	fb_console.getc  = NULL; // no input from the framebuffer
+	fb_console.clear = console_fb_clear;
+	fb_console.flush = console_fb_flush;
+
+	error = console_register(&fb_console);
+	if (error != 0)
+	{
+		return error;
+	}
+
 	s_init = true;
-	return error;
+	return 0;
 }
 
 void console_set_color(uint32_t color) { s_color = color; }
@@ -255,7 +268,7 @@ void console_set_color(uint32_t color) { s_color = color; }
 void console_set_scale(uint32_t scale)
 {
 	struct framebuffer* fb = hal_fb_get_info();
-	if (scale == 0 || !fb || FONT_WIDTH * scale > fb->width || FONT_HEIGHT * scale > fb->height)
+	if (scale == 0 || !fb || scale > fb->width / FONT_WIDTH || scale > fb->height / FONT_HEIGHT)
 		return; // would leave zero columns or rows
 
 	s_scale = scale;

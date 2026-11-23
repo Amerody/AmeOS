@@ -23,7 +23,7 @@ int hal_uart_init(unsigned port, uint32_t baud)
 	case 3:
 	case 4:
 	case 5:
-		uart_pl011_enable(port); // TODO: implement
+		return uart_pl011_enable(port); // TODO: implement
 		break;
 	case 1:
 		return uart_mini_enable(baud);

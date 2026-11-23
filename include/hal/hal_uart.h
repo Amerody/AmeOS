@@ -36,15 +36,6 @@ extern "C"
 	 * @return 0 on success, -ERROR_NO_DEVICE if the platform has no such port, -ERROR_INVALID_ARG if
 	 *         the baud rate is outside what the hardware can produce, or another
 	 *         negative error if the UART's receive interrupt can't be set up.
-	 *
-	 * @bug rpi4: ports 0 and 2-5 return 0 although the PL011 driver is only a
-	 *      placeholder, so a caller (e.g. console_uart_init()) believes the port works
-	 *      and all its output is silently dropped. -ERROR_NO_DEVICE would match the contract.
-	 * @bug rpi4: -ERROR_INVALID_ARG is never returned for a bad @p baud (only from aux_init()). The divisor
-	 *      500 MHz / (8 * baud) - 1 is not range-checked: @p baud 0 divides by zero,
-	 *      rates below ~954 baud need more than the 16 bits of AUX_MU_BAUD_REG and
-	 *      are silently truncated by mmio_write_field(), and very high rates
-	 *      underflow the "- 1" or overflow 8 * baud.
 	 */
 	int hal_uart_init(unsigned port, uint32_t baud);
 

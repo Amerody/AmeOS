@@ -9,6 +9,7 @@
  * @ingroup uart
  */
 
+#include "arch/irq.h"
 #include "auxiliary/aux_regs.h"
 #include "auxiliary/auxiliary.h"
 #include "gpio/gpio.h"
@@ -19,11 +20,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define PIN_START             14U ///< Start pin to configure
-#define PIN_END               17U ///< End pin to configure
+#define PIN_START             14u ///< Start pin to configure
+#define PIN_END               15u ///< End pin to configure
 
-#define AUX_UART_CLOCK        500000000                               ///< 500 MHz clock
-#define AUX_MU_BAUD(baud)     ((AUX_UART_CLOCK / ((baud) * 8U)) - 1U) ///< Helper to calculate the baudrate
+#define AUX_UART_CLOCK_HZ     500000000ull                               ///< 500 MHz clock
+#define AUX_MU_BAUD(baud)     ((AUX_UART_CLOCK_HZ / ((baud) * 8U)) - 1U) ///< Helper to calculate the baudrate
+#define AUX_MU_BAUD_MAX_REG   0xFFFFu                                    ///< Max value admitted in the MU_BAUD register (16 bits)
 
 #define UART_MINI_RX_BUF_SIZE 256u ///< Size of the receive ring buffer in bytes. Must be a power of 2
 
@@ -72,6 +74,30 @@ static bool uart_mini_is_data_ready()
 }
 
 /**
+ * @brief Checks if the given baudrate is valid
+ * 
+ * @param baud Baudrate to check
+ * @retval true The baudrate is valid
+ * @retval false The baudrate is not valid
+ */
+static bool uart_mini_check_baud(uint32_t baud)
+{
+	if (baud == 0)
+		return false;
+
+	// 64 bits so (8 * baud) never overflows uint32_t
+	uint64_t denom    = 8ULL * (uint64_t) baud;
+	uint64_t quotient = AUX_UART_CLOCK_HZ / denom;
+
+	// Prevent unsigned underflow on (quotient - 1) when baud > 62,500,000
+	if (quotient == 0)
+		return false;
+
+	uint64_t reg = quotient - 1;
+	return reg <= AUX_MU_BAUD_MAX_REG;
+}
+
+/**
  * @brief Mini UART interrupt handler, set with aux_set_callback()
  *
  * Only the receive interrupt is enabled (see uart_mini_enable()), so every
@@ -99,7 +125,8 @@ static void uart_mini_irq_handler(void* arg)
 
 int uart_mini_enable(uint32_t baud)
 {
-	// @todo Make it so used pins are choosable (between possibilities)
+	if (!uart_mini_check_baud(baud))
+		return -ERROR_INVALID_ARG;
 
 	// Set the necessary pins to ALT5
 	for (gpio_t pin = PIN_START; pin <= PIN_END; pin++)
@@ -138,9 +165,11 @@ int uart_mini_enable(uint32_t baud)
 
 void uart_mini_putc(char c)
 {
+	arch_irq_flags_t f = arch_irq_save();
 	while (!uart_mini_is_write_ready())
 		;
 	mmio_write(&AUX->MU_IO_REG, (uint32_t) c);
+	arch_irq_restore(f);
 }
 
 bool uart_mini_getc(char* c)

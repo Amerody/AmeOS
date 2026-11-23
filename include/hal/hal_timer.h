@@ -106,7 +106,8 @@ extern "C"
 	 * @param hz        Ticks per second; 0 stops the tick.
 	 * @param callback  Function to call on every tick; required when @p hz != 0.
 	 *
-	 * Stopping the tick (@p hz == 0) always succeeds, even before hal_timer_init().
+	 * Stopping the tick (@p hz == 0) ignores @p callback and always succeeds, 
+	 * even before hal_timer_init().
 	 *
 	 * @retval 0 The tick was started, changed or stopped
 	 * @retval -ERROR_NO_DEVICE @p hz != 0 and hal_timer_init() hasn't succeeded yet

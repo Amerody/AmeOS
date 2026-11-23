@@ -116,12 +116,14 @@ typedef enum
  * @param value Value to write
  * @param base_reg Pointer to the base register of this register block (e.g., &(GPIO->GPFSEL0))
  * @param field_size Size of the field to write. Important for calculations on which register to use
+ * @param raw Do a raw write (not a read-modify-write)
+ * 
  * @return Status of the operation
  * @retval GPIO_SUCCESS The operation was successful
  * @retval GPIO_ERROR_INVALID_PIN @p pin is out of range
  * @retval GPIO_ERROR_INVALID_VALUE @p value is invalid for its field
  */
-gpio_status_t gpio_call(gpio_t pin, uint32_t value, mmio_register32_t base_reg, gpio_field_size_t field_size)
+gpio_status_t gpio_call(gpio_t pin, uint32_t value, mmio_register32_t base_reg, gpio_field_size_t field_size, bool raw)
 {
 	uint32_t field_mask = (1U << field_size) - 1U;
 
@@ -136,15 +138,23 @@ gpio_status_t gpio_call(gpio_t pin, uint32_t value, mmio_register32_t base_reg, 
 	mmio_register32_t target_reg = base_reg + reg_index;
 	unsigned int      shift      = (pin % num_fields) * field_size;
 
-	mmio_write_field(target_reg, value, field_mask, shift);
+	if (raw)
+		mmio_write(target_reg, (value << shift));
+	else
+		mmio_write_field(target_reg, value, field_mask, shift);
 
 	return GPIO_SUCCESS;
 }
 
-gpio_status_t gpio_set(gpio_t pin) { return gpio_call(pin, 1, &GPIO->GPSET0, GPIO_SET_FIELD_SIZE); }
+gpio_status_t gpio_set(gpio_t pin) { return gpio_call(pin, 1, &GPIO->GPSET0, GPIO_SET_FIELD_SIZE, true); }
 
-gpio_status_t gpio_clr(gpio_t pin) { return gpio_call(pin, 1, &GPIO->GPCLR0, GPIO_CLR_FIELD_SIZE); }
+gpio_status_t gpio_clr(gpio_t pin) { return gpio_call(pin, 1, &GPIO->GPCLR0, GPIO_CLR_FIELD_SIZE, true); }
 
-gpio_status_t gpio_set_resistor(gpio_t pin, gpio_resistor_t value) { return gpio_call(pin, value, &GPIO->GPIO_PUP_PDN_CNTRL_REG0, GPIO_PULL_FIELD_SIZE); }
+gpio_status_t gpio_set_resistor(gpio_t pin, gpio_resistor_t value)
+{
+	if (value > GPIO_PUP_PDN_SEL_PDN)
+		return GPIO_ERROR_INVALID_VALUE;
+	return gpio_call(pin, value, &GPIO->GPIO_PUP_PDN_CNTRL_REG0, GPIO_PULL_FIELD_SIZE, false);
+}
 
-gpio_status_t gpio_select_function(gpio_t pin, gpio_function_t func) { return gpio_call(pin, func, &GPIO->GPFSEL0, GPIO_FSEL_FIELD_SIZE); }
+gpio_status_t gpio_select_function(gpio_t pin, gpio_function_t func) { return gpio_call(pin, func, &GPIO->GPFSEL0, GPIO_FSEL_FIELD_SIZE, false); }

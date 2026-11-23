@@ -48,15 +48,10 @@ extern "C"
 	 * Call after console_init().
 	 *
 	 * @retval 0 The framebuffer is set up and registered
-	 * @retval -ERROR_BUSY console_fb_init() was already called, even if that earlier call
-	 *                failed
+	 * @retval -ERROR_BUSY console_fb_init() was already called and succeeded
+	 * @retval -ERROR_NO_SPACE No more console sinks can be registered
 	 * @return Otherwise the negative error from hal_fb_init()
 	 *
-	 * @bug The result of console_register() is ignored, so -ERROR_NO_SPACE is never returned:
-	 *      when the registry is full, the framebuffer is set up but gets no console
-	 *      output.
-	 * @bug The sink is registered before hal_fb_init(). If hal_fb_init() fails, the
-	 *      sink stays registered on a framebuffer that isn't set up.
 	 */
 	int console_fb_init();
 
@@ -81,10 +76,6 @@ extern "C"
 	 * which is also the case before console_fb_init().
 	 *
 	 * @param scale Scale factor; 1 is the font's native size
-	 *
-	 * @bug The fit check computes FONT_WIDTH * @p scale and FONT_HEIGHT * @p scale in 32
-	 *      bits. For @p scale 0x80000000 both wrap to 0, the check passes, and the column
-	 *      and row counts then divide by a cell size of 0 (undefined behaviour in C).
 	 */
 	void console_set_scale(uint32_t scale);
 

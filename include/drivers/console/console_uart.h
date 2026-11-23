@@ -48,14 +48,8 @@ extern "C"
 	 * @retval 0 The UART is set up and registered
 	 * @retval -ERROR_BUSY A UART console was already initialised, even if that earlier
 	 *                call failed
-	 * @return Otherwise the negative error from hal_uart_init() (-ERROR_NO_DEVICE, -ERROR_INVALID_ARG, or
-	 *         another error if the receive interrupt can't be set up)
-	 *
-	 * @bug The result of console_register() is ignored, so -ERROR_NO_SPACE is never returned:
-	 *      when the registry is full, the UART is set up but gets no console output.
-	 * @bug The sink is registered before hal_uart_init(). If hal_uart_init() fails, the
-	 *      sink stays registered on a port that isn't set up, and the port stays
-	 *      claimed, so a retry returns -ERROR_BUSY.
+	 * @retval -ERROR_NO_SPACE No more console sinks can be registered
+	 * @return Otherwise the negative error from hal_uart_init()
 	 */
 	int console_uart_init(unsigned port);
 

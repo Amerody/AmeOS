@@ -14,8 +14,10 @@
  * @brief Enables a PL011 UART. Placeholder: does nothing yet.
  *
  * @param id Platform UART number (0, 2, 3, 4 or 5)
+ * 
+ * @return -ERROR_NO_DEVICE There is no PL011 driver yet
  */
-void uart_pl011_enable(unsigned int id);
+int uart_pl011_enable(unsigned int id);
 
 /**
  * @brief Writes a character to a PL011 UART. Placeholder: does nothing yet.

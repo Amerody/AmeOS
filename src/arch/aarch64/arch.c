@@ -3,7 +3,9 @@
 
 #include "arch/arch.h"
 
-#include "arch/irq.h"
+#include "hal/hal_timer.h"
+
+#include <stddef.h>
 
 /**
  * @file arch.c
@@ -24,7 +26,8 @@ extern void install_vector_table();
 
 void arch_init()
 {
-	install_vector_table();
+	install_vector_table();                           // sets VBAR_EL1, then isb
+	__asm__ volatile("msr daifclr, #4" ::: "memory"); // unmask SError
 }
 
 const char* arch_name()
@@ -39,7 +42,8 @@ void arch_cpu_idle()
 
 void arch_halt()
 {
-	arch_irq_disable();
+	// stop the timer
+	hal_timer_set_tick(0, NULL); // the callback is ignored
 
 	while (1)
 		arch_cpu_idle();

@@ -93,6 +93,13 @@ int console_uart_init(unsigned port)
 	if (s_port != 0xFF)
 		return -ERROR_BUSY;
 
+	int error = hal_uart_init(port, UART_BAUD_RATE);
+	if (error != 0)
+	{
+		return error;
+	}
+	// If the UART has initialized properly, register the sink
+
 	s_port = port;
 
 	static struct console uart_console;
@@ -101,7 +108,7 @@ int console_uart_init(unsigned port)
 	uart_console.getc  = console_uart_getc;
 	uart_console.clear = console_uart_clear;
 	uart_console.flush = console_uart_flush;
-	console_register(&uart_console);
 
-	return hal_uart_init(s_port, UART_BAUD_RATE);
+	error = console_register(&uart_console);
+	return error;
 }

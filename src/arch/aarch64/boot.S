@@ -8,10 +8,11 @@
  * In order:
  *   1. Only CPU 0 (MPIDR_EL1 Aff0 == 0) continues; the others wait forever
  *      in a wfe loop (proc_hang).
- *   2. Drops to EL1h from EL3 or EL2, whichever it was started in (prepare_el1
- *      sets up the EL2 controls and SCTLR_EL1 first). The eret paths enter EL1
- *      with D, A, I and F masked. When started directly in EL1, nothing is
- *      dropped and DAIF is left as it was.
+ *   2. Drops from EL2 to EL1h (QEMU and the Pi 4 firmware both start the
+ *      kernel in EL2). prepare_el1 sets up the EL2 controls and SCTLR_EL1
+ *      first. The eret enters EL1h with D, A, I and F masked (SPSR 0x3c5):
+ *      no vector table is installed yet. When started directly in EL1,
+ *      nothing is dropped and DAIF is left as it was.
  *   3. Enables FP/SIMD at EL1 and EL0 (CPACR_EL1), sets SP to __stack_top
  *      and zeroes .bss 8 bytes at a time (__bss_start and __bss_end from the
  *      linker script).
@@ -64,21 +65,10 @@ master:
     mrs x0, CurrentEL
     lsr x0, x0, #2
     cmp x0, #3
-    b.eq from_el3 // We're in EL3 (QEMU)
+    b.eq proc_hang // We shouldn't start in EL3. If we do, hang
     cmp x0, #2
-    b.eq from_el2 // We're in EL2 (physical rpi4)
-    b in_el1 // already EL1
-
-from_el3:
-    mov     x0, #((1 << 10) | (1 << 0) | (3 << 4))  // SCR_EL3: RW, NS, RES1
-    msr     scr_el3, x0
-    msr     cptr_el3, xzr // don't trap FP/SIMD to EL3
-    prepare_el1
-    mov     x0, #0x3c5 // SPSR: EL1h, DAIF masked
-    msr     spsr_el3, x0
-    adr     x0, in_el1
-    msr     elr_el3, x0
-    eret // EL3 -> EL1 directly
+    b.eq from_el2 // We're in EL2
+    b in_el1 // already EL1 (shouldn't happen)
 
 from_el2:
     prepare_el1
@@ -97,8 +87,9 @@ in_el1:
     adr     x0, __stack_top
     mov     sp, x0
 
-    // Install the vector table before an interrupt can ocurr
-    // bl install_vector_table // External function defined in vectors.S
+    // The vector table is not installed here
+    // arch_init() does so from kmain(), then unmasks SError.
+    // IRQs, and FIQs are unmasked by arch_irq_enable()
 
     // Clear BSS (Uninitialized global variables)
     adr x0, __bss_start

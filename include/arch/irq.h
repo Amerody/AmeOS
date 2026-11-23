@@ -20,6 +20,8 @@
  */
 #pragma once
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -29,17 +31,17 @@ extern "C"
 	 * @brief Opaque saved interrupt-mask state, produced by arch_irq_save() and
 	 *        consumed by arch_irq_restore(). Do not interpret its value.
 	 */
-	typedef unsigned long arch_irq_flags_t;
+	typedef uint64_t arch_irq_flags_t;
 
 	/**
 	 * @brief Unmask IRQs on this CPU.
 	 *
-	 * Not nesting-safe: use it only where IRQs are known to have been masked by
-	 * you (for example once in kmain() at the end of boot). Elsewhere use
-	 * arch_irq_save()/arch_irq_restore().
+	 * Not nesting-safe: use it only where IRQs and FIQs are known to have been 
+	 * masked by you (for example once in kmain() at the end of boot). Elsewhere 
+	 * use arch_irq_save()/arch_irq_restore().
 	 *
-	 * Do not call from an IRQ handler: handlers run with IRQs masked and nested
-	 * interrupts are not supported.
+	 * Do not call from an exception handler: handlers run with exceptions masked 
+	 * and nested interrupts are not supported.
 	 *
 	 * Acts as a compiler barrier.
 	 */
@@ -73,7 +75,7 @@ extern "C"
 	/**
 	 * @brief Restore the mask state captured by arch_irq_save().
 	 *
-	 * IRQs become unmasked only if they were unmasked when the matching save ran.
+	 * IRQs and FIQs become unmasked only if they were unmasked when the matching save ran.
 	 * Acts as a compiler barrier.
 	 *
 	 * @param flags Value returned by the matching arch_irq_save().
@@ -81,13 +83,13 @@ extern "C"
 	void arch_irq_restore(arch_irq_flags_t flags);
 
 	/**
-	 * @brief Are IRQs currently unmasked on this CPU?
+	 * @brief Are IRQs and FIQs currently unmasked on this CPU?
 	 *
-	 * Intended for assertions (for example "must be called with IRQs masked");
+	 * Intended for assertions (for example "must be called with IRQs and FIQs masked");
 	 * do not use it to make locking decisions.
 	 *
-	 * @retval true IRQs are unmasked
-	 * @retval false IRQs are masked
+	 * @retval true IRQs and FIQs are unmasked
+	 * @retval false IRQs and FIQs are masked
 	 */
 	bool arch_irqs_enabled();
 

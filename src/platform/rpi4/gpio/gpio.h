@@ -50,15 +50,10 @@ typedef enum
  * @brief Sets the given GPIO pin
  *
  * @param pin Pin to set
+ * 
  * @return Status of the operation
  * @retval GPIO_SUCCESS if the operation was successful
  * @retval GPIO_ERROR_INVALID_PIN @p pin is out of range
- *
- * @bug GPSETn is write-only (BCM2711 ARM Peripherals, chapter 5, Table 70: type WO),
- *      but this does a read-modify-write through mmio_write_field(). Whatever the read
- *      returns is written back, so any 1 bit in it also sets that other pin. It should
- *      be a single mmio_write() of (1 << bit); the set/clear registers exist precisely
- *      to avoid read-modify-write.
  */
 gpio_status_t gpio_set(gpio_t pin);
 
@@ -66,12 +61,10 @@ gpio_status_t gpio_set(gpio_t pin);
  * @brief Clears the given GPIO pin
  *
  * @param pin Pin to clear
+ * 
  * @return Status of the operation
  * @retval GPIO_SUCCESS The operation was successful
  * @retval GPIO_ERROR_INVALID_PIN @p pin is out of range
- *
- * @bug GPCLRn is write-only (BCM2711 ARM Peripherals, chapter 5, GPCLR0 table: type WO),
- *      but this does a read-modify-write; see gpio_set().
  */
 gpio_status_t gpio_clr(gpio_t pin);
 
@@ -84,9 +77,6 @@ gpio_status_t gpio_clr(gpio_t pin);
  * @return Status of the operation
  * @retval GPIO_SUCCESS The operation was successful
  * @retval GPIO_ERROR_INVALID_PIN @p pin is out of range
- *
- * @bug A @p value of 3 passes the check (it fits the 2-bit field) although 0b11 is
- *      Reserved in GPIO_PUP_PDN_CNTRL_REGn (BCM2711 ARM Peripherals, Table 90).
  */
 gpio_status_t gpio_set_resistor(gpio_t pin, gpio_resistor_t value);
 
@@ -96,6 +86,7 @@ gpio_status_t gpio_set_resistor(gpio_t pin, gpio_resistor_t value);
  *
  * @param pin Pin to set the function for
  * @param func Function to set
+ * 
  * @return Status of the operation
  * @retval GPIO_SUCCESS The operation was successful
  * @retval GPIO_ERROR_INVALID_PIN @p pin is out of range

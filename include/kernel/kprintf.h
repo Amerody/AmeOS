@@ -11,25 +11,9 @@
  * A small printf() subset with no buffering: every character goes straight to
  * console_putc(), so output appears on every registered sink as it is formatted.
  *
- * Supported conversions:
- * | Conversion | Argument             | Output                                      |
- * |------------|----------------------|---------------------------------------------|
- * | @c %%c     | @c int               | the character                               |
- * | @c %%s     | @c const @c char*    | the string; @c "(null)" for NULL            |
- * | @c %%d     | @c int               | signed decimal                              |
- * | @c %%u     | @c unsigned          | unsigned decimal                            |
- * | @c %%x     | @c unsigned          | lowercase hexadecimal, no prefix            |
- * | @c %%p     | @c void*             | @c 0x followed by lowercase hexadecimal     |
- * | @c \%\%     | none                 | a single @c %                               |
- *
- * Length modifiers: any number of @c l or @c z before @c d, @c u or @c x makes the
- * argument 64-bit (@c int64_t / @c uint64_t), so @c %%ld, @c %%lld and @c %%zu all work.
- * Other modifiers (@c h, @c hh, @c j, @c t) are not supported.
- *
- * Not supported: flags, field width and precision (e.g. @c %08x), @c %%X, @c %%o
- * and floating point. An unknown conversion is printed as is, @c % included, but
- * without its length modifiers (@c %%lq prints @c %%q); a lone @c % at the end of
- * the format string is dropped, also when length modifiers follow it.
+ * The format string is parsed by fmt_vformat() from the kernel library, so the
+ * supported conversions are the ones listed in format.h. To format into a buffer
+ * instead of the console, use snprintf() from format.h.
  *
  * Context: same as console_putc(), so safe from interrupt and exception handlers
  * and the panic path. There is no locking, so output from different contexts can
@@ -37,6 +21,7 @@
  */
 
 #include <stdarg.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -46,7 +31,7 @@ extern "C"
 	/**
 	 * @brief Prints a formatted string to the console.
 	 *
-	 * See the file description for the supported conversions.
+	 * See format.h for the supported conversions.
 	 *
 	 * @param fmt Format string
 	 * @param ... Arguments for the conversions in @p fmt

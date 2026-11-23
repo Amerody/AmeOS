@@ -49,7 +49,9 @@ extern "C"
 	 *  - the interrupt controller is initialised, so hal_irq_register() /
 	 *    hal_irq_enable() work (CPU IRQs are still masked);
 	 *  - platform_mem_regions() returns valid data (including any parsing of
-	 *    firmware-provided information such as a device tree).
+	 *    firmware-provided information such as a device tree);
+	 *  - platform_get_info() returns the board description (or a note that it isn't
+	 *    available).
 	 *
 	 * Does not touch the UART (see hal_uart_init()) or the timer (see
 	 * hal_timer_init()), and does not unmask CPU interrupts.
@@ -57,10 +59,14 @@ extern "C"
 	 * Nothing can be printed yet while this runs. If bring-up fails in a way that
 	 * cannot be recovered, the implementation calls arch_halt().
 	 *
+	 * @retval 0 Success
+	 * @retval -1 The platform didn't initialize successfully (rpi4: never returned; a
+	 *         failed board-information query isn't treated as an error)
+	 *
 	 * @todo The device tree isn't parsed yet, so platform_mem_regions() has no data
 	 *       after this returns.
 	 */
-	void platform_init();
+	int platform_init();
 
 	/**
 	 * @brief Reset the whole board, as if it had just been powered on.
@@ -91,6 +97,20 @@ extern "C"
 	 * @return A static string; never NULL.
 	 */
 	const char* platform_name();
+
+	/**
+	 * @brief Human-readable description of the board, one item per line.
+	 *
+	 * The content is chosen by each platform (rpi4: firmware revision, board model,
+	 * revision and serial, and the ARM and VideoCore memory). Lines are separated by
+	 * @c '\\n'.
+	 *
+	 * Valid after platform_init(), which fills it in once; it doesn't change afterwards,
+	 * so it can be read from any context. Before platform_init() it is an empty string.
+	 *
+	 * @return A static string; never NULL.
+	 */
+	const char* platform_get_info();
 
 	/** @brief A contiguous range of physical memory. */
 	struct mem_region

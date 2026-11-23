@@ -27,21 +27,35 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/// @brief Mailbox channel for property-tag requests
-#define MAILBOX_CH_PROP          8
+/// @brief Property tag: get the firmware revision (value: one u32 out)
+#define MBOX_TAG_GET_FIRM_VER       0x00000001
+/// @brief Property tag: get the board model (value: one u32 out)
+#define MBOX_TAG_GET_BOARD_MODEL    0x00010001
+/// @brief Property tag: get the board revision code (value: one u32 out)
+#define MBOX_TAG_GET_BOARD_REVISION 0x00010002
+/// @brief Property tag: get the board serial number (value: one u64 out)
+#define MBOX_TAG_GET_BOARD_SERIAL   0x00010004
+/// @brief Property tag: get the ARM's memory region (value: base address and size in
+///        bytes out, both u32)
+#define MBOX_TAG_GET_ARM_MEMORY     0x00010005
+/// @brief Property tag: get the VideoCore's memory region (value: base address and size
+///        in bytes out, both u32)
+#define MBOX_TAG_GET_VC_MEMORY      0x00010006
 
 /// @brief Property tag: allocate the framebuffer (value: alignment in, address and size out)
-#define MBOX_TAG_FB_ALLOCATE     0x40001
+#define MBOX_TAG_FB_ALLOCATE        0x00040001
 /// @brief Property tag: set the physical (display) width and height
-#define MBOX_TAG_FB_SET_PHYS_WH  0x48003
+#define MBOX_TAG_FB_SET_PHYS_WH     0x00048003
 /// @brief Property tag: set the virtual (buffer) width and height
-#define MBOX_TAG_FB_SET_VIRT_WH  0x48004
+#define MBOX_TAG_FB_SET_VIRT_WH     0x00048004
 /// @brief Property tag: set the depth, in bits per pixel
-#define MBOX_TAG_FB_SET_DEPTH    0x48005
+#define MBOX_TAG_FB_SET_DEPTH       0x00048005
 /// @brief Property tag: get the pitch, in bytes per row
-#define MBOX_TAG_FB_GET_PITCH    0x40008
+#define MBOX_TAG_FB_GET_PITCH       0x00040008
 /// @brief Property tag: set the virtual offset (x, y) of the displayed area
-#define MBOX_TAG_FB_SET_VIRT_OFF 0x48009
+#define MBOX_TAG_FB_SET_VIRT_OFF    0x00048009
+
+// The Allocate Memory tag and following ones are interesting for a future graphics library
 
 /**
  * @brief State of one property request being built in a caller-provided buffer.
@@ -133,10 +147,12 @@ int mailbox_prop_send(struct mailbox_prop* p);
  *
  * @pre mailbox_prop_send() returned 0 for the request @p value belongs to
  *
- * @param value Pointer returned by mailbox_prop_add() for that tag; NULL is allowed
+ * @param value Pointer returned by mailbox_prop_add(), or by one of the
+ *              mailbox_request_*() helpers in mailbox_tags.h, for that tag; NULL is
+ *              allowed
  *
  * @retval true The tag was answered and its value words are complete
  * @retval false @p value is NULL (the tag didn't fit), or the tag wasn't answered (e.g.
  *         unknown to this firmware) or was truncated
  */
-bool mailbox_prop_tag_ok(const uint32_t* value);
+bool mailbox_prop_tag_ok(const void* value);

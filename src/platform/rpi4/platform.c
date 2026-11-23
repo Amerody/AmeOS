@@ -5,13 +5,15 @@
 
 #include "arch/arch.h"
 #include "hal/hal_fb.h"
+#include "mailbox/mailbox_tags.h"
 #include "soc.h"
 
 #include <common/mmio.h>
 #include <hal/hal_irq.h>
+#include <lib/format.h>
+#include <lib/string.h>
 
 #include <stddef.h>
-
 /**
  * @file platform.c
  * @brief Raspberry Pi 4 implementation of the platform.h contract (see platform.h)
@@ -58,11 +60,59 @@ struct PM_Registers
 /// @brief Platform name returned by platform_name(); KERNEL_PLATFORM_NAME is set by CMake
 static const char* s_platform_name = KERNEL_PLATFORM_NAME;
 
-void platform_init()
+/// @brief Board description returned by platform_get_info(); filled once by platform_init()
+static char s_info[512];
+
+// Brings up the GIC, then asks the firmware for the board information in one property
+// request and formats it into s_info. A failed query only replaces the text with a note:
+// the board works without it, so platform_init() still succeeds.
+int platform_init()
 {
 	hal_irq_init();
 
+	// request system data
+	alignas(16) uint32_t buf[64];
+	struct mailbox_prop  p;
+
+	mailbox_prop_begin(&p, buf, 64);
+
+	// firmware version
+	struct mbox_firmware_ver* firmware_version = mailbox_request_firmware_version(&p);
+
+	// board model
+	struct mbox_board_model* board_model = mailbox_request_board_model(&p);
+
+	// board_revision
+	struct mbox_board_revision* board_revision = mailbox_request_board_revision(&p);
+
+	// board serial
+	struct mbox_board_serial* board_serial = mailbox_request_board_serial(&p);
+
+	// arm memory
+	struct mbox_arm_memory* arm_memory = mailbox_request_arm_memory(&p);
+
+	// vc memory
+	struct mbox_vc_memory* vc_memory = mailbox_request_vc_memory(&p);
+
+	if (mailbox_prop_send(&p) != 0 || !mailbox_prop_tag_ok(firmware_version) || !mailbox_prop_tag_ok(board_model) || !mailbox_prop_tag_ok(board_revision) || !mailbox_prop_tag_ok(board_serial) || !mailbox_prop_tag_ok(arm_memory) || !mailbox_prop_tag_ok(vc_memory))
+	{
+		snprintf(s_info, sizeof s_info, "Board info unavailable\n");
+		return 0; // not fatal: the board works without the information
+	}
+
+	uint64_t serial = ((uint64_t) board_serial->high << 32) | board_serial->low;
+
+	(void) snprintf(s_info, sizeof s_info, "Firmware revision: %x\n"
+	                                       "Board model:       %x\n"
+	                                       "Board revision:    %x\n"
+	                                       "Serial:            %lx\n"
+	                                       "ARM memory:        %u MiB at %x\n"
+	                                       "VC memory:         %u MiB at %x",
+	                firmware_version->version, board_model->model, board_revision->revision, serial, arm_memory->size / (1024 * 1024), arm_memory->base, vc_memory->size / (1024 * 1024), vc_memory->base);
+
 	// Platform mem regions data not parsed yet
+
+	return 0;
 }
 
 // Arms the PM watchdog with a very short timeout and a full-reset configuration, the same
@@ -102,6 +152,11 @@ void platform_shutdown()
 const char* platform_name()
 {
 	return s_platform_name;
+}
+
+const char* platform_get_info()
+{
+	return s_info;
 }
 
 size_t platform_mem_regions(struct mem_region* out, size_t max)

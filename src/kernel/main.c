@@ -84,10 +84,11 @@ static void step(int rc, const char* fmt, ...)
  *        framebuffer sinks), timer and tick, then unmasks CPU IRQs.
  *
  * The console exists only after platform_init(), so arch_init() and platform_init()
- * can't print; they return nothing (platform_init() halts on fatal errors), so their
- * status lines are always printed as OK. Only hal_timer_init() reports a real result:
- * the return values of console_uart_init(), console_fb_init() and hal_timer_set_tick()
- * are not checked.
+ * can't print. arch_init() returns nothing, and the result of platform_init() isn't
+ * checked (it halts on fatal errors), so their status lines are always printed as OK.
+ * The board description from platform_get_info() is printed after them.
+ * console_uart_init(), console_fb_init() and hal_timer_init() report their real result;
+ * the return value of hal_timer_set_tick() is not checked.
  */
 static void init()
 {
@@ -100,6 +101,7 @@ static void init()
 
 	step(0, "Architecture %s initialized", arch_name());
 	step(0, "Platform %s initialized", platform_name());
+	kprintf("Platform info: %s\n", platform_get_info());
 
 	step(hal_timer_init(), "Timer initialized");
 	hal_timer_set_tick(TIMER_POLL_HZ, on_tick);

@@ -33,6 +33,8 @@ struct VC_MBOX_Registers
 #define VC_MBOX_BASE             (PERIPHERAL_BASE + 0x0000B880)             ///< VideoCore Mailbox base address
 #define VC_MBOX                  ((struct VC_MBOX_Registers*) VC_MBOX_BASE) ///< VideoCore Mailbox access
 
+/// @brief Mailbox channel for property-tag requests
+#define MAILBOX_CH_PROP          8
 /// @brief Response code in the second word of the buffer when the firmware processed the request
 #define MBOX_RESPONSE            0x80000000u
 /// @brief STATUS bit: the write mailbox is full, so no message can be sent yet
@@ -142,13 +144,14 @@ int mailbox_prop_send(struct mailbox_prop* p)
 	return mailbox_call(MAILBOX_CH_PROP, p->buf);
 }
 
-bool mailbox_prop_tag_ok(const uint32_t* value)
+bool mailbox_prop_tag_ok(const void* value)
 {
 	if (!value)
 		return false;
 
-	uint32_t word                  = *(value - 1);
-	uint32_t size                  = *(value - 2);
-	uint32_t response_lenght_bytes = word & MBOX_RESPONSE_VB_OK_MASK;
+	const uint32_t* v                     = value;
+	uint32_t        word                  = v[-1];
+	uint32_t        size                  = v[-2];
+	uint32_t        response_lenght_bytes = word & MBOX_RESPONSE_VB_OK_MASK;
 	return ((word & MBOX_RESPONSE_OK_MASK) != 0) && (response_lenght_bytes <= size);
 }

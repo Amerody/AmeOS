@@ -45,7 +45,7 @@ add_library(kernel_flags INTERFACE)
 target_compile_definitions(kernel_flags INTERFACE "KERNEL_ARCH_NAME=\"${KERNEL_ARCH}\""  "KERNEL_PLATFORM_NAME=\"${KERNEL_PLATFORM}\"")
 target_compile_definitions(kernel_flags INTERFACE 
     "KERNEL_VERSION_MAJOR=0"
-    "KERNEL_VERSION_MINOR=1"
+    "KERNEL_VERSION_MINOR=2"
     "KERNEL_VERSION_PATCH=0"
 )
 
@@ -59,6 +59,7 @@ target_compile_options(kernel_flags INTERFACE
     -fno-omit-frame-pointer
     -fparse-all-comments
     -Wall -Wextra
+    -Wpointer-arith
 
     # Release only optimizations
     $<$<CONFIG:Release>:-O3>

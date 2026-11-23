@@ -4,6 +4,7 @@
 #include "hal/platform.h"
 
 #include "arch/arch.h"
+#include "hal/hal_fb.h"
 #include "soc.h"
 
 #include <common/mmio.h>
@@ -69,6 +70,9 @@ void platform_init()
 // countdown and resets the machine as soon as RSTC is written.
 void platform_reboot()
 {
+	struct framebuffer* fb = hal_fb_get_info();
+	hal_fb_fill_rect(0, 0, fb->width, fb->height, 0x00000000);
+
 	// use a timeout of 10 ticks (~150us)
 	mmio_write(&PM->WDOG, 10 | PM_PASSWORD);
 	uint32_t val = mmio_read_field(&PM->RSTC, PM_RSTC_WRCFG_CLR, 0);

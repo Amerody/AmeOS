@@ -94,8 +94,8 @@ static void init()
 	arch_init();     // exception vectors installed, IRQs masked
 	platform_init(); // interrupt controller up, memory map valid
 	console_init();
-	console_uart_init(1);
-	console_fb_init();
+	step(console_uart_init(1), "Console UART");
+	step(console_fb_init(), "Console FB");
 	console_set_scale(1);
 
 	step(0, "Architecture %s initialized", arch_name());

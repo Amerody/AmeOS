@@ -16,15 +16,8 @@
  */
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
-
-/**
- * @brief Request and response buffer shared by every mailbox_call(), 36 words.
- *
- * 16-byte aligned because the mailbox message carries the buffer address with its
- * low 4 bits replaced by the channel number.
- */
-extern volatile uint32_t mailbox_buffer[36] __attribute__((aligned(16)));
 
 /// @brief Mailbox channel for property-tag requests
 #define MAILBOX_CH_PROP          8
@@ -43,24 +36,98 @@ extern volatile uint32_t mailbox_buffer[36] __attribute__((aligned(16)));
 #define MBOX_TAG_FB_SET_VIRT_OFF 0x48009
 
 /**
- * @brief Sends mailbox_buffer on a channel and waits for the firmware's reply.
+ * @brief State of one property request being built in a caller-provided buffer.
  *
- * Busy-waits, with no timeout, until the mailbox can take the message, then until the
- * reply to this message arrives. Other messages read in the meantime are discarded.
- *
- * Only the overall response code (mailbox_buffer[1]) is checked; the caller checks
- * the values each tag returned.
- *
- * @param channel Mailbox channel; only the low 4 bits are used
- *
- * @retval 0 The firmware answered with the success response code
- * @retval -1 The firmware answered with an error
- *
- * @bug No barrier between filling mailbox_buffer (RAM) and writing the WRITE register
- *      (a different peripheral), and none between reading the matching reply and
- *      reading mailbox_buffer. Device-nGnRnE ordering only holds within one peripheral,
- *      so a @c dsb is needed on both sides (Arm ARM, Device memory ordering). Harmless
- *      in QEMU; once the MMU maps RAM as cacheable, the buffer also needs a clean before
- *      the request and an invalidate after the reply.
+ * Filled in by mailbox_prop_begin(); the caller never touches the fields. One request
+ * per struct; the struct can live on the stack next to the buffer.
  */
-int mailbox_call(uint8_t channel);
+struct mailbox_prop
+{
+	uint32_t* buf;        ///< Start of the request buffer (16-byte aligned)
+	size_t    cap_words;  ///< Capacity of @c buf, in 32-bit words
+	size_t    next_idx;   ///< Index in @c buf where the next tag header goes
+	bool      overflowed; ///< Set if a mailbox_prop_add() didn't fit; makes send fail
+};
+
+/**
+ * @brief Starts a new property request in @p buf.
+ *
+ * Records the buffer and its capacity in @p p and positions the cursor after the
+ * two header words (total size and request code), which are only written by
+ * mailbox_prop_send(). Nothing is written to @p buf yet.
+ *
+ * The buffer must stay valid, and must not be reused for another request, until the
+ * caller has finished reading the reply.
+ *
+ * @pre @p buf is 16-byte aligned (the mailbox message replaces the address's low 4
+ *      bits with the channel number), e.g. `alignas(16) uint32_t buf[32];`
+ * @pre @p words is at least 3 (two header words plus the end tag)
+ *
+ * @param p     Builder state to initialise
+ * @param buf   Request buffer, owned by the caller
+ * @param words Capacity of @p buf, in 32-bit words
+ */
+void mailbox_prop_begin(struct mailbox_prop* p, uint32_t* buf, size_t words);
+
+/**
+ * @brief Appends one tag to the request and returns where its value words are.
+ *
+ * Writes the three tag header words (tag id, value buffer size in bytes, request code
+ * 0), zeroes the value words and moves the cursor past them. @p value_size is rounded
+ * up to a multiple of 4 bytes.
+ *
+ * The caller writes the tag's arguments (if any) through the returned pointer before
+ * mailbox_prop_send(), and reads the firmware's answer through the same pointer
+ * after it. The firmware writes its answer into the same words, so @p value_size must
+ * be the larger of the request size and the response size of that tag.
+ *
+ * Space for the end tag is always kept free: the tag only fits if its header, its
+ * value words and one more word fit in the buffer.
+ *
+ * @param p          Builder state, from mailbox_prop_begin()
+ * @param tag        Tag id (MBOX_TAG_*)
+ * @param value_size Size of the tag's value buffer, in bytes
+ *
+ * @return Pointer to the tag's first value word inside the request buffer, or NULL if
+ *         the tag doesn't fit (the request is then marked as overflowed and
+ *         mailbox_prop_send() fails)
+ */
+uint32_t* mailbox_prop_add(struct mailbox_prop* p, uint32_t tag, size_t value_size);
+
+/**
+ * @brief Finishes the request, sends it on the property channel and waits for the reply.
+ *
+ * Writes the end tag (0) at the cursor, the total size in bytes (header + tags + end
+ * tag) in word 0 and the request code 0 in word 1, then calls mailbox_call() on
+ * #MAILBOX_CH_PROP and checks the overall response code in word 1.
+ *
+ * A success only means the firmware parsed the buffer. Each tag can still have been
+ * left unanswered: check it with mailbox_prop_tag_ok().
+ *
+ * Busy-waits with no timeout (see mailbox_call()). Not for interrupt handlers.
+ *
+ * @param p Builder state, from mailbox_prop_begin() and zero or more mailbox_prop_add()
+ *
+ * @retval 0 The firmware answered with the success code (0x80000000)
+ * @retval -ERROR_NO_SPACE A mailbox_prop_add() didn't fit; nothing was sent
+ * @return Otherwise a negative error: the firmware answered with an error code
+ *         (0x80000001: error parsing the request)
+ */
+int mailbox_prop_send(struct mailbox_prop* p);
+
+/**
+ * @brief Checks that the firmware answered one tag completely.
+ *
+ * Reads the tag's request/response code (the word just before @p value): the tag was
+ * answered if bit 31 is set, and the answer is complete if the response length in
+ * bits 30:0 is no larger than the tag's value buffer size (the word before that). A
+ * longer response means the firmware truncated it to fit.
+ *
+ * @pre mailbox_prop_send() returned 0 for the request @p value belongs to
+ *
+ * @param value Pointer returned by mailbox_prop_add() for that tag
+ *
+ * @retval true The tag was answered and its value words are complete
+ * @retval false The tag wasn't answered (e.g. unknown to this firmware) or was truncated
+ */
+bool mailbox_prop_tag_ok(const uint32_t* value);

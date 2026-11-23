@@ -27,75 +27,60 @@ static struct framebuffer s_fb_info;
 // https://github.com/raspberrypi/firmware/wiki/Mailbox-property-interface
 int hal_fb_init(uint32_t width, uint32_t height, uint32_t depth)
 {
-	mailbox_buffer[0] = 35 * 4; // Total size
-	mailbox_buffer[1] = 0;      // Request
+	alignas(16) uint32_t buf[32];
+	struct mailbox_prop  p;
+
+	mailbox_prop_begin(&p, buf, 32);
+
+	uint32_t* pwh   = mailbox_prop_add(&p, MBOX_TAG_FB_SET_PHYS_WH, 8);
+	uint32_t* vwh   = mailbox_prop_add(&p, MBOX_TAG_FB_SET_VIRT_WH, 8);
+	uint32_t* dep   = mailbox_prop_add(&p, MBOX_TAG_FB_SET_DEPTH, 4);
+	uint32_t* voff  = mailbox_prop_add(&p, MBOX_TAG_FB_SET_VIRT_OFF, 8);
+	uint32_t* pitch = mailbox_prop_add(&p, MBOX_TAG_FB_GET_PITCH, 4);
+	uint32_t* alloc = mailbox_prop_add(&p, MBOX_TAG_FB_ALLOCATE, 8);
+	if (!alloc)
+		return -1;
 
 	// Set physical dimensions
-	mailbox_buffer[2] = MBOX_TAG_FB_SET_PHYS_WH;
-	mailbox_buffer[3] = 8;      // Value size
-	mailbox_buffer[4] = 0;      // request/response code
-	mailbox_buffer[5] = width;  // value buffer word 1
-	mailbox_buffer[6] = height; // value buffer word 2
+	pwh[0] = width;
+	pwh[1] = height;
 
 	// Set virtual dimensions
-	mailbox_buffer[7]  = MBOX_TAG_FB_SET_VIRT_WH;
-	mailbox_buffer[8]  = 8;
-	mailbox_buffer[9]  = 0;
-	mailbox_buffer[10] = width;
-	mailbox_buffer[11] = height;
+	vwh[0] = width;
+	vwh[1] = height;
 
 	// Set depth (32-bit ARGB)
-	mailbox_buffer[12] = MBOX_TAG_FB_SET_DEPTH;
-	mailbox_buffer[13] = 4;
-	mailbox_buffer[14] = 0;
-	mailbox_buffer[15] = depth;
+	dep[0] = depth;
 
 	// Set virtual offset (critical for proper initialization!)
-	mailbox_buffer[16] = MBOX_TAG_FB_SET_VIRT_OFF;
-	mailbox_buffer[17] = 8;
-	mailbox_buffer[18] = 0;
-	mailbox_buffer[19] = 0; // X offset
-	mailbox_buffer[20] = 0; // Y offset
-
-	// Get pitch
-	mailbox_buffer[21] = MBOX_TAG_FB_GET_PITCH;
-	mailbox_buffer[22] = 4;
-	mailbox_buffer[23] = 0;
-	mailbox_buffer[24] = 0;
+	voff[0] = 0; // X offset
+	voff[1] = 0; // Y offset
 
 	// Allocate buffer
-	mailbox_buffer[25] = MBOX_TAG_FB_ALLOCATE;
-	mailbox_buffer[26] = 8;
-	mailbox_buffer[27] = 0;
-	mailbox_buffer[28] = 4096; // Alignment (4096 required!)
-	mailbox_buffer[29] = 0;
+	alloc[0] = 4096; // Alignment (4096 required!)
 
-	// End tag
-	mailbox_buffer[30] = 0;
-
-	if (mailbox_call(MAILBOX_CH_PROP) != 0)
-	{
+	// Check if everything succeeded
+	if (mailbox_prop_send(&p) != 0 || !mailbox_prop_tag_ok(pwh) || !mailbox_prop_tag_ok(vwh) || !mailbox_prop_tag_ok(dep) || !mailbox_prop_tag_ok(voff) || !mailbox_prop_tag_ok(pitch) || !mailbox_prop_tag_ok(alloc))
 		return -1;
-	}
 
-	// Check if allocation succeeded
-	if (mailbox_buffer[28] == 0)
-	{
+	if (pwh[0] != vwh[0] || pwh[1] != vwh[1])
+		return -1; // if the physical and virtual dimensions are not the same, fail
+
+	if (dep[0] != depth)
+		return -1; // if the depth isn't what we asked for, fail
+
+	if (alloc[1] < pitch[0] * pwh[1])
 		return -1;
-	}
-	// if allocation succeeded, use the values picked by the firmware
+
+	// if everything succeeded, use the values picked by the firmware
 	// in case they aren't the same
-	s_fb_info.width  = mailbox_buffer[5];
-	s_fb_info.height = mailbox_buffer[6];
-	s_fb_info.depth  = mailbox_buffer[15];
-	if (s_fb_info.depth != 32)
-		return -1; // if the depth isn't 32 bits, fail
+	s_fb_info.width  = pwh[0];
+	s_fb_info.height = pwh[1];
+	s_fb_info.depth  = dep[0];
 
 	// Extract framebuffer address and pitch from response
-	s_fb_info.buffer = (uint32_t*) (uint64_t) (mailbox_buffer[28] & 0x3FFFFFFF);
-	s_fb_info.pitch  = mailbox_buffer[24];
-	if (mailbox_buffer[29] < s_fb_info.pitch * s_fb_info.height)
-		return -1;
+	s_fb_info.buffer = (uint32_t*) (uint64_t) (alloc[0] & 0x3FFFFFFF);
+	s_fb_info.pitch  = pitch[0];
 
 	return 0;
 }

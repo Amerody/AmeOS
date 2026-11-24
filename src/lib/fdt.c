@@ -54,13 +54,21 @@ struct fdt_header
 static struct fdt_header s_header; ///< Header of the selected blob
 static const uint8_t*    s_blob;   ///< Selected blob; NULL until fdt_init() succeeds
 
-/// @brief Rounds @p v up to a multiple of 4 (tokens are 4-byte aligned, spec 5.6)
+/**
+ * @brief Rounds @p v up to a multiple of 4 (tokens are 4-byte aligned, spec 5.6)
+ * @param v Offset or length in bytes
+ * @return @p v rounded up to the next multiple of 4
+ */
 static inline uint32_t align4(uint32_t v)
 {
 	return (v + 3u) & ~3u;
 }
 
-/// @brief Reads a big-endian u32 at any alignment
+/**
+ * @brief Reads a big-endian u32 at any alignment
+ * @param p Address of the first byte
+ * @return The value in native endianness
+ */
 static uint32_t read_be32(const void* p)
 {
 	uint32_t val;
@@ -70,7 +78,11 @@ static uint32_t read_be32(const void* p)
 	return __builtin_bswap32(val);
 }
 
-/// @brief Reads a big-endian u64 at any alignment
+/**
+ * @brief Reads a big-endian u64 at any alignment
+ * @param p Address of the first byte
+ * @return The value in native endianness
+ */
 static uint64_t read_be64(const void* p)
 {
 	uint64_t val;
@@ -78,13 +90,21 @@ static uint64_t read_be64(const void* p)
 	return __builtin_bswap64(val);
 }
 
-/// @brief Start of the structure block
+/**
+ * @brief Start of the structure block
+ * @return Address of the structure block inside the selected blob; only valid when
+ *         fdt_init() has succeeded
+ */
 static inline const uint8_t* struct_base()
 {
 	return s_blob + s_header.off_dt_struct;
 }
 
-/// @brief String at @p nameoff in the strings block, or NULL if out of bounds
+/**
+ * @brief String at @p nameoff in the strings block
+ * @param nameoff Offset of the string from the start of the strings block
+ * @return The NUL-terminated string, or NULL if @p nameoff is out of bounds
+ */
 static const char* get_string(uint32_t nameoff)
 {
 	if (nameoff >= s_header.size_dt_strings)
@@ -111,6 +131,11 @@ uint64_t fdt_read_cells(const void* p, uint32_t cell_count)
  * @brief Checks that the block [@p off, @p off + @p size) lies inside a blob of @p total bytes.
  *
  * Written with subtractions so that no addition can wrap around.
+ *
+ * @param off   Offset of the block from the start of the blob
+ * @param size  Size of the block in bytes
+ * @param total Size of the whole blob in bytes
+ * @return true if the block starts after the header and ends inside the blob
  */
 static bool block_fits(uint32_t off, uint32_t size, uint32_t total)
 {
@@ -119,6 +144,7 @@ static bool block_fits(uint32_t off, uint32_t size, uint32_t total)
 
 /**
  * @brief Reads and checks the header of @p blob into s_header.
+ * @param blob Start of the blob (8-byte aligned)
  * @retval SUCCESS        The header is valid
  * @retval -ERROR_GENERIC Bad magic, unsupported version or a block out of bounds
  */
@@ -293,7 +319,14 @@ static int node_body(struct fdt_node node, uint32_t* first)
 	return SUCCESS;
 }
 
-/// @brief From @p off, skips NOP tokens; @p token / @p next describe the first other token
+/**
+ * @brief From @p off, skips NOP tokens
+ * @param off   In: offset of a token. Out: offset of the first token that isn't a NOP
+ * @param token The token at the returned @p off
+ * @param next  Offset of the token after it
+ * @retval SUCCESS        @p off, @p token and @p next describe the first non-NOP token
+ * @retval -ERROR_GENERIC Ran off the structure block, or a malformed token (see next_token())
+ */
 static int skip_nops(uint32_t* off, uint32_t* token, uint32_t* next)
 {
 	for (;;)
@@ -497,7 +530,17 @@ bool fdt_is_node_enabled(struct fdt_node node)
 	return strcmp(s, "okay") == 0 || strcmp(s, "ok") == 0;
 }
 
-/// @brief Reads a single-u32 property @p name of @p node, or @p fallback if absent
+/**
+ * @brief Reads a single-u32 property of @p node, or @p fallback if it's absent
+ * @param node     Node to read from
+ * @param name     Property name, e.g. "#address-cells"
+ * @param fallback Value used when the property is absent
+ * @param out      The value
+ * @retval SUCCESS            @p out holds the value or @p fallback
+ * @retval -ERROR_INVALID_ARG @p out is NULL
+ * @retval -ERROR_GENERIC     The property isn't exactly 4 bytes
+ * @return Other negative errors: see fdt_get_prop()
+ */
 static int get_u32_prop(struct fdt_node node, const char* name, uint32_t fallback, uint32_t* out)
 {
 	if (!out)

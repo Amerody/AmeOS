@@ -83,13 +83,15 @@ static void step(int rc, const char* fmt, ...)
  *        framebuffer sinks), timer and tick, then unmasks CPU IRQs.
  *
  * The console exists only after platform_init(), so arch_init() and platform_init()
- * can't print. arch_init() returns nothing, and the result of platform_init() isn't
- * checked (it halts on fatal errors), so their status lines are always printed as OK.
- * The board description from platform_get_info() is printed after them.
- * console_uart_init(), console_fb_init() and hal_timer_init() report their real result;
- * the return value of hal_timer_set_tick() is not checked.
- * 
- * @param firmware_arg Argument left from the firmware
+ * can't print. arch_init() returns nothing, so its status line is always printed as OK.
+ * The return value of platform_init() isn't checked (it halts on fatal errors); instead,
+ * the problems it recorded (platform_get_init_errors()) are printed in red and its status
+ * line is printed as failed. The board description from platform_get_info() is printed
+ * after them. console_uart_init(), console_fb_init() and hal_timer_init() report their
+ * real result; the return value of hal_timer_set_tick() is not checked.
+ *
+ * @param firmware_arg Value the firmware left in x0, passed on to platform_init()
+ *                     (rpi4: the address of the DTB)
  */
 static void init(uintptr_t firmware_arg)
 {
@@ -132,7 +134,8 @@ static void init(uintptr_t firmware_arg)
  * arch_cpu_idle() before unmasking IRQs (the lost-wakeup-free sequence described
  * there). Never returns.
  *
- * @param firmware_arg Argument left from the firmware
+ * @param firmware_arg Value the firmware left in x0 at entry, saved by boot.S and passed
+ *                     on to init() without being interpreted (rpi4: the address of the DTB)
  */
 void kmain(uintptr_t firmware_arg)
 {

@@ -158,6 +158,7 @@ extern "C"
 
 	/**
 	 * @brief Name of @p node, including its unit address (e.g. "memory@0"). The root's name is "".
+	 * @param node Node to name.
 	 * @return The name inside the blob, or NULL if @p node isn't a node.
 	 */
 	const char* fdt_get_node_name(struct fdt_node node);
@@ -168,12 +169,15 @@ extern "C"
 	 * "memory" matches "memory" and "memory@0" but not "memory-controller";
 	 * "memory@0" only matches "memory@0" (spec 2.2.1, node names).
 	 *
+	 * @param node Node to check.
+	 * @param name Name to compare with, with or without a unit address.
 	 * @return true if @p node's name matches @p name.
 	 */
 	bool fdt_is_node_named(struct fdt_node node, const char* name);
 
 	/**
 	 * @brief Checks the @c status property (spec 2.3.4).
+	 * @param node Node to check.
 	 * @return true if @c status is absent, "okay" or "ok"; false otherwise
 	 *         (e.g. "disabled") or if @p node isn't a node.
 	 */

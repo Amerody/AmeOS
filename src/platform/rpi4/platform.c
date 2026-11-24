@@ -67,7 +67,7 @@ static char s_info[512];
 
 /// @brief Buffer to store possible errors during initialization
 static char s_errors[512];
-/// @brief Index of the next charater to write in @p s_errors
+/// @brief Index of the next character to write in @p s_errors
 static size_t s_idx_errors;
 
 /**
@@ -79,18 +79,24 @@ static size_t s_idx_errors;
  * If there are at least sizeof(s_errors) - 1 characters, the rest 
  * of the input is ignored and a NULL character is written at the 
  * end of the buffer
+ *
+ * @bug The size check only runs once, before copying: a message longer than the space
+ *      left is copied whole and writes past the end of @p s_errors. The check needs to be
+ *      inside the copy loop to match the description above.
+ *
+ * @param err Message to append, usually ending with @c '\\n'
  */
 static void add_error(const char* err)
 {
-	if (s_idx_errors >= sizeof(s_errors))
-	{
-		s_errors[sizeof(s_errors) - 1] = '\0';
-		return;
-	}
-
 	char c;
 	while ((c = *err++) != '\0')
 	{
+		if (s_idx_errors >= sizeof(s_errors))
+		{
+			s_errors[sizeof(s_errors) - 1] = '\0';
+			return;
+		}
+
 		s_errors[s_idx_errors++] = c;
 	}
 	s_errors[s_idx_errors] = '\0';
@@ -124,6 +130,11 @@ static size_t s_ram_count;
 
 /**
  * @brief Appends [base, base + size) to @p ranges.
+ * @param ranges List to append to
+ * @param count  In/out: number of valid entries in @p ranges
+ * @param max    Capacity of @p ranges in entries
+ * @param base   First byte of the range
+ * @param size   Size of the range in bytes
  * @return false if the list is full or base + size overflows (nothing is added);
  *         true otherwise, including for an empty range, which is skipped.
  */
@@ -143,8 +154,13 @@ static bool range_add(struct mem_range* ranges, size_t* count, size_t max, uint6
 /**
  * @brief Removes [rb, re) from every range in @p ranges, splitting ranges where needed.
  *
- * Doesn't keep the order (sort_and_merge() restores it).
+ * Doesn't keep the order (range_sort_and_merge() restores it).
  *
+ * @param ranges List to remove from
+ * @param count  In/out: number of valid entries in @p ranges
+ * @param max    Capacity of @p ranges in entries (a split adds one)
+ * @param rb     First byte to remove
+ * @param re     One past the last byte to remove
  * @return false if a split needed a free slot and there was none. The range is then
  *         cut short at @p rb, so the result loses some RAM but never contains reserved memory.
  */
@@ -197,7 +213,11 @@ static bool range_subtract(struct mem_range* ranges, size_t* count, size_t max, 
 	return ok;
 }
 
-/// @brief Rounds every range inward to page boundaries and drops the ones that become empty
+/**
+ * @brief Rounds every range inward to page boundaries and drops the ones that become empty
+ * @param ranges List to align
+ * @param count  In/out: number of valid entries in @p ranges
+ */
 static void range_align_inward(struct mem_range* ranges, size_t* count)
 {
 	size_t kept = 0;
@@ -213,7 +233,11 @@ static void range_align_inward(struct mem_range* ranges, size_t* count)
 	*count = kept;
 }
 
-/// @brief Sorts @p ranges by base (insertion sort: the list is tiny) and merges touching ones
+/**
+ * @brief Sorts @p ranges by base (insertion sort: the list is tiny) and merges touching ones
+ * @param ranges List to sort
+ * @param count  In/out: number of valid entries in @p ranges (smaller after merging)
+ */
 static void range_sort_and_merge(struct mem_range* ranges, size_t* count)
 {
 	for (size_t i = 1; i < *count; i++)
@@ -246,6 +270,11 @@ static void range_sort_and_merge(struct mem_range* ranges, size_t* count)
 
 /**
  * @brief Adds every @c reg tuple of @p node (cells taken from @p parent) to @p ranges.
+ * @param node   Node whose @c reg to read
+ * @param parent @p node's parent (holds the cell counts)
+ * @param ranges List to append to
+ * @param count  In/out: number of valid entries in @p ranges
+ * @param max    Capacity of @p ranges in entries
  * @return false if a tuple didn't fit or @c reg is malformed.
  */
 static bool add_reg_ranges(struct fdt_node node, struct fdt_node parent, struct mem_range* ranges, size_t* count, size_t max)
@@ -386,7 +415,7 @@ static void peripheral_base_init_from_dtb()
 		add_error("DTB: no /soc translation for the ARM-local peripherals, using the default base\n");
 }
 
-// Reads the DTB first (the peripheral base comes from it), then brings up the GIC, asks
+// Reads the DTB first (the peripheral base addresses come from it), then brings up the GIC, asks
 // the firmware for the board information in one property request and formats it into
 // s_info, and builds the RAM map. A failed query only replaces the text with a note:
 // the board works without it, so platform_init() still succeeds.

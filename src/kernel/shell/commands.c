@@ -300,6 +300,20 @@ static int cmd_peek(size_t argc, char* argv[])
 	return 0;
 }
 
+/**
+ * @brief Shell command @c mem: prints the RAM map from platform_mem_regions().
+ *
+ * One line per region, @c "@<base> size <size>" in lowercase hex. These are the regions
+ * the platform hands to core: the kernel image is still inside them, and they say nothing
+ * about which pages are in use. At most 16 regions are printed, even if the platform
+ * reports more (the count line shows the total).
+ *
+ * @param argc Number of tokens; must be 1
+ * @param argv Tokens; unused
+ *
+ * @retval 0 The map (or "RAM regions not mapped" if it's empty) was printed
+ * @retval -1 Extra arguments were given (the usage was printed)
+ */
 static int cmd_mem(size_t argc, char* argv[])
 {
 	(void) argv;

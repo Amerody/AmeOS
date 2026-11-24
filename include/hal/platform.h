@@ -59,8 +59,13 @@ extern "C"
 	 * Nothing can be printed yet while this runs. If bring-up fails in a way that
 	 * cannot be recovered, the implementation calls arch_halt().
 	 *
-	 * @param firmware_arg Firmware argument
-	 * 
+	 * @param firmware_arg Value the firmware left in x0, forwarded unchanged by kmain().
+	 *                     Core doesn't interpret it. rpi4: the physical address of the
+	 *                     DTB. It is read before any register is touched, because the
+	 *                     peripheral base addresses (soc.h) and the RAM map come from it;
+	 *                     if it isn't a valid DTB, the defaults are kept, the RAM map is
+	 *                     empty and the problem is reported by platform_get_init_errors().
+	 *
 	 * @retval 0 Success
 	 * @retval -1 The platform didn't initialize successfully (rpi4: never returned; a
 	 *         failed board-information query isn't treated as an error)
@@ -97,6 +102,18 @@ extern "C"
 	 */
 	const char* platform_name();
 
+	/**
+	 * @brief Problems platform_init() met but could recover from, one per line.
+	 *
+	 * platform_init() runs before the console exists, so it records problems instead
+	 * of printing them; kmain() prints them once the console is up. rpi4: an invalid
+	 * DTB, peripheral bases left at their defaults, or RAM left out of the map.
+	 *
+	 * Valid after platform_init(); doesn't change afterwards.
+	 *
+	 * @return A static, NUL-terminated string with lines separated by @c '\\n', or NULL
+	 *         if there were no problems.
+	 */
 	const char* platform_get_init_errors();
 
 	/**

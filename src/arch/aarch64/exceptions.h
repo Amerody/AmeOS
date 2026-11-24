@@ -19,7 +19,7 @@
  */
 #pragma once
 
-#include "arch/context.h" /* struct trap_frame */
+#include "arch/context_types.h"
 
 /**
  * @brief Synchronous exceptions: SVC (syscalls), aborts, alignment faults, BRK, ...

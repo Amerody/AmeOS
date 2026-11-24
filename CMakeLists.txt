@@ -49,7 +49,10 @@ target_compile_definitions(kernel_flags INTERFACE
     "KERNEL_VERSION_PATCH=0"
 )
 
-target_include_directories(kernel_flags INTERFACE "${CMAKE_SOURCE_DIR}/include")
+target_include_directories(kernel_flags INTERFACE 
+    "${CMAKE_SOURCE_DIR}/include" 
+    "${CMAKE_SOURCE_DIR}/src/arch/${KERNEL_ARCH}/include"
+)
 target_compile_options(kernel_flags INTERFACE 
     -mcpu=cortex-a72
     -ffreestanding
@@ -341,7 +344,7 @@ if(KERNEL_BUILD_DOCS)
             set(DOXYGEN_ENABLED_SECTIONS "INTERNAL_DOCS")
         else()
             set(DOXYGEN_ENABLED_SECTIONS "")
-            set(DOXYGEN_EXCLUDE "${CMAKE_SOURCE_DIR}/docs/internal") # don't include the internal documentation on Release
+            set(DOXYGEN_EXCLUDE "${CMAKE_SOURCE_DIR}/docs/internal") # public docs only: leave out docs/internal
         endif()
 
         setup_doxygen_layout()
@@ -359,10 +362,18 @@ if(KERNEL_BUILD_DOCS)
             list(APPEND _doc_inputs "${CMAKE_CURRENT_BINARY_DIR}/generated")
         endif()
 
+        # Doxygen never deletes pages of removed/renamed files, so wipe the output first.
+        # A separate target (not PRE_BUILD) because on non-VS generators PRE_BUILD on a
+        # custom target is not guaranteed to run before the target's own command.
+        add_custom_target(docs_clean
+            COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_SOURCE_DIR}/docs/html"
+            COMMENT "Cleaning stale Doxygen HTML output"
+            VERBATIM)
+
         doxygen_add_docs(docs ${_doc_inputs} ALL
             COMMENT "Generating Doxygen documentation")
-        
-        add_dependencies(docs kernel) # Only generate documentation after the kernel builds successfully. 
+
+        add_dependencies(docs kernel docs_clean) # Only generate documentation after the kernel builds successfully. 
     else()
         message(WARNING "Doxygen not found: documentation will not be generated "
                         "(install Doxygen, or configure with -DKERNEL_BUILD_DOCS=OFF)")

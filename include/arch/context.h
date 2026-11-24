@@ -27,7 +27,7 @@
  */
 #pragma once
 
-#include "context_types.h" /* struct cpu_context, struct trap_frame */
+#include "arch/context_types.h"
 
 #include <stdint.h>
 

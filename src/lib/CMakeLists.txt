@@ -6,5 +6,6 @@ add_library(lib OBJECT
     "memory.c"
     "ringbuf.c"
     "format.c"
+    "fdt.c"
 )
 target_link_libraries(lib PUBLIC kernel_flags)

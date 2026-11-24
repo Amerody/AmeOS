@@ -96,7 +96,7 @@ struct GICD_Registers
 	volatile uint32_t CIDR3; ///< Component ID 3 Register
 };
 
-#define GICD_BASE (PERIPHERAL_BASE + 0x1841000)        ///< GICD base address
+#define GICD_BASE (ARM_LOCAL_BASE + 0x41000)           ///< GICD base address (bus address 0x40041000)
 #define GICD      ((struct GICD_Registers*) GICD_BASE) ///< GICD access
 
 /// @brief All the GICC Registers
@@ -132,7 +132,7 @@ struct GICC_Registers
 	volatile uint32_t DIR; ///< Deactivate Interrupt Register
 };
 
-#define GICC_BASE                      (PERIPHERAL_BASE + 0x1842000)        ///< GICC base address
+#define GICC_BASE                      (ARM_LOCAL_BASE + 0x42000)           ///< GICC base address (bus address 0x40042000)
 #define GICC                           ((struct GICC_Registers*) GICC_BASE) ///< GICC access
 
 #define GIC_INTID_SGI_BASE             0u  ///< First SGI (0-15)

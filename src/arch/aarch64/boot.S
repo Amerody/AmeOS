@@ -104,7 +104,18 @@ clear_bss:
     cbnz x1, clear_bss
 
 run_main:
-    mov x0, x19 // Restore the DTB pointer into x0 as argument 1 for kmain (see kmain for explanation on why we need the DTB pointer)
+    /*
+     * Pass the DTB pointer to kmain as argument 0 (x0)
+     * 
+     * Why the DTB pointer is passed in:
+     * 1. Hardware Discovery: The DTB contains the blueprint of the SoC. It identifies
+     *    the exact locations of memory maps, peripheral addresses, and CPU cores.
+     * 2. Dynamic Memory: It explicitly details how much RAM is physically present
+     *    (crucial for distinguishing between the 2GB, 4GB, or 8GB versions of the Pi 4).
+     * 3. Future Proofing: If the peripheral base addresses change in future board revisions
+     *    or QEMU targets, parsing this pointer prevents the kernel from instantly crashing.
+     */
+    mov x0, x19 
     // Jump to C code, should not return
     bl kmain
 

@@ -7,6 +7,7 @@
 * [CoreLink GIC-400 Generic Interrupt Controller TRM (version r0p1)](https://developer.arm.com/documentation/ddi0471/latest)
 * [Cortex-A72 MPCore Processor TRM (version r0p3)](https://support.arm.com/documentation/100095/0003/)
 * [Raspberry Pi firmware: Mailbox property interface (wiki)](https://github.com/raspberrypi/firmware/wiki/)
+* [DTB format](https://devicetree-specification.readthedocs.io/en/stable/flattened-format.html)
 
 ## Concepts
 * [Operating Systems: Three Easy Pieces, Arpaci-Dusseau](https://pages.cs.wisc.edu/~remzi/OSTEP/)

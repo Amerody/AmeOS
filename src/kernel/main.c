@@ -11,6 +11,7 @@
 #include <drivers/console/console_uart.h>
 #include <gfx/color.h>
 #include <hal/hal.h>
+#include <kernel/error.h>
 
 #include <stddef.h>
 #include <stdint.h>
@@ -21,8 +22,6 @@
  *        feeds the shell.
  * @ingroup kernel
  */
-
-// uint64_t PERIPHERAL_BASE = 0xFE000000UL; // Fallback value
 
 /// @brief Rate of the periodic timer tick set up in init(), in Hz
 #define TIMER_POLL_HZ 1000
@@ -89,18 +88,34 @@ static void step(int rc, const char* fmt, ...)
  * The board description from platform_get_info() is printed after them.
  * console_uart_init(), console_fb_init() and hal_timer_init() report their real result;
  * the return value of hal_timer_set_tick() is not checked.
+ * 
+ * @param firmware_arg Argument left from the firmware
  */
-static void init()
+static void init(uintptr_t firmware_arg)
 {
-	arch_init();     // exception vectors installed, IRQs masked
-	platform_init(); // interrupt controller up, memory map valid
+	arch_init();                 // exception vectors installed, IRQs masked
+	platform_init(firmware_arg); // interrupt controller up, memory map valid
 	console_init();
 	step(console_uart_init(1), "Console UART");
 	step(console_fb_init(), "Console FB");
 	console_set_scale(1);
 
 	step(0, "Architecture %s initialized", arch_name());
-	step(0, "Platform %s initialized", platform_name());
+
+	// Once we got a console we can write to, write the possible platform errors
+	const char* platform_errors = platform_get_init_errors();
+	if (platform_errors)
+	{
+		console_set_color(COLOR_RED);
+		kprintf("Errors when initializing platform\n%s", platform_errors);
+		console_set_color(COLOR_WHITE);
+		step(1, "Platform %s failed to initialize", platform_name());
+	}
+	else
+	{
+		step(0, "Platform %s initialized", platform_name());
+	}
+
 	kprintf("Platform info: %s\n", platform_get_info());
 
 	step(hal_timer_init(), "Timer initialized");
@@ -117,29 +132,11 @@ static void init()
  * arch_cpu_idle() before unmasking IRQs (the lost-wakeup-free sequence described
  * there). Never returns.
  *
- * @param dtb_ptr Physical memory address pointing to the Device Tree Blob (DTB).
- *                Passed automatically in X0 by QEMU or the physical RPi4 bootloader.
- *                Not used yet: DTB parsing is deferred until the memory allocator works.
- *
- * Why the DTB pointer is passed in:
- * 1. Hardware Discovery: The DTB contains the blueprint of the SoC. It identifies
- *    the exact locations of memory maps, peripheral addresses, and CPU cores.
- * 2. Dynamic Memory: It explicitly details how much RAM is physically present
- *    (crucial for distinguishing between the 2GB, 4GB, or 8GB versions of the Pi 4).
- * 3. Future Proofing: If the peripheral base addresses change in future board revisions
- *    or QEMU targets, parsing this pointer prevents the kernel from instantly crashing.
+ * @param firmware_arg Argument left from the firmware
  */
-void kmain(uint64_t dtb_ptr)
+void kmain(uintptr_t firmware_arg)
 {
-	(void) dtb_ptr;
-	// 	  (Optional but recommended) Parse the DTB structure here
-	//    Find the "soc" node or "ranges" property to extract the base.
-	//
-	//    if (parsed_soc_base != 0) {
-	//        PERIPHERAL_BASE = parsed_soc_base;
-	//    }
-
-	init();
+	init(firmware_arg);
 	kprintf("Welcome to AmeOS version %d.%d.%d!\n", KERNEL_VERSION_MAJOR, KERNEL_VERSION_MINOR, KERNEL_VERSION_PATCH);
 
 	// initialize the shell after boot has completed successfully
@@ -153,7 +150,6 @@ void kmain(uint64_t dtb_ptr)
 		{
 			arch_irq_enable();
 			shell_feed(c);
-			// kprintf("%x\n", c);
 		}
 		else
 		{

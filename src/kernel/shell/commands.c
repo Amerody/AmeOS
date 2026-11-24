@@ -2,11 +2,13 @@
 // Copyright (C) 2026 Amerody
 #include "commands.h"
 
-#include "hal/hal_timer.h"
 #include "kernel/console.h"
+#include "kernel/error.h"
 #include "kernel/kprintf.h"
 #include "kernel/shutdown.h"
 
+#include <hal/hal_timer.h>
+#include <hal/platform.h>
 #include <lib/memory.h>
 #include <lib/string.h>
 
@@ -40,6 +42,8 @@ static int cmd_uptime(size_t argc, char* argv[]);
 
 // peek
 static int cmd_peek(size_t argc, char* argv[]);
+
+static int cmd_mem(size_t argc, char* argv[]);
 
 // reboot
 static int cmd_reboot(size_t argc, char* argv[]);
@@ -75,6 +79,10 @@ static const struct command s_commands[] = {
 	{ "peek",
 	  "Prints the value at a memory address. Use: peek <hex_address>",
 	  cmd_peek },
+	{ "mem",
+	  "Prints the memory details. Use: mem",
+	  cmd_mem },
+
 	{ "reboot",
 	  "Reboots the system. Use: reboot",
 	  cmd_reboot },
@@ -289,6 +297,31 @@ static int cmd_peek(size_t argc, char* argv[])
 
 	paddr_t ptr = (paddr_t) (uintptr_t) value;
 	kprintf("%x: %x\n", value, *ptr);
+	return 0;
+}
+
+static int cmd_mem(size_t argc, char* argv[])
+{
+	(void) argv;
+	if (argc > 1)
+	{
+		kprintf("Use: mem\n");
+		return -1;
+	}
+
+	struct mem_region regions[16];
+	size_t            count = platform_mem_regions(regions, 16);
+	if (count != 0)
+	{
+		kprintf("RAM map: %lu region(s)\n", count);
+		for (size_t i = 0; i < count && i < 16; i++)
+			kprintf("  @%lx size %lx\n", regions[i].base, regions[i].size);
+	}
+	else
+	{
+		kprintf("RAM regions not mapped\n");
+	}
+
 	return 0;
 }
 

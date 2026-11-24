@@ -59,14 +59,13 @@ extern "C"
 	 * Nothing can be printed yet while this runs. If bring-up fails in a way that
 	 * cannot be recovered, the implementation calls arch_halt().
 	 *
+	 * @param firmware_arg Firmware argument
+	 * 
 	 * @retval 0 Success
 	 * @retval -1 The platform didn't initialize successfully (rpi4: never returned; a
 	 *         failed board-information query isn't treated as an error)
-	 *
-	 * @todo The device tree isn't parsed yet, so platform_mem_regions() has no data
-	 *       after this returns.
 	 */
-	int platform_init();
+	int platform_init(uintptr_t firmware_arg);
 
 	/**
 	 * @brief Reset the whole board, as if it had just been powered on.
@@ -98,6 +97,8 @@ extern "C"
 	 */
 	const char* platform_name();
 
+	const char* platform_get_init_errors();
+
 	/**
 	 * @brief Human-readable description of the board, one item per line.
 	 *
@@ -123,7 +124,8 @@ extern "C"
 	 * @brief Describe the RAM the kernel may use.
 	 *
 	 * Regions are sorted by ascending address and do not overlap. They exclude
-	 * memory owned by firmware or the GPU, but include the kernel image itself:
+	 * memory owned by firmware or the GPU (rpi4: the device tree
+	 * reservations and the DTB itself), but include the kernel image itself:
 	 * core subtracts the image (using linker symbols) before handing pages to the
 	 * physical allocator.
 	 *
@@ -135,9 +137,6 @@ extern "C"
 	 * @param out  Array to fill; may be NULL when @p max is 0 (to just count).
 	 * @param max  Capacity of @p out in entries.
 	 * @return     Total number of usable regions.
-	 *
-	 * @todo Not implemented yet: always returns 0 and writes nothing, until the
-	 *       device tree is parsed.
 	 */
 	size_t platform_mem_regions(struct mem_region* out, size_t max);
 

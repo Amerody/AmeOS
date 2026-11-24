@@ -19,10 +19,12 @@
  */
 enum
 {
-	SUCCESS = 0, ///< No error
+	SUCCESS = 0,   ///< No error
+	ERROR_GENERIC, ///< Generic error
 
 	ERROR_INVALID_ARG, ///< Invalid argument
 	ERROR_BUSY,        ///< Busy: already initialised or in use
 	ERROR_NO_DEVICE,   ///< No such device
 	ERROR_NO_SPACE,    ///< No space left
+	ERROR_NOT_FOUND,   ///< Something was not found
 };

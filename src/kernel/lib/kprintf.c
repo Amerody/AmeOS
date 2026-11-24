@@ -5,6 +5,7 @@
 
 #include "kernel/console.h"
 
+#include <arch/irq.h>
 #include <lib/format.h>
 #include <lib/math.h>
 
@@ -35,9 +36,11 @@ static void console_out(struct fmt_out* o, char c)
 
 void kvprintf(const char* fmt, va_list ap)
 {
-	struct fmt_out out;
+	arch_irq_flags_t f = arch_irq_save();
+	struct fmt_out   out;
 	out.putc = console_out;
 	fmt_vformat(&out, fmt, ap);
+	arch_irq_restore(f);
 }
 
 __attribute__((format(printf, 1, 2))) void kprintf(const char* fmt, ...)

@@ -120,6 +120,24 @@ extern "C"
 	 *      that lands in the middle of normal-context output can scroll twice (losing a
 	 *      line), overwrite characters or corrupt the scrolled image. The UART sink has
 	 *      a similar race (see uart_mini_putc()). Latent: no handler prints today.
+	 *
+	 * @todo Masking IRQs around the sinks is a single-core stopgap: it keeps
+	 *       IRQs off for a whole fb scroll and doesn't help with SMP. Replace it
+	 *       with an output buffer:
+	 *       - console_putc() only enqueues, with IRQs masked around the put (and
+	 *         a spinlock once SMP exists), because every context is a producer
+	 *         and ringbuf.h allows only one.
+	 *       - A drain function sends queued bytes to the sinks. Only one context
+	 *         drains at a time: guard it with a try-lock flag, and if it's taken,
+	 *         return, because the current drainer picks up the new bytes.
+	 *       - panic() and the exception handlers drain synchronously and ignore
+	 *         the try-lock, so a panic during a drain still prints.
+	 *       - console_clear() and console_flush() drain first, so queued text
+	 *         isn't drawn after a clear or lost at reset.
+	 *       - Decide what happens when the buffer is full (drop and count the
+	 *         lost bytes?).
+	 *       - Optionally, queue a whole kprintf() message at once, so output
+	 *         from different contexts doesn't interleave mid-line.
 	 */
 	void console_putc(char c);
 

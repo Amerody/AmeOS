@@ -43,7 +43,7 @@ typedef enum
 static esc_state_t s_escape_sequence_state = STATE_NORMAL;
 
 /**
- * @brief Moore FSM to handle an escape sequence
+ * @brief Mealy FSM to handle an escape sequence
  *
  * Advances #s_escape_sequence_state by one byte. shell_feed() calls it for @c ESC and
  * for every byte while a sequence is in progress, and drops those bytes:

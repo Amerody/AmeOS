@@ -24,7 +24,7 @@
 
 /// @brief All the PM Registers
 /// @warning @p RESERVED_* are not to be used
-/// @note The rpi4 power management registers are not documented well. This is taken from
+/// @note The rpi4 power management registers are not documented well. This is adapted from
 /// 	  the Linux driver (https://github.com/torvalds/linux/blob/master/drivers/watchdog/bcm2835_wdt.c)
 /// @todo move this to hal_wdt or its appropiate file (pm.c for example) once it's needed
 struct PM_Registers
@@ -80,25 +80,15 @@ static size_t s_idx_errors;
  * of the input is ignored and a NULL character is written at the 
  * end of the buffer
  *
- * @bug The size check only runs once, before copying: a message longer than the space
- *      left is copied whole and writes past the end of @p s_errors. The check needs to be
- *      inside the copy loop to match the description above.
- *
  * @param err Message to append, usually ending with @c '\\n'
  */
 static void add_error(const char* err)
 {
 	char c;
-	while ((c = *err++) != '\0')
-	{
-		if (s_idx_errors >= sizeof(s_errors))
-		{
-			s_errors[sizeof(s_errors) - 1] = '\0';
-			return;
-		}
-
+	// Stop one short of the end so the NUL below always fits
+	while (s_idx_errors < sizeof(s_errors) - 1 && (c = *err++) != '\0')
 		s_errors[s_idx_errors++] = c;
-	}
+
 	s_errors[s_idx_errors] = '\0';
 }
 

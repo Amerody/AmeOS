@@ -9,6 +9,7 @@ add_library(kernel_core OBJECT
     "lib/panic.c"
     "lib/delay.c"
     "lib/shutdown.c"
+    "lib/spinlock.c"
 
     "shell/shell.c"
     "shell/commands.c"
